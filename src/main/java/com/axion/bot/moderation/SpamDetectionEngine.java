@@ -1,7 +1,6 @@
 package com.axion.bot.moderation;
 
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -514,18 +513,15 @@ public class SpamDetectionEngine {
     private static class MessageRecord {
         private final String content;
         private final Instant timestamp;
-        private final String channelId;
         
         public MessageRecord(String content, Instant timestamp, String channelId) {
             this.content = content;
             this.timestamp = timestamp;
-            this.channelId = channelId;
         }
         
         // Getters
         public String getContent() { return content; }
         public Instant getTimestamp() { return timestamp; }
-        public String getChannelId() { return channelId; }
     }
     
     private static class UserBehaviorProfile {

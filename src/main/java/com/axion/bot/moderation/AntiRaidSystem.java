@@ -438,20 +438,17 @@ public class AntiRaidSystem {
         private final String userId;
         private final String content;
         private final Instant timestamp;
-        private final String channelId;
         
         public MessageEvent(String userId, String content, Instant timestamp, String channelId) {
             this.userId = userId;
             this.content = content;
             this.timestamp = timestamp;
-            this.channelId = channelId;
         }
         
         // Getters
         public String getUserId() { return userId; }
         public String getContent() { return content; }
         public Instant getTimestamp() { return timestamp; }
-        public String getChannelId() { return channelId; }
     }
     
     private static class RaidDetectionResult {
@@ -479,44 +476,35 @@ public class AntiRaidSystem {
     
     private static class CoordinatedSpamResult {
         private final boolean coordinatedSpam;
-        private final String spamContent;
         private final List<String> involvedUsers;
-        private final int messageCount;
         private final String reason;
         
         public CoordinatedSpamResult(boolean coordinatedSpam, String spamContent, List<String> involvedUsers, int messageCount, String reason) {
             this.coordinatedSpam = coordinatedSpam;
-            this.spamContent = spamContent;
             this.involvedUsers = involvedUsers;
-            this.messageCount = messageCount;
             this.reason = reason;
         }
         
         // Getters
         public boolean isCoordinatedSpam() { return coordinatedSpam; }
-        public String getSpamContent() { return spamContent; }
         public List<String> getInvolvedUsers() { return involvedUsers; }
-        public int getMessageCount() { return messageCount; }
         public String getReason() { return reason; }
     }
     
     private static class RaidCharacteristics {
         private final double newAccountRatio;
         private final double suspiciousNameRatio;
-        private final double defaultAvatarRatio;
         private final boolean suspicious;
         
         public RaidCharacteristics(double newAccountRatio, double suspiciousNameRatio, double defaultAvatarRatio, boolean suspicious) {
             this.newAccountRatio = newAccountRatio;
             this.suspiciousNameRatio = suspiciousNameRatio;
-            this.defaultAvatarRatio = defaultAvatarRatio;
             this.suspicious = suspicious;
         }
         
         // Getters
         public double getNewAccountRatio() { return newAccountRatio; }
         public double getSuspiciousNameRatio() { return suspiciousNameRatio; }
-        public double getDefaultAvatarRatio() { return defaultAvatarRatio; }
         public boolean isSuspicious() { return suspicious; }
     }
     

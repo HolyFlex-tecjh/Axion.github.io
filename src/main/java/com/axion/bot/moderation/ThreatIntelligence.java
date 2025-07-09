@@ -470,7 +470,6 @@ public class ThreatIntelligence {
         }
         
         // Getters
-        public String getIdentifier() { return identifier; }
         public ThreatType getType() { return type; }
         public String getDescription() { return description; }
         public int getSeverityScore() { return severityScore; }
@@ -493,31 +492,21 @@ public class ThreatIntelligence {
         }
         
         // Getters
-        public String getPattern() { return pattern; }
         public String getDescription() { return description; }
         public int getScore() { return score; }
     }
     
     private static class MaliciousDomain {
-        private final String domain;
-        private final ThreatType type;
         private final int threatScore;
-        private final String source;
         private final Instant timestamp;
         
         public MaliciousDomain(String domain, ThreatType type, int threatScore, String source, Instant timestamp) {
-            this.domain = domain;
-            this.type = type;
             this.threatScore = threatScore;
-            this.source = source;
             this.timestamp = timestamp;
         }
         
         // Getters
-        public String getDomain() { return domain; }
-        public ThreatType getType() { return type; }
         public int getThreatScore() { return threatScore; }
-        public String getSource() { return source; }
         public Instant getTimestamp() { return timestamp; }
     }
     
