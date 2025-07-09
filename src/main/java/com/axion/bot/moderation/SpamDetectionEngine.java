@@ -253,7 +253,7 @@ public class SpamDetectionEngine {
     private SpamFlag checkExcessiveMentions(Message message) {
         int mentionCount = message.getMentions().getUsers().size() + 
                          message.getMentions().getRoles().size() + 
-                         (message.mentionsEveryone() ? 1 : 0);
+                         (message.getMentions().mentionsEveryone() ? 1 : 0);
         
         if (mentionCount > MAX_MENTIONS_PER_MESSAGE) {
             int score = Math.min((mentionCount - MAX_MENTIONS_PER_MESSAGE) * 15, 50);
@@ -324,19 +324,19 @@ public class SpamDetectionEngine {
     private SpamFlag checkSuspiciousDomains(String content) {
         Pattern urlPattern = Pattern.compile("https?://([^/\\s]+)", Pattern.CASE_INSENSITIVE);
         
-        int suspiciousCount = 0;
+        final int[] suspiciousCount = {0};
         List<String> foundDomains = new ArrayList<>();
         
         urlPattern.matcher(content).results().forEach(match -> {
             String domain = match.group(1).toLowerCase();
             if (suspiciousDomains.containsKey(domain)) {
-                suspiciousCount++;
+                suspiciousCount[0]++;
                 foundDomains.add(domain);
             }
         });
         
-        if (suspiciousCount > 0) {
-            int score = suspiciousCount * 30;
+        if (suspiciousCount[0] > 0) {
+            int score = suspiciousCount[0] * 30;
             return new SpamFlag(
                 SpamType.SUSPICIOUS_LINKS,
                 "Suspicious domains detected: " + foundDomains.size(),
@@ -660,6 +660,8 @@ public class SpamDetectionEngine {
         public List<SpamFlag> getRecentFlags() { return recentFlags; }
     }
     
+    // Enums
+    
     public enum SpamLikelihood {
         VERY_LOW,
         LOW,
@@ -678,6 +680,8 @@ public class SpamDetectionEngine {
         FAST_TYPING,
         SUSPICIOUS_LINKS,
         BOT_BEHAVIOR,
-        REPETITIVE_CONTENT
+        REPETITIVE_CONTENT,
+        CAPS_SPAM,
+        EMOJI_SPAM
     }
 }

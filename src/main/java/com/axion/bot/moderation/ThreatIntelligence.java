@@ -243,14 +243,14 @@ public class ThreatIntelligence {
         Pattern urlPattern = Pattern.compile("https?://([^/\\s]+)", Pattern.CASE_INSENSITIVE);
         
         List<String> foundDomains = new ArrayList<>();
-        int totalScore = 0;
+        final int[] totalScore = {0};
         
         urlPattern.matcher(content).results().forEach(match -> {
             String domain = match.group(1).toLowerCase();
             MaliciousDomain maliciousDomain = maliciousDomains.get(domain);
             if (maliciousDomain != null) {
                 foundDomains.add(domain);
-                totalScore += maliciousDomain.getThreatScore();
+                totalScore[0] += maliciousDomain.getThreatScore();
             }
         });
         
@@ -258,7 +258,7 @@ public class ThreatIntelligence {
             return new ThreatFlag(
                 ThreatType.MALICIOUS_LINK,
                 "Malicious domains detected: " + foundDomains.size(),
-                Math.min(totalScore, 95)
+                Math.min(totalScore[0], 95)
             );
         }
         

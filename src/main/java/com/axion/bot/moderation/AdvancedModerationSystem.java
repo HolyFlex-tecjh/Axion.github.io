@@ -47,7 +47,7 @@ public class AdvancedModerationSystem {
     
     public AdvancedModerationSystem(AdvancedModerationConfig config) {
         this.config = config;
-        this.moderationLogger = new ModerationLogger(config);
+        this.moderationLogger = new ModerationLogger();
         this.antiRaidSystem = new AntiRaidSystem(this);
         this.toxicityAnalyzer = new ToxicityAnalyzer();
         this.spamEngine = new SpamDetectionEngine();
@@ -91,8 +91,9 @@ public class AdvancedModerationSystem {
         
         // 1. Spam Detection (Enhanced)
         if (settings.isSpamProtectionEnabled()) {
-            ModerationResult spamResult = spamEngine.analyzeMessage(profile, content, event);
-            if (!spamResult.isAllowed()) {
+            SpamDetectionEngine.SpamDetectionResult spamDetection = spamEngine.analyzeMessage(event.getMessage(), profile);
+            if (spamDetection.isSpam()) {
+                ModerationResult spamResult = convertSpamDetectionToModerationResult(spamDetection);
                 detectionResults.add(spamResult);
             }
         }
@@ -107,7 +108,8 @@ public class AdvancedModerationSystem {
         
         // 3. Threat Intelligence
         if (settings.isThreatIntelEnabled()) {
-            ModerationResult threatResult = threatIntel.scanContent(content, event.getMessage().getAttachments());
+            ThreatIntelligence.ThreatAnalysisResult threatAnalysis = threatIntel.analyzeContent(content, event.getAuthor().getId(), event.getChannel().getId());
+            ModerationResult threatResult = convertThreatAnalysisToModerationResult(threatAnalysis);
             if (!threatResult.isAllowed()) {
                 detectionResults.add(threatResult);
             }
@@ -167,8 +169,7 @@ public class AdvancedModerationSystem {
             if (accountAge.toDays() < settings.getMinAccountAgeDays()) {
                 return ModerationResult.moderate(
                     "Account too new: " + accountAge.toDays() + " days old",
-                    ModerationAction.KICK,
-                    ModerationSeverity.MEDIUM
+                    ModerationAction.KICK
                 );
             }
         }
@@ -451,6 +452,99 @@ public class AdvancedModerationSystem {
         return userProfiles.get(key);
     }
     
+    public AntiRaidSystem getAntiRaidSystem() {
+        return antiRaidSystem;
+    }
+    
+    public int getHighRiskUserCount(String guildId) {
+        return (int) userProfiles.values().stream()
+            .filter(profile -> profile.getGuildId().equals(guildId))
+            .filter(profile -> profile.isHighRisk())
+            .count();
+    }
+    
+    public void executeSmartBan(Guild guild, User targetUser, User moderator, String reason) {
+        Member targetMember = guild.getMember(targetUser);
+        Member moderatorMember = guild.getMember(moderator);
+        
+        if (targetMember != null && moderatorMember != null) {
+            applySmartBan(targetMember, null, reason, moderatorMember, true);
+        } else {
+            logger.warn("Could not execute smart ban - member not found: target={}, moderator={}", 
+                targetUser.getId(), moderator.getId());
+        }
+    }
+    
+    public void executeAdvancedTimeout(Guild guild, User targetUser, User moderator, String reason) {
+        Member targetMember = guild.getMember(targetUser);
+        Member moderatorMember = guild.getMember(moderator);
+        
+        if (targetMember != null && moderatorMember != null) {
+            // Calculate intelligent timeout duration based on user profile
+            UserModerationProfile profile = getUserProfile(targetUser.getId(), guild.getId(), true);
+            Duration baseDuration = Duration.ofMinutes(30); // Default 30 minutes
+            Duration intelligentDuration = calculateEscalatedDuration(baseDuration, profile);
+            
+            applyAdvancedTimeout(targetMember, intelligentDuration, reason, moderatorMember);
+        } else {
+            logger.warn("Could not execute advanced timeout - member not found: target={}, moderator={}", 
+                targetUser.getId(), moderator.getId());
+        }
+    }
+    
+    /**
+     * Execute mass action based on criteria
+     */
+    public int executeMassAction(Guild guild, String action, String criteria, String reason, User moderator) {
+        List<String> targetUserIds = new ArrayList<>();
+        
+        // Determine target users based on criteria
+        switch (criteria.toLowerCase()) {
+            case "high_risk":
+                targetUserIds = userProfiles.values().stream()
+                    .filter(profile -> profile.getGuildId().equals(guild.getId()))
+                    .filter(UserModerationProfile::isHighRisk)
+                    .map(UserModerationProfile::getUserId)
+                    .collect(Collectors.toList());
+                break;
+            case "recent_violations":
+                targetUserIds = userProfiles.values().stream()
+                    .filter(profile -> profile.getGuildId().equals(guild.getId()))
+                    .filter(profile -> profile.getRecentViolationCount() > 3)
+                    .map(UserModerationProfile::getUserId)
+                    .collect(Collectors.toList());
+                break;
+            default:
+                logger.warn("Unknown mass action criteria: {}", criteria);
+                return 0;
+        }
+        
+        // Convert action string to ModerationAction
+        ModerationAction moderationAction;
+        switch (action.toLowerCase()) {
+            case "ban":
+                moderationAction = ModerationAction.BAN;
+                break;
+            case "kick":
+                moderationAction = ModerationAction.KICK;
+                break;
+            case "timeout":
+                moderationAction = ModerationAction.TIMEOUT;
+                break;
+            default:
+                logger.warn("Unknown mass action type: {}", action);
+                return 0;
+        }
+        
+        // Execute the mass action
+        executeMassAction(guild, targetUserIds, moderationAction, reason);
+        
+        logger.info("Mass action {} executed by {} on {} users with criteria '{}'", 
+            action, moderator.getAsTag(), targetUserIds.size(), criteria);
+        
+        return targetUserIds.size();
+    }
+    
     public void shutdown() {
         scheduler.shutdown();
         try {
@@ -473,8 +567,8 @@ public class AdvancedModerationSystem {
     private ModerationResult processViolations(List<ModerationResult> violations, UserModerationProfile profile, MessageReceivedEvent event, GuildModerationSettings settings) {
         // Process multiple violations and determine appropriate action
         ModerationResult mostSevere = violations.stream()
-            .max(Comparator.comparing(r -> r.getSeverity().ordinal()))
-            .orElse(ModerationResult.allowed());
+                .max(Comparator.comparing(r -> r.getSeverity()))
+                .orElse(ModerationResult.allowed());
         
         profile.addViolation(mostSevere.getReason());
         return mostSevere;
@@ -519,5 +613,50 @@ public class AdvancedModerationSystem {
         // Note: ModerationLogger expects different parameters, so we'll use the static logger for now
         logger.info("Moderation action: {} - {} - {} - {}", 
             log.getUsername(), log.getAction(), log.getReason(), log.getSeverity());
+    }
+    
+    private ModerationResult convertSpamDetectionToModerationResult(SpamDetectionEngine.SpamDetectionResult spamDetection) {
+        if (!spamDetection.isSpam()) {
+            return ModerationResult.allowed();
+        }
+        
+        String reason = spamDetection.getDescription();
+        ModerationAction action = ModerationAction.DELETE_MESSAGE;
+        
+        // Determine severity based on spam score and likelihood
+        switch (spamDetection.getLikelihood()) {
+            case HIGH:
+                return ModerationResult.severe(reason, ModerationAction.DELETE_AND_TIMEOUT);
+            case MEDIUM:
+                return ModerationResult.moderate(reason, ModerationAction.DELETE_MESSAGE);
+            case LOW:
+            default:
+                return ModerationResult.warn(reason, ModerationAction.DELETE_MESSAGE);
+        }
+    }
+    
+    private ModerationResult convertThreatAnalysisToModerationResult(ThreatIntelligence.ThreatAnalysisResult threatAnalysis) {
+        if (!threatAnalysis.isThreat()) {
+            return ModerationResult.allowed();
+        }
+        
+        String reason = "Threat detected: " + threatAnalysis.getFlags().stream()
+            .map(flag -> flag.getType().toString())
+            .collect(java.util.stream.Collectors.joining(", "));
+        
+        // Determine severity based on threat level
+        switch (threatAnalysis.getLevel()) {
+            case VERY_HIGH:
+                return ModerationResult.ban(reason, ModerationAction.BAN);
+            case HIGH:
+                return ModerationResult.severe(reason, ModerationAction.DELETE_AND_TIMEOUT);
+            case MEDIUM:
+                return ModerationResult.moderate(reason, ModerationAction.DELETE_MESSAGE);
+            case LOW:
+                return ModerationResult.warn(reason, ModerationAction.FLAG_FOR_REVIEW);
+            case NONE:
+            default:
+                return ModerationResult.allowed();
+        }
     }
 }

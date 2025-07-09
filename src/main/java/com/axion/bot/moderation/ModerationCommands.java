@@ -263,8 +263,8 @@ public class ModerationCommands {
                         );
                         
                         // Update user moderation profile
-                        UserModerationProfile profile = advancedSystem.getUserProfile(targetMember.getUser().getId(), event.getGuild().getId());
-                        profile.setTimeoutStatus(true, Duration.ofMinutes(minutes));
+        UserModerationProfile profile = advancedSystem.getUserProfile(targetMember.getUser().getId(), event.getGuild().getId(), true);
+        profile.setTimeoutStatus(true, Duration.ofMinutes(minutes));
                         
                         logger.info("Timed out {} for {} minutes by {}: {}", targetMember.getUser().getAsTag(), minutes, event.getAuthor().getAsTag(), reason);
                     },
@@ -297,7 +297,7 @@ public class ModerationCommands {
         
         // Add warning and update user profile
         String userId = targetMember.getUser().getId();
-        UserModerationProfile profile = advancedSystem.getUserProfile(userId, event.getGuild().getId());
+        UserModerationProfile profile = advancedSystem.getUserProfile(userId, event.getGuild().getId(), true);
         profile.recordViolation(ModerationAction.WARN_USER, reason, ModerationSeverity.LOW, false);
         
         int warnings = profile.getWarningCount();
@@ -371,7 +371,7 @@ public class ModerationCommands {
         
         Member targetMember = mentionedMembers.get(0);
         String userId = targetMember.getUser().getId();
-        UserModerationProfile profile = advancedSystem.getUserProfile(userId, event.getGuild().getId());
+        UserModerationProfile profile = advancedSystem.getUserProfile(userId, event.getGuild().getId(), true);
         
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(profile.getWarningCount() > 0 ? Color.ORANGE : Color.GREEN)
@@ -543,7 +543,7 @@ public class ModerationCommands {
         }
         
         Member targetMember = mentionedMembers.get(0);
-        UserModerationProfile profile = advancedSystem.getUserProfile(targetMember.getUser().getId(), event.getGuild().getId());
+        UserModerationProfile profile = advancedSystem.getUserProfile(targetMember.getUser().getId(), event.getGuild().getId(), true);
         
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(profile.isHighRisk() ? Color.RED : profile.isLowRisk() ? Color.GREEN : Color.YELLOW)
@@ -569,15 +569,32 @@ public class ModerationCommands {
     private boolean handleRaidStatusCommand(MessageReceivedEvent event, String[] args) {
         AntiRaidSystem.RaidStatus status = advancedSystem.getAntiRaidSystem().getRaidStatus(event.getGuild().getId());
         
+        // Handle null status (no raid activity recorded)
+        if (status == null) {
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setColor(Color.GREEN)
+                    .setTitle("🛡️ Anti-Raid Status")
+                    .addField("Raid Detected", "✅ NO", true)
+                    .addField("Raid Type", "None", true)
+                    .addField("Enhanced Verification", "❌ Inactive", true)
+                    .addField("Start Time", "N/A", true)
+                    .addField("Status", "🟢 Inactive", true)
+                    .addField("System", "🟢 Online", true)
+                    .setTimestamp(Instant.now());
+            
+            event.getChannel().sendMessageEmbeds(embed.build()).queue();
+            return true;
+        }
+        
         EmbedBuilder embed = new EmbedBuilder()
-                .setColor(status.isRaidDetected() ? Color.RED : Color.GREEN)
+                .setColor(status.isActive() ? Color.RED : Color.GREEN)
                 .setTitle("🛡️ Anti-Raid Status")
-                .addField("Raid Detected", status.isRaidDetected() ? "🚨 YES" : "✅ NO", true)
-                .addField("Threat Level", status.getThreatLevel().toString(), true)
-                .addField("Active Response", status.getActiveResponse().toString(), true)
-                .addField("Recent Joins", String.valueOf(status.getRecentJoinCount()), true)
-                .addField("Suspicious Activity", String.valueOf(status.getSuspiciousActivityCount()), true)
-                .addField("Last Updated", status.getLastUpdate().toString(), true)
+                .addField("Raid Detected", status.isActive() ? "🚨 YES" : "✅ NO", true)
+                .addField("Raid Type", status.getType() != null ? status.getType().toString() : "None", true)
+                .addField("Enhanced Verification", status.isEnhancedVerification() ? "✅ Active" : "❌ Inactive", true)
+                .addField("Start Time", status.getStartTime() != null ? status.getStartTime().toString() : "N/A", true)
+                .addField("Status", status.isActive() ? "🔴 Active" : "🟢 Inactive", true)
+                .addField("System", "🟢 Online", true)
                 .setTimestamp(Instant.now());
         
         event.getChannel().sendMessageEmbeds(embed.build()).queue();

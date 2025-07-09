@@ -53,7 +53,17 @@ public enum ModerationAction {
     /**
      * System handling - automatisk handling udført af systemet
      */
-    SYSTEM_ACTION("System handling", 0);
+    SYSTEM_ACTION("System handling", 0),
+    
+    /**
+     * Flag user for manual review
+     */
+    FLAG_FOR_REVIEW("Flag for review", 1),
+    
+    /**
+     * Temporary ban from server
+     */
+    TEMP_BAN("Temporary ban", 4);
     
     private final String description;
     private final int severity;
@@ -94,6 +104,7 @@ public enum ModerationAction {
                this == TIMEOUT || 
                this == KICK || 
                this == BAN ||
+               this == TEMP_BAN ||
                this == DELETE_AND_WARN ||
                this == DELETE_AND_TIMEOUT;
     }
@@ -109,7 +120,7 @@ public enum ModerationAction {
      * Tjekker om handlingen fjerner brugeren fra serveren
      */
     public boolean removesFromServer() {
-        return this == KICK || this == BAN;
+        return this == KICK || this == BAN || this == TEMP_BAN;
     }
     
     /**
@@ -131,9 +142,12 @@ public enum ModerationAction {
             case KICK:
                 return "👢";
             case BAN:
+            case TEMP_BAN:
                 return "🔨";
             case SYSTEM_ACTION:
                 return "🤖";
+            case FLAG_FOR_REVIEW:
+                return "🚩";
             default:
                 return "❓";
         }
@@ -154,12 +168,16 @@ public enum ModerationAction {
                 return "Du er blevet kicket fra serveren på grund af overtrædelse af serverreglerne.";
             case BAN:
                 return "Du er blevet bannet fra serveren på grund af overtrædelse af serverreglerne.";
+            case TEMP_BAN:
+                return "Du er blevet midlertidigt bannet fra serveren på grund af overtrædelse af serverreglerne.";
             case DELETE_AND_WARN:
                 return "Din besked blev slettet og du har modtaget en advarsel.";
             case DELETE_AND_TIMEOUT:
                 return "Din besked blev slettet og du er blevet givet en timeout.";
             case SYSTEM_ACTION:
                 return "Automatisk system handling udført.";
+            case FLAG_FOR_REVIEW:
+                return "Din aktivitet er blevet flagget til manuel gennemgang.";
             default:
                 return "Moderation handling udført.";
         }
@@ -181,6 +199,8 @@ public enum ModerationAction {
                 return emoji + " Kicket **" + username + "**: " + reason;
             case BAN:
                 return emoji + " Bannet **" + username + "**: " + reason;
+            case TEMP_BAN:
+                return emoji + " Midlertidigt bannet **" + username + "**: " + reason;
             case DELETE_AND_WARN:
                 return emoji + " Slettet besked og advaret **" + username + "**: " + reason;
             case DELETE_AND_TIMEOUT:
@@ -189,6 +209,8 @@ public enum ModerationAction {
                 return "📝 Loggede handling for **" + username + "**: " + reason;
             case SYSTEM_ACTION:
                 return emoji + " Automatisk system handling for **" + username + "**: " + reason;
+            case FLAG_FOR_REVIEW:
+                return emoji + " Flagget **" + username + "** til manuel gennemgang: " + reason;
             default:
                 return emoji + " Moderation handling udført på **" + username + "**: " + reason;
         }
