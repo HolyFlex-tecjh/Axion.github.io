@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test - Axion Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 1px solid #3a3a3a;
+        }
+        button {
+            background: #4785ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3574e0;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+        .info { background: #2d4a5a; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Axion Bot Login System Test</h1>
+    
+    <div class="test-section">
+        <h2>Authentication Status</h2>
+        <div id="authStatus" class="status info">Checking...</div>
+        <button onclick="checkAuth()">Check Authentication</button>
+        <button onclick="clearAuth()">Clear Authentication</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Login Test</h2>
+        <button onclick="simulateLogin()">Simulate Discord Login</button>
+        <button onclick="simulateDemoLogin()">Simulate Demo Login</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Navigation Test</h2>
+        <a href="index.html"><button>Go to Homepage</button></a>
+        <a href="login.html"><button>Go to Login Page</button></a>
+        <a href="dashboard.html"><button>Go to Dashboard</button></a>
+    </div>
+    
+    <div class="test-section">
+        <h2>User Data</h2>
+        <div id="userData" class="status info">No user data</div>
+    </div>
+
+    <script>
+        function checkAuth() {
+            const token = localStorage.getItem('axion-auth-token');
+            const user = localStorage.getItem('axion-user');
+            const statusDiv = document.getElementById('authStatus');
+            const userDataDiv = document.getElementById('userData');
+            
+            if (token && user) {
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ User is authenticated';
+                
+                const userData = JSON.parse(user);
+                userDataDiv.className = 'status success';
+                userDataDiv.innerHTML = `
+                    <strong>Username:</strong> ${userData.username}<br>
+                    <strong>ID:</strong> ${userData.id}<br>
+                    <strong>Avatar:</strong> ${userData.avatar ? '✅' : '❌'}<br>
+                    <strong>Servers:</strong> ${userData.guilds ? userData.guilds.length : 0}<br>
+                    <strong>Demo Mode:</strong> ${userData.isDemo ? '✅' : '❌'}
+                `;
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ User is not authenticated';
+                userDataDiv.className = 'status info';
+                userDataDiv.textContent = 'No user data';
+            }
+        }
+        
+        function clearAuth() {
+            localStorage.removeItem('axion-auth-token');
+            localStorage.removeItem('axion-user');
+            localStorage.removeItem('axion-login-time');
+            checkAuth();
+        }
+        
+        function simulateLogin() {
+            const userData = {
+                id: '123456789012345678',
+                username: 'TestUser',
+                discriminator: '1234',
+                avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
+                guilds: [
+                    {
+                        id: '987654321098765432',
+                        name: 'Test Server',
+                        icon: null,
+                        owner: false,
+                        permissions: 8,
+                        botPresent: true
+                    }
+                ]
+            };
+            
+            localStorage.setItem('axion-user', JSON.stringify(userData));
+            localStorage.setItem('axion-auth-token', 'test-jwt-token-' + Date.now());
+            localStorage.setItem('axion-login-time', Date.now().toString());
+            
+            checkAuth();
+            alert('✅ Discord login simulated successfully!');
+        }
+        
+        function simulateDemoLogin() {
+            const demoData = {
+                id: 'demo-user',
+                username: 'Demo User',
+                discriminator: '0000',
+                avatar: 'https://cdn.discordapp.com/embed/avatars/0.png',
+                guilds: [
+                    {
+                        id: 'demo-server-1',
+                        name: 'Demo Server',
+                        icon: null,
+                        owner: true,
+                        permissions: 8,
+                        botPresent: true
+                    }
+                ],
+                isDemo: true
+            };
+            
+            localStorage.setItem('axion-user', JSON.stringify(demoData));
+            localStorage.setItem('axion-auth-token', 'demo-token');
+            localStorage.setItem('axion-login-time', Date.now().toString());
+            
+            checkAuth();
+            alert('✅ Demo login simulated successfully!');
+        }
+        
+        // Check auth on page load
+        checkAuth();
+    </script>
+</body>
+</html>

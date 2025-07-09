@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Axion Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <img src="assets/axion-logo.svg" alt="Axion Bot" class="sidebar-logo">
+                <span class="sidebar-title">Axion Dashboard</span>
+            </div>
+            
+            <!-- User Info -->
+            <div class="sidebar-user">
+                <img src="" alt="User Avatar" class="user-avatar" id="dashboardUserAvatar">
+                <div class="user-details">
+                    <span class="user-name" id="dashboardUserName">Loading...</span>
+                    <span class="user-id" id="dashboardUserId">#0000</span>
+                </div>
+                <button class="logout-btn" id="dashboardLogout" title="Log ud">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+            
+            <!-- Server Selector -->
+            <div class="server-selector">
+                <label for="serverSelect">Vælg Server:</label>
+                <select id="serverSelect" class="server-select">
+                    <option value="">Indlæser servere...</option>
+                </select>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="menu-section">
+                    <h4 class="menu-section-title">Oversigt</h4>
+                    <a href="#dashboard" class="menu-item active">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#analytics" class="menu-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </a>
+                </div>
+                
+                <div class="menu-section">
+                    <h4 class="menu-section-title">Bot Konfiguration</h4>
+                    <a href="#general" class="menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Generelle Indstillinger</span>
+                    </a>
+                    <a href="#moderation" class="menu-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Moderation</span>
+                    </a>
+                    <a href="#automod" class="menu-item">
+                        <i class="fas fa-robot"></i>
+                        <span>Auto-Moderation</span>
+                    </a>
+                    <a href="#music" class="menu-item">
+                        <i class="fas fa-music"></i>
+                        <span>Musik</span>
+                    </a>
+                    <a href="#commands" class="menu-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Custom Commands</span>
+                    </a>
+                </div>
+                
+                <div class="menu-section">
+                    <h4 class="menu-section-title">Community</h4>
+                    <a href="#roles" class="menu-item">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Roller & Permissions</span>
+                    </a>
+                    <a href="#welcome" class="menu-item">
+                        <i class="fas fa-door-open"></i>
+                        <span>Velkomst Beskeder</span>
+                    </a>
+                    <a href="#levels" class="menu-item">
+                        <i class="fas fa-trophy"></i>
+                        <span>Leveling System</span>
+                    </a>
+                </div>
+            </div>
+            
+                <div class="sidebar-footer">
+                    <div class="server-selector gradient-border">
+                        <img src="https://cdn.discordapp.com/icons/123456789/server-icon.png" alt="Server" class="server-icon status-online">
+                        <div class="server-info">
+                            <span class="server-name">Min Discord Server</span>
+                            <span class="server-members">1,234 medlemmer</span>
+                        </div>
+                        <i class="fas fa-chevron-down"></i>
+                        <div class="notification-badge">3</div>
+                    </div>
+                </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <button class="mobile-menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="page-title">
+                    <h1>Dashboard Oversigt</h1>
+                    <p>Administrer din Axion Bot konfiguration</p>
+                </div>
+                
+                <div class="top-bar-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-sync-alt"></i>
+                        Sync Data
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Gem Ændringer
+                    </button>
+                    
+                    <div class="user-menu gradient-border">
+                        <img src="https://cdn.discordapp.com/avatars/123456789/user-avatar.png" alt="User" class="user-avatar status-online">
+                        <span class="user-name glow-text">BrugerNavn#1234</span>
+                        <i class="fas fa-chevron-down"></i>
+                        <div class="notification-badge">2</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card animate-slide-up">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value glow-text">1,234</span>
+                            <span class="stat-label">Total Medlemmer</span>
+                            <span class="stat-change positive">+5.2%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card animate-slide-up" style="animation-delay: 0.1s;">
+                        <div class="stat-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value glow-text">8,567</span>
+                            <span class="stat-label">Beskeder i dag</span>
+                            <span class="stat-change positive">+12.1%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card animate-slide-up" style="animation-delay: 0.2s;">
+                        <div class="stat-icon">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value glow-text">23</span>
+                            <span class="stat-label">Moderationshandlinger</span>
+                            <span class="stat-change negative">-8.3%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card animate-slide-up" style="animation-delay: 0.3s;">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-value glow-text">99.9%</span>
+                            <span class="stat-label">Bot Uptime</span>
+                            <span class="stat-change positive">+0.1%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="section">
+                    <h2 class="section-title">Hurtige Handlinger</h2>
+                    <div class="quick-actions">
+                        <div class="action-card">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>Auto-Moderation</h3>
+                            <p>Konfigurer automatisk spam og toxic detection</p>
+                            <button class="btn btn-primary">Konfigurer</button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <i class="fas fa-door-open"></i>
+                            <h3>Velkomst Beskeder</h3>
+                            <p>Opsæt personaliserede velkomst beskeder</p>
+                            <button class="btn btn-primary">Opsæt</button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <i class="fas fa-music"></i>
+                            <h3>Musik Indstillinger</h3>
+                            <p>Konfigurer musik permissions og kvalitet</p>
+                            <button class="btn btn-primary">Indstil</button>
+                        </div>
+                        
+                        <div class="action-card">
+                            <i class="fas fa-terminal"></i>
+                            <h3>Custom Commands</h3>
+                            <p>Opret og administrer custom commands</p>
+                            <button class="btn btn-primary">Administrer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="section">
+                    <h2 class="section-title">Seneste Aktivitet</h2>
+                    <div class="activity-feed">
+                        <div class="activity-item">
+                            <div class="activity-icon moderation">
+                                <i class="fas fa-ban"></i>
+                            </div>
+                            <div class="activity-content">
+                                <span class="activity-action">Bruger banned</span>
+                                <span class="activity-details">SpamBot#1234 blev banned for spam</span>
+                                <span class="activity-time">2 minutter siden</span>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon music">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <div class="activity-content">
+                                <span class="activity-action">Musik afspillet</span>
+                                <span class="activity-details">"Imagine Dragons - Believer" tilføjet til kø</span>
+                                <span class="activity-time">5 minutter siden</span>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon welcome">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <span class="activity-action">Nyt medlem</span>
+                                <span class="activity-details">NewUser#5678 joinde serveren</span>
+                                <span class="activity-time">10 minutter siden</span>
+                            </div>
+                        </div>
+                        
+                        <div class="activity-item">
+                            <div class="activity-icon command">
+                                <i class="fas fa-terminal"></i>
+                            </div>
+                            <div class="activity-content">
+                                <span class="activity-action">Command udført</span>
+                                <span class="activity-details">!serverinfo kommando brugt af Admin#1234</span>
+                                <span class="activity-time">15 minutter siden</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <h3>Server Aktivitet (7 dage)</h3>
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Command Brug</h3>
+                        <canvas id="commandChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Auth Required Screen -->
+    <div class="auth-required" id="authRequired">
+        <div class="auth-required-content">
+            <i class="fas fa-lock auth-required-icon"></i>
+            <h2>Login Påkrævet</h2>
+            <p>Du skal logge ind med din Discord konto for at få adgang til dashboard.</p>
+            <a href="login.html" class="auth-required-btn">
+                <i class="fab fa-discord"></i>
+                Log ind med Discord
+            </a>
+        </div>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div class="dashboard-loading" id="dashboardLoading">
+        <div class="loading-spinner-large"></div>
+        <div class="loading-text">Indlæser Dashboard</div>
+        <div class="loading-subtext">Henter server data...</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="dashboard-auth.js"></script>
+</body>
+</html>

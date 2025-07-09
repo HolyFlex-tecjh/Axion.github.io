@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kommandoer - Axion Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/axion-logo.svg" alt="Axion Bot" class="logo-img">
+                <span class="logo-text">Axion Bot</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Hjem</a>
+                <a href="index.html#features" class="nav-link">Funktioner</a>
+                <a href="commands.html" class="nav-link active">Kommandoer</a>
+                <a href="pricing.html" class="nav-link">Priser</a>
+                <a href="index.html#support" class="nav-link">Support</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary" id="loginBtn">Login</a>
+                <a href="#invite" class="btn btn-primary" id="inviteBtn">Tilføj til Server</a>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <div class="user-info">
+                        <img src="" alt="User Avatar" class="user-avatar" id="userAvatar">
+                        <span class="user-name" id="userName"></span>
+                    </div>
+                    <div class="user-dropdown">
+                        <a href="dashboard.html" class="dropdown-item">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </a>
+                        <a href="#" class="dropdown-item" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Log ud
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Commands Hero -->
+    <section class="commands-hero">
+        <div class="hero-particles"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-terminal"></i>
+                    <span>150+ Kommandoer</span>
+                </div>
+                <h1 class="hero-title">
+                    Komplet <span class="gradient-text">Kommando Oversigt</span>
+                </h1>
+                <p class="hero-description">
+                    Udforsk Axion Bots omfattende kommando bibliotek med over 150+ kommandoer fordelt på 12 kategorier
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" data-target="150">0</span>
+                        <span class="stat-label">Kommandoer</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-target="12">0</span>
+                        <span class="stat-label">Kategorier</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" data-target="99">0</span>
+                        <span class="stat-label">% Uptime</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Commands Section -->
+    <section class="popular-commands">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-fire"></i>
+                    Mest Populære Kommandoer
+                </h2>
+                <p class="section-description">De kommandoer vores brugere elsker mest</p>
+            </div>
+            
+            <div class="popular-grid">
+                <div class="popular-card">
+                    <div class="popular-icon">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <h3>!play</h3>
+                    <p>Afspil musik fra YouTube, Spotify og mere</p>
+                    <div class="popular-stats">
+                        <span><i class="fas fa-chart-line"></i> 2.5M brugt</span>
+                    </div>
+                </div>
+                
+                <div class="popular-card">
+                    <div class="popular-icon">
+                        <i class="fas fa-hammer"></i>
+                    </div>
+                    <h3>!ban</h3>
+                    <p>Banner brugere med avanceret logging</p>
+                    <div class="popular-stats">
+                        <span><i class="fas fa-chart-line"></i> 1.8M brugt</span>
+                    </div>
+                </div>
+                
+                <div class="popular-card">
+                    <div class="popular-icon">
+                        <i class="fas fa-laugh"></i>
+                    </div>
+                    <h3>!meme</h3>
+                    <p>Generer sjove memes til din server</p>
+                    <div class="popular-stats">
+                        <span><i class="fas fa-chart-line"></i> 1.2M brugt</span>
+                    </div>
+                </div>
+                
+                <div class="popular-card">
+                    <div class="popular-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>!rank</h3>
+                    <p>Vis din level og XP progression</p>
+                    <div class="popular-stats">
+                        <span><i class="fas fa-chart-line"></i> 900K brugt</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Commands Section -->
+    <section id="commands" class="commands">
+        <div class="container">
+            <div class="commands-search-container">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="commandSearch" placeholder="Søg efter kommandoer..." class="search-input">
+                    <div class="search-suggestions"></div>
+                </div>
+                <div class="search-filters">
+                    <div class="filter-group">
+                        <label>Permission:</label>
+                        <select id="permissionFilter">
+                            <option value="">Alle</option>
+                            <option value="everyone">Alle</option>
+                            <option value="moderator">Moderator</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Popularitet:</label>
+                        <select id="popularityFilter">
+                            <option value="">Alle</option>
+                            <option value="high">Høj</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Lav</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Favoritter:</label>
+                        <button id="favoritesFilter" class="filter-toggle">
+                            <i class="fas fa-heart"></i>
+                            Vis favoritter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="commands-content">
+                <div class="commands-sidebar">
+                    <div class="category-menu">
+                        <div class="category-item active" data-category="all">
+                            <i class="fas fa-grip-horizontal"></i>
+                            <span>Alle Kommandoer</span>
+                            <div class="category-count">150+</div>
+                        </div>
+                        <div class="category-item" data-category="moderation">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Moderation</span>
+                            <div class="category-count">25</div>
+                        </div>
+                        <div class="category-item" data-category="music">
+                            <i class="fas fa-music"></i>
+                            <span>Musik</span>
+                            <div class="category-count">18</div>
+                        </div>
+                        <div class="category-item" data-category="fun">
+                            <i class="fas fa-laugh"></i>
+                            <span>Underholdning</span>
+                            <div class="category-count">32</div>
+                        </div>
+                        <div class="category-item" data-category="utility">
+                            <i class="fas fa-tools"></i>
+                            <span>Værktøjer</span>
+                            <div class="category-count">28</div>
+                        </div>
+                        <div class="category-item" data-category="economy">
+                            <i class="fas fa-coins"></i>
+                            <span>Økonomi</span>
+                            <div class="category-count">15</div>
+                        </div>
+                        <div class="category-item" data-category="levels">
+                            <i class="fas fa-trophy"></i>
+                            <span>Leveling</span>
+                            <div class="category-count">12</div>
+                        </div>
+                        <div class="category-item" data-category="automod">
+                            <i class="fas fa-robot"></i>
+                            <span>Auto-Mod</span>
+                            <div class="category-count">8</div>
+                        </div>
+                        <div class="category-item" data-category="custom">
+                            <i class="fas fa-code"></i>
+                            <span>Custom</span>
+                            <div class="category-count">5</div>
+                        </div>
+                        <div class="category-item" data-category="info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Information</span>
+                            <div class="category-count">7</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="commands-list">
+                    <div class="command-category active" data-category="all">
+                        <h3 class="category-title">
+                            <i class="fas fa-grip-horizontal"></i>
+                            Alle Kommandoer
+                        </h3>
+                        
+                        <!-- Moderation Commands -->
+                        <div class="command-item" data-permission="moderator" data-popularity="high">
+                            <div class="command-header">
+                                <div class="command-title">
+                                    <div class="command-syntax">ban [@bruger] [grund]</div>
+                                    <div class="command-badges">
+                                        <span class="permission-badge moderator">Moderator</span>
+                                        <span class="popularity-badge high">Højt</span>
+                                        <button class="favorite-btn" data-command="ban">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="copy-btn" data-command="!ban [@bruger] [grund]">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="command-description">Banner en bruger permanent fra serveren</div>
+                            </div>
+                            <div class="command-details">
+                                <div class="command-examples">
+                                    <h4>Eksempler:</h4>
+                                    <div class="example-item">
+                                        <code>!ban @SpamBot#1234 Spam</code>
+                                        <span class="example-desc">Banner bruger for spam</span>
+                                    </div>
+                                    <div class="example-item">
+                                        <code>!ban @ToxicUser Toxic adfærd</code>
+                                        <span class="example-desc">Banner bruger med specifik grund</span>
+                                    </div>
+                                </div>
+                                <div class="command-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Permanent</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-history"></i>
+                                        <span>Logged</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Music Commands -->
+                        <div class="command-item" data-permission="everyone" data-popularity="high">
+                            <div class="command-header">
+                                <div class="command-title">
+                                    <div class="command-syntax">play [sang/url]</div>
+                                    <div class="command-badges">
+                                        <span class="permission-badge everyone">Alle</span>
+                                        <span class="popularity-badge high">Højt</span>
+                                        <button class="favorite-btn" data-command="play">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="copy-btn" data-command="!play [sang/url]">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="command-description">Afspil musik fra YouTube, Spotify, SoundCloud og mere</div>
+                            </div>
+                            <div class="command-details">
+                                <div class="command-examples">
+                                    <h4>Eksempler:</h4>
+                                    <div class="example-item">
+                                        <code>!play Imagine Dragons Believer</code>
+                                        <span class="example-desc">Søg og afspil sang</span>
+                                    </div>
+                                    <div class="example-item">
+                                        <code>!play https://youtu.be/...</code>
+                                        <span class="example-desc">Afspil fra direkte link</span>
+                                    </div>
+                                </div>
+                                <div class="command-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-volume-up"></i>
+                                        <span>High quality</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-list"></i>
+                                        <span>Queue support</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fun Commands -->
+                        <div class="command-item" data-permission="everyone" data-popularity="medium">
+                            <div class="command-header">
+                                <div class="command-title">
+                                    <div class="command-syntax">meme [kategori]</div>
+                                    <div class="command-badges">
+                                        <span class="permission-badge everyone">Alle</span>
+                                        <span class="popularity-badge medium">Medium</span>
+                                        <button class="favorite-btn" data-command="meme">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="copy-btn" data-command="!meme [kategori]">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="command-description">Generer sjove memes fra populære kategorier</div>
+                            </div>
+                            <div class="command-details">
+                                <div class="command-examples">
+                                    <h4>Kategorier:</h4>
+                                    <div class="example-item">
+                                        <code>!meme programming</code>
+                                        <span class="example-desc">Programmerings memes</span>
+                                    </div>
+                                    <div class="example-item">
+                                        <code>!meme wholesome</code>
+                                        <span class="example-desc">Positive memes</span>
+                                    </div>
+                                </div>
+                                <div class="command-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-random"></i>
+                                        <span>Random</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-heart"></i>
+                                        <span>SFW only</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Utility Commands -->
+                        <div class="command-item" data-permission="everyone" data-popularity="high">
+                            <div class="command-header">
+                                <div class="command-title">
+                                    <div class="command-syntax">remind [tid] [besked]</div>
+                                    <div class="command-badges">
+                                        <span class="permission-badge everyone">Alle</span>
+                                        <span class="popularity-badge high">Højt</span>
+                                        <button class="favorite-btn" data-command="remind">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="copy-btn" data-command="!remind [tid] [besked]">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="command-description">Sæt påmindelser med fleksible tidsformater</div>
+                            </div>
+                            <div class="command-details">
+                                <div class="command-examples">
+                                    <h4>Eksempler:</h4>
+                                    <div class="example-item">
+                                        <code>!remind 30m Check the oven</code>
+                                        <span class="example-desc">Påmindelse om 30 minutter</span>
+                                    </div>
+                                    <div class="example-item">
+                                        <code>!remind 2h Stream starts!</code>
+                                        <span class="example-desc">Påmindelse om 2 timer</span>
+                                    </div>
+                                </div>
+                                <div class="command-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Flexible timing</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-bell"></i>
+                                        <span>DM notification</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Economy Commands -->
+                        <div class="command-item" data-permission="everyone" data-popularity="medium">
+                            <div class="command-header">
+                                <div class="command-title">
+                                    <div class="command-syntax">daily</div>
+                                    <div class="command-badges">
+                                        <span class="permission-badge everyone">Alle</span>
+                                        <span class="popularity-badge medium">Medium</span>
+                                        <button class="favorite-btn" data-command="daily">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="copy-btn" data-command="!daily">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="command-description">Claim dine daglige coins og bonusser</div>
+                            </div>
+                            <div class="command-details">
+                                <div class="command-examples">
+                                    <h4>Features:</h4>
+                                    <div class="feature-grid">
+                                        <span class="feature">💰 500-1000 coins</span>
+                                        <span class="feature">🏆 Streak bonuser</span>
+                                        <span class="feature">🎁 Random items</span>
+                                        <span class="feature">✨ Premium bonuser</span>
+                                    </div>
+                                </div>
+                                <div class="command-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-sync"></i>
+                                        <span>24h cooldown</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-fire"></i>
+                                        <span>Streak system</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Level Commands -->
+                        <div class="command-item" data-permission="everyone" data-popularity="medium">
+                            <div class="command-header">
+                                <div class="command-title">
+                                    <div class="command-syntax">rank [@bruger]</div>
+                                    <div class="command-badges">
+                                        <span class="permission-badge everyone">Alle</span>
+                                        <span class="popularity-badge medium">Medium</span>
+                                        <button class="favorite-btn" data-command="rank">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="copy-btn" data-command="!rank [@bruger]">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="command-description">Vis din eller andres level, XP og ranking</div>
+                            </div>
+                            <div class="command-details">
+                                <div class="command-examples">
+                                    <h4>Features:</h4>
+                                    <div class="feature-grid">
+                                        <span class="feature">📊 Detaljeret statistik</span>
+                                        <span class="feature">🎨 Custom design</span>
+                                        <span class="feature">🏅 Achievements</span>
+                                    </div>
+                                </div>
+                                <div class="command-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-image"></i>
+                                        <span>Beautiful cards</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-trophy"></i>
+                                        <span>Achievements</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="command-item" data-permission="everyone" data-popularity="medium">
+                            <div class="command-header">
+                                <div class="command-title">
+                                    <div class="command-syntax">leaderboard [type]</div>
+                                    <div class="command-badges">
+                                        <span class="permission-badge everyone">Alle</span>
+                                        <span class="popularity-badge medium">Medium</span>
+                                        <button class="favorite-btn" data-command="leaderboard">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        <button class="copy-btn" data-command="!leaderboard [type]">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="command-description">Server leaderboard for XP, coins, aktivitet og meget mere</div>
+                            </div>
+                            <div class="command-details">
+                                <div class="command-examples">
+                                    <h4>Typer:</h4>
+                                    <div class="example-item">
+                                        <code>!leaderboard xp</code>
+                                        <span class="example-desc">XP leaderboard</span>
+                                    </div>
+                                    <div class="example-item">
+                                        <code>!leaderboard coins</code>
+                                        <span class="example-desc">Wealth leaderboard</span>
+                                    </div>
+                                </div>
+                                <div class="command-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-medal"></i>
+                                        <span>Top 100</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-sync"></i>
+                                        <span>Real-time</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Klar til at bruge alle disse kommandoer?</h2>
+                <p class="cta-description">
+                    Tilføj Axion Bot til din server og få adgang til alle 150+ kommandoer med det samme
+                </p>
+                <a href="#" class="btn btn-primary btn-large">
+                    <i class="fab fa-discord"></i>
+                    Tilføj Axion Bot Nu
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="assets/axion-logo.svg" alt="Axion Bot">
+                        <span>Axion Bot</span>
+                    </div>
+                    <p class="footer-description">
+                        Den ultimative Discord bot for moderne communities. 
+                        Kraftfuld, pålidelig og let at bruge.
+                    </p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Produkt</h4>
+                    <ul>
+                        <li><a href="index.html#features">Funktioner</a></li>
+                        <li><a href="commands.html">Kommandoer</a></li>
+                        <li><a href="pricing.html">Priser</a></li>
+                        <li><a href="#">Changelog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Dokumentation</a></li>
+                        <li><a href="#">Discord Server</a></li>
+                        <li><a href="#">Status</a></li>
+                        <li><a href="#">Kontakt</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Firma</h4>
+                    <ul>
+                        <li><a href="#">Om os</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Privatlivspolitik</a></li>
+                        <li><a href="#">Servicevilkår</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Axion Bot. Alle rettigheder forbeholdes.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="enhanced.js"></script>
+    <script src="commands.js"></script>
+</body>
+</html>

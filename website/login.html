@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Axion Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="login.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/axion-logo.svg" alt="Axion Bot" class="logo-img">
+                <span class="logo-text">Axion Bot</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Hjem</a>
+                <a href="index.html#features" class="nav-link">Funktioner</a>
+                <a href="index.html#commands" class="nav-link">Kommandoer</a>
+                <a href="index.html#pricing" class="nav-link">Priser</a>
+                <a href="index.html#support" class="nav-link">Support</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary active">Login</a>
+                <a href="index.html#invite" class="btn btn-primary">Tilføj til Server</a>
+            </div>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Section -->
+    <section class="login-section">
+        <div class="login-particles"></div>
+        <div class="container">
+            <div class="login-container">
+                <div class="login-left">
+                    <div class="login-hero">
+                        <h1 class="login-title">
+                            Velkommen tilbage til <span class="gradient-text">Axion</span>
+                        </h1>
+                        <p class="login-subtitle">
+                            Log ind for at få adgang til dit personaliserede dashboard og administrere dine servere
+                        </p>
+                        <div class="login-features">
+                            <div class="feature-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Server Statistikker</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Avancerede Indstillinger</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-users"></i>
+                                <span>Medlemshåndtering</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Moderation Tools</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="login-right">
+                    <div class="login-form-container">
+                        <div class="login-header">
+                            <h2>Log ind med Discord</h2>
+                            <p>Brug din Discord konto for at få adgang</p>
+                        </div>
+                        
+                        <div class="login-methods">
+                            <button class="discord-login-btn" id="discordLogin">
+                                <i class="fab fa-discord"></i>
+                                <span>Log ind med Discord</span>
+                                <div class="login-btn-glow"></div>
+                            </button>
+                            
+                            <div class="login-divider">
+                                <span>eller</span>
+                            </div>
+                            
+                            <div class="demo-login">
+                                <button class="demo-login-btn" id="demoLogin">
+                                    <i class="fas fa-eye"></i>
+                                    <span>Demo Dashboard</span>
+                                </button>
+                                <p class="demo-text">Prøv dashboard uden at logge ind</p>
+                            </div>
+                        </div>
+                        
+                        <div class="login-benefits">
+                            <h3>Når du logger ind får du adgang til:</h3>
+                            <ul class="benefits-list">
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    Personligt dashboard med alle dine servere
+                                </li>
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    Live statistikker og aktivitetsgrafer
+                                </li>
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    Avancerede konfigurationsmuligheder
+                                </li>
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    Moderation logs og historie
+                                </li>
+                                <li>
+                                    <i class="fas fa-check"></i>
+                                    Custom commands og automod setup
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="login-security">
+                            <div class="security-badge">
+                                <i class="fas fa-shield-check"></i>
+                                <div>
+                                    <strong>100% Sikker</strong>
+                                    <p>Vi gemmer aldrig dine Discord oplysninger</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Overlay -->
+        <div class="login-loading" id="loginLoading">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <h3>Logger ind...</h3>
+                <p>Henter dine server oplysninger</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="assets/axion-logo.png" alt="Axion Bot" class="footer-logo-img">
+                        <span class="footer-logo-text">Axion Bot</span>
+                    </div>
+                    <p class="footer-description">
+                        Den ultimative Discord bot til moderation, musik, sjov og meget mere.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link"><i class="fab fa-discord"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Produkt</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html#features">Funktioner</a></li>
+                        <li><a href="index.html#commands">Kommandoer</a></li>
+                        <li><a href="index.html#pricing">Priser</a></li>
+                        <li><a href="#">Changelog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Dokumentation</a></li>
+                        <li><a href="#">Discord Server</a></li>
+                        <li><a href="#">Status Side</a></li>
+                        <li><a href="#">Kontakt Os</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Juridisk</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Privatlivspolitik</a></li>
+                        <li><a href="#">Servicevilkår</a></li>
+                        <li><a href="#">Cookie Politik</a></li>
+                        <li><a href="#">GDPR</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Axion Bot. Alle rettigheder forbeholdes.</p>
+                <p>Lavet med ❤️ for Discord fællesskabet</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="login.js"></script>
+</body>
+</html>
