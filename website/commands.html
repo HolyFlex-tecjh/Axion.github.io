@@ -3,8 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kommandoer - Axion Bot</title>
+    <title>Kommandoer - Axion Bot | Komplet kommandooversigt</title>
+    <meta name="description" content="Udforsk alle Axion Bot kommandoer: moderation, musik, divertissement, administration og meget mere. Komplet guide med eksempler og forklaringer.">
+    <meta name="keywords" content="axion bot, discord bot, kommandoer, moderation, musik, administration, discord commands">
+    <meta name="author" content="Axion Bot Team">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://axionbot.com/commands">
+    <meta property="og:title" content="Axion Bot Kommandoer - Komplet oversigt">
+    <meta property="og:description" content="Udforsk alle Axion Bot kommandoer med eksempler og forklaringer. Moderation, musik, divertissement og meget mere.">
+    <meta property="og:image" content="https://axionbot.com/assets/axion-logo.svg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://axionbot.com/commands">
+    <meta property="twitter:title" content="Axion Bot Kommandoer">
+    <meta property="twitter:description" content="Komplet oversigt over alle Axion Bot kommandoer med eksempler og forklaringer.">
+    <meta property="twitter:image" content="https://axionbot.com/assets/axion-logo.svg">
+    
+    <link rel="icon" type="image/svg+xml" href="assets/axion-logo.svg">
+    <link rel="stylesheet" href="fallback.css">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enhanced-styles.css">
+    <link rel="stylesheet" href="modern-utilities.css">
+    <link rel="stylesheet" href="commands.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -28,22 +51,16 @@
                 <a href="#invite" class="btn btn-primary" id="inviteBtn">Tilføj til Server</a>
                 <div class="user-menu" id="userMenu" style="display: none;">
                     <div class="user-info">
-                        <img src="" alt="User Avatar" class="user-avatar" id="userAvatar">
+                        <img class="user-avatar" id="userAvatar" src="" alt="User Avatar">
                         <span class="user-name" id="userName"></span>
                     </div>
                     <div class="user-dropdown">
-                        <a href="dashboard.html" class="dropdown-item">
-                            <i class="fas fa-tachometer-alt"></i>
-                            Dashboard
-                        </a>
-                        <a href="#" class="dropdown-item" id="logoutBtn">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Log ud
-                        </a>
+                        <a href="dashboard.html" class="dropdown-link">Dashboard</a>
+                        <a href="#" class="dropdown-link" id="logoutBtn">Log ud</a>
                     </div>
                 </div>
             </div>
-            <div class="hamburger">
+            <div class="hamburger" id="hamburger">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -64,7 +81,7 @@
                     Komplet <span class="gradient-text">Kommando Oversigt</span>
                 </h1>
                 <p class="hero-description">
-                    Udforsk Axion Bots omfattende kommando bibliotek med over 150+ kommandoer fordelt på 12 kategorier
+                    Udforsk Axion Bots omfattende kommando bibliotek med over 150+ kommandoer fordelt på 12 kategorier. Fra moderation til musik, vi har alt hvad du har brug for.
                 </p>
                 <div class="hero-stats">
                     <div class="stat-item">
@@ -614,7 +631,8 @@
         </div>
     </footer>
 
-    <script src="enhanced.js"></script>
+    <script src="debug.js"></script>
+    <script src="enhanced-v2.js"></script>
     <script src="commands.js"></script>
 </body>
 </html>

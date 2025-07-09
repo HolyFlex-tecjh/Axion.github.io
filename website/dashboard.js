@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup counter animations
     animateCounters();
     
+    // Initialize appeal system
+    initializeAppealSystem();
+    
     // Add new enhancements
     setTimeout(() => {
         createParticleBackground();
@@ -29,23 +32,715 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
-// Mobile menu functionality
-function setupMobileMenu() {
-    const mobileToggle = document.querySelector('.mobile-menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
+// Appeal System Implementation
+function initializeAppealSystem() {
+    setupAppealNavigation();
+    setupAppealModals();
+    setupAppealHandlers();
+    loadAppealData();
+}
+
+// Navigation for appeal sections
+function setupAppealNavigation() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    const sections = {
+        'appeals': document.getElementById('appeals-section'),
+        'my-appeals': document.getElementById('my-appeals-section'),
+        'banned-servers': document.getElementById('banned-servers-section')
+    };
     
-    if (mobileToggle && sidebar) {
-        mobileToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('active');
-        });
-        
-        // Close sidebar when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const href = this.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                const sectionId = href.substring(1);
+                showSection(sectionId, sections);
+                
+                // Update active state
+                menuItems.forEach(mi => mi.classList.remove('active'));
+                this.classList.add('active');
             }
         });
+    });
+}
+
+function showSection(sectionId, sections) {
+    // Hide all sections
+    Object.values(sections).forEach(section => {
+        if (section) section.style.display = 'none';
+    });
+    
+    // Show default dashboard content
+    const dashboardContent = document.querySelector('.dashboard-content');
+    if (sectionId === 'dashboard') {
+        dashboardContent.style.display = 'block';
+        return;
     }
+    
+    // Hide dashboard content when showing appeal sections
+    dashboardContent.style.display = 'none';
+    
+    // Show selected section
+    const targetSection = sections[sectionId];
+    if (targetSection) {
+        targetSection.style.display = 'block';
+        
+        // Load section-specific data
+        switch(sectionId) {
+            case 'appeals':
+                loadAdminAppeals();
+                break;
+            case 'my-appeals':
+                loadUserAppeals();
+                break;
+            case 'banned-servers':
+                loadBannedServers();
+                break;
+        }
+    }
+}
+
+// Modal setup
+function setupAppealModals() {
+    const appealModal = document.getElementById('appealModal');
+    const responseModal = document.getElementById('responseModal');
+    const createAppealBtn = document.getElementById('createAppealBtn');
+    const closeAppealModal = document.getElementById('closeAppealModal');
+    const closeResponseModal = document.getElementById('closeResponseModal');
+    
+    // Create appeal modal
+    if (createAppealBtn) {
+        createAppealBtn.addEventListener('click', () => {
+            showAppealModal();
+        });
+    }
+    
+    // Close modals
+    if (closeAppealModal) {
+        closeAppealModal.addEventListener('click', () => {
+            hideModal(appealModal);
+        });
+    }
+    
+    if (closeResponseModal) {
+        closeResponseModal.addEventListener('click', () => {
+            hideModal(responseModal);
+        });
+    }
+    
+    // Close modals when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === appealModal) {
+            hideModal(appealModal);
+        }
+        if (e.target === responseModal) {
+            hideModal(responseModal);
+        }
+    });
+}
+
+// Appeal form handlers
+function setupAppealHandlers() {
+    const appealForm = document.getElementById('appealForm');
+    const cancelAppeal = document.getElementById('cancelAppeal');
+    const refreshAppeals = document.getElementById('refreshAppeals');
+    const refreshBannedServers = document.getElementById('refreshBannedServers');
+    const appealStatusFilter = document.getElementById('appealStatusFilter');
+    
+    // Appeal form submission
+    if (appealForm) {
+        appealForm.addEventListener('submit', handleAppealSubmission);
+    }
+    
+    // Cancel appeal
+    if (cancelAppeal) {
+        cancelAppeal.addEventListener('click', () => {
+            hideModal(document.getElementById('appealModal'));
+        });
+    }
+    
+    // Refresh buttons
+    if (refreshAppeals) {
+        refreshAppeals.addEventListener('click', loadAdminAppeals);
+    }
+    
+    if (refreshBannedServers) {
+        refreshBannedServers.addEventListener('click', loadBannedServers);
+    }
+    
+    // Status filter
+    if (appealStatusFilter) {
+        appealStatusFilter.addEventListener('change', filterAppeals);
+    }
+    
+    // Response form handlers
+    const approveAppeal = document.getElementById('approveAppeal');
+    const denyAppeal = document.getElementById('denyAppeal');
+    
+    if (approveAppeal) {
+        approveAppeal.addEventListener('click', () => handleAppealResponse('approved'));
+    }
+    
+    if (denyAppeal) {
+        denyAppeal.addEventListener('click', () => handleAppealResponse('denied'));
+    }
+}
+
+// Load appeal data
+function loadAppealData() {
+    loadAppealCounts();
+    loadBannedServersForDropdown();
+}
+
+function loadAppealCounts() {
+    // Simulate API call to get appeal counts
+    setTimeout(() => {
+        const appealNotification = document.getElementById('appealNotification');
+        const bannedServersCount = document.getElementById('bannedServersCount');
+        
+        // Mock data - replace with actual API calls
+        const pendingAppeals = 3;
+        const bannedServers = 2;
+        
+        if (appealNotification) {
+            appealNotification.textContent = pendingAppeals;
+            appealNotification.style.display = pendingAppeals > 0 ? 'block' : 'none';
+        }
+        
+        if (bannedServersCount) {
+            bannedServersCount.textContent = bannedServers;
+            bannedServersCount.style.display = bannedServers > 0 ? 'block' : 'none';
+        }
+    }, 500);
+}
+
+// Admin appeals management
+function loadAdminAppeals() {
+    const appealsGrid = document.getElementById('appealsGrid');
+    if (!appealsGrid) return;
+    
+    // Show loading state
+    appealsGrid.innerHTML = '<div class="loading-state">Loading appeals...</div>';
+    
+    // Simulate API call
+    setTimeout(() => {
+        const mockAppeals = [
+            {
+                id: 1,
+                userId: '123456789',
+                username: 'BannedUser#1234',
+                avatar: 'https://cdn.discordapp.com/avatars/123456789/avatar.png',
+                serverId: '987654321',
+                serverName: 'My Discord Server',
+                reason: 'I was banned for spam, but I believe it was a misunderstanding. I was sharing a link to a helpful resource and didn\'t realize it would be considered spam.',
+                apology: 'I apologize for any confusion and will be more careful about sharing links in the future.',
+                status: 'pending',
+                createdAt: '2023-12-01T10:30:00Z',
+                updatedAt: '2023-12-01T10:30:00Z'
+            },
+            {
+                id: 2,
+                userId: '987654321',
+                username: 'RegretfulUser#5678',
+                avatar: 'https://cdn.discordapp.com/avatars/987654321/avatar.png',
+                serverId: '123456789',
+                serverName: 'Another Server',
+                reason: 'I was banned for inappropriate behavior. I realize my actions were wrong and have learned from this experience.',
+                apology: 'I sincerely apologize for my behavior and understand why I was banned. I would like a second chance to be a positive member of the community.',
+                status: 'pending',
+                createdAt: '2023-11-30T15:45:00Z',
+                updatedAt: '2023-11-30T15:45:00Z'
+            }
+        ];
+        
+        renderAppeals(mockAppeals);
+    }, 1000);
+}
+
+function renderAppeals(appeals) {
+    const appealsGrid = document.getElementById('appealsGrid');
+    if (!appealsGrid) return;
+    
+    if (appeals.length === 0) {
+        appealsGrid.innerHTML = '<div class="no-data">No appeals found.</div>';
+        return;
+    }
+    
+    appealsGrid.innerHTML = appeals.map(appeal => `
+        <div class="appeal-card ${appeal.status}" data-appeal-id="${appeal.id}">
+            <div class="appeal-header">
+                <div class="appeal-user">
+                    <img src="${appeal.avatar}" alt="${appeal.username}" class="user-avatar">
+                    <div class="user-info">
+                        <span class="username">${appeal.username}</span>
+                        <span class="user-id">${appeal.userId}</span>
+                    </div>
+                </div>
+                <span class="appeal-status status-${appeal.status}">${getStatusText(appeal.status)}</span>
+            </div>
+            
+            <div class="appeal-server">
+                <i class="fas fa-server"></i>
+                <span>${appeal.serverName}</span>
+            </div>
+            
+            <div class="appeal-content">
+                <h4>Reason:</h4>
+                <p>${appeal.reason}</p>
+                
+                ${appeal.apology ? `
+                    <h4>Apology:</h4>
+                    <p>${appeal.apology}</p>
+                ` : ''}
+            </div>
+            
+            <div class="appeal-meta">
+                <span class="appeal-date">
+                    <i class="fas fa-calendar"></i>
+                    ${formatDate(appeal.createdAt)}
+                </span>
+            </div>
+            
+            ${appeal.status === 'pending' ? `
+                <div class="appeal-actions">
+                    <button class="btn btn-success btn-sm" onclick="respondToAppeal(${appeal.id}, 'approve')">
+                        <i class="fas fa-check"></i>
+                        Approve
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="respondToAppeal(${appeal.id}, 'deny')">
+                        <i class="fas fa-times"></i>
+                        Deny
+                    </button>
+                </div>
+            ` : ''}
+        </div>
+    `).join('');
+}
+
+// User appeals management
+function loadUserAppeals() {
+    const userAppealsList = document.getElementById('userAppealsList');
+    if (!userAppealsList) return;
+    
+    // Show loading state
+    userAppealsList.innerHTML = '<div class="loading-state">Loading your appeals...</div>';
+    
+    // Simulate API call
+    setTimeout(() => {
+        const mockUserAppeals = [
+            {
+                id: 1,
+                serverId: '987654321',
+                serverName: 'Gaming Community',
+                reason: 'I was banned for using inappropriate language, but I believe the punishment was too harsh.',
+                status: 'pending',
+                createdAt: '2023-12-01T10:30:00Z',
+                response: null
+            },
+            {
+                id: 2,
+                serverId: '123456789',
+                serverName: 'Study Group',
+                reason: 'I was banned for spam, but I was just trying to help with homework.',
+                status: 'denied',
+                createdAt: '2023-11-28T14:20:00Z',
+                response: {
+                    reason: 'After review, the ban was justified due to repeated violations.',
+                    respondedAt: '2023-11-29T09:15:00Z',
+                    respondedBy: 'Admin#1234'
+                }
+            }
+        ];
+        
+        renderUserAppeals(mockUserAppeals);
+    }, 1000);
+}
+
+function renderUserAppeals(appeals) {
+    const userAppealsList = document.getElementById('userAppealsList');
+    if (!userAppealsList) return;
+    
+    if (appeals.length === 0) {
+        userAppealsList.innerHTML = `
+            <div class="no-data">
+                <i class="fas fa-clipboard-list"></i>
+                <p>You haven't submitted any appeals yet.</p>
+                <button class="btn btn-primary" id="createFirstAppeal">
+                    <i class="fas fa-plus"></i>
+                    Create Your First Appeal
+                </button>
+            </div>
+        `;
+        
+        // Add event listener to the create button
+        const createFirstAppeal = document.getElementById('createFirstAppeal');
+        if (createFirstAppeal) {
+            createFirstAppeal.addEventListener('click', showAppealModal);
+        }
+        return;
+    }
+    
+    userAppealsList.innerHTML = appeals.map(appeal => `
+        <div class="user-appeal-item status-${appeal.status}">
+            <div class="appeal-header">
+                <div class="appeal-server">
+                    <i class="fas fa-server"></i>
+                    <span>${appeal.serverName}</span>
+                </div>
+                <span class="appeal-status status-${appeal.status}">${getStatusText(appeal.status)}</span>
+            </div>
+            
+            <div class="appeal-content">
+                <p>${appeal.reason}</p>
+            </div>
+            
+            ${appeal.response ? `
+                <div class="appeal-response">
+                    <h4>Admin Response:</h4>
+                    <p>${appeal.response.reason}</p>
+                    <div class="response-meta">
+                        <span>Responded by ${appeal.response.respondedBy} on ${formatDate(appeal.response.respondedAt)}</span>
+                    </div>
+                </div>
+            ` : ''}
+            
+            <div class="appeal-meta">
+                <span class="appeal-date">
+                    <i class="fas fa-calendar"></i>
+                    Submitted: ${formatDate(appeal.createdAt)}
+                </span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Banned servers management
+function loadBannedServers() {
+    const bannedServersGrid = document.getElementById('bannedServersGrid');
+    if (!bannedServersGrid) return;
+    
+    // Show loading state
+    bannedServersGrid.innerHTML = '<div class="loading-state">Loading banned servers...</div>';
+    
+    // Simulate API call
+    setTimeout(() => {
+        const mockBannedServers = [
+            {
+                serverId: '123456789',
+                serverName: 'Gaming Community',
+                serverIcon: 'https://cdn.discordapp.com/icons/123456789/icon.png',
+                banReason: 'Inappropriate behavior',
+                bannedAt: '2023-11-25T16:30:00Z',
+                bannedBy: 'ModeratorBot#1234',
+                canAppeal: true,
+                hasActiveAppeal: false
+            },
+            {
+                serverId: '987654321',
+                serverName: 'Study Group',
+                serverIcon: 'https://cdn.discordapp.com/icons/987654321/icon.png',
+                banReason: 'Spam',
+                bannedAt: '2023-11-20T12:15:00Z',
+                bannedBy: 'Admin#5678',
+                canAppeal: true,
+                hasActiveAppeal: true
+            }
+        ];
+        
+        renderBannedServers(mockBannedServers);
+    }, 1000);
+}
+
+function renderBannedServers(servers) {
+    const bannedServersGrid = document.getElementById('bannedServersGrid');
+    if (!bannedServersGrid) return;
+    
+    if (servers.length === 0) {
+        bannedServersGrid.innerHTML = `
+            <div class="no-data">
+                <i class="fas fa-check-circle"></i>
+                <p>You are not banned from any servers!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    bannedServersGrid.innerHTML = servers.map(server => `
+        <div class="banned-server-card">
+            <div class="server-header">
+                <img src="${server.serverIcon}" alt="${server.serverName}" class="server-icon">
+                <div class="server-info">
+                    <h3>${server.serverName}</h3>
+                    <span class="server-id">${server.serverId}</span>
+                </div>
+            </div>
+            
+            <div class="ban-details">
+                <div class="ban-reason">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Reason:</strong> ${server.banReason}
+                </div>
+                
+                <div class="ban-meta">
+                    <div class="ban-date">
+                        <i class="fas fa-calendar"></i>
+                        Banned: ${formatDate(server.bannedAt)}
+                    </div>
+                    <div class="banned-by">
+                        <i class="fas fa-user"></i>
+                        By: ${server.bannedBy}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="server-actions">
+                ${server.canAppeal ? 
+                    server.hasActiveAppeal ? 
+                        '<button class="btn btn-secondary btn-sm" disabled><i class="fas fa-clock"></i> Appeal Pending</button>' :
+                        `<button class="btn btn-primary btn-sm" onclick="createAppealForServer('${server.serverId}', '${server.serverName}')"><i class="fas fa-gavel"></i> Submit Appeal</button>`
+                    : 
+                    '<button class="btn btn-secondary btn-sm" disabled><i class="fas fa-ban"></i> Cannot Appeal</button>'
+                }
+            </div>
+        </div>
+    `).join('');
+}
+
+// Modal functions
+function showAppealModal() {
+    const modal = document.getElementById('appealModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        loadBannedServersForDropdown();
+    }
+}
+
+function hideModal(modal) {
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function showResponseModal(appealId) {
+    const modal = document.getElementById('responseModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        loadAppealDetails(appealId);
+    }
+}
+
+// Appeal handling functions
+function handleAppealSubmission(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const appealData = {
+        serverId: document.getElementById('appealServer').value,
+        reason: document.getElementById('appealReason').value,
+        apology: document.getElementById('appealApology').value
+    };
+    
+    // Show loading state
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    submitBtn.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Reset form
+        e.target.reset();
+        
+        // Hide modal
+        hideModal(document.getElementById('appealModal'));
+        
+        // Show success message
+        showNotification('Appeal submitted successfully!', 'success');
+        
+        // Refresh appeals if on that page
+        loadUserAppeals();
+        
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 1500);
+}
+
+function handleAppealResponse(action) {
+    const responseReason = document.getElementById('responseReason').value;
+    const modal = document.getElementById('responseModal');
+    const appealId = modal.dataset.appealId;
+    
+    if (!appealId) return;
+    
+    // Show loading state
+    const buttons = modal.querySelectorAll('button');
+    buttons.forEach(btn => btn.disabled = true);
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Hide modal
+        hideModal(modal);
+        
+        // Show success message
+        showNotification(`Appeal ${action} successfully!`, 'success');
+        
+        // Refresh appeals
+        loadAdminAppeals();
+        
+        // Reset buttons
+        buttons.forEach(btn => btn.disabled = false);
+    }, 1500);
+}
+
+// Helper functions
+function loadBannedServersForDropdown() {
+    const serverSelect = document.getElementById('appealServer');
+    if (!serverSelect) return;
+    
+    // Simulate API call
+    setTimeout(() => {
+        const mockServers = [
+            { id: '123456789', name: 'Gaming Community' },
+            { id: '987654321', name: 'Study Group' }
+        ];
+        
+        serverSelect.innerHTML = '<option value="">Vælg server...</option>' + 
+            mockServers.map(server => `<option value="${server.id}">${server.name}</option>`).join('');
+    }, 500);
+}
+
+function loadAppealDetails(appealId) {
+    const modal = document.getElementById('responseModal');
+    const appealDetails = document.getElementById('appealDetails');
+    
+    if (!appealDetails) return;
+    
+    modal.dataset.appealId = appealId;
+    
+    // Show loading state
+    appealDetails.innerHTML = '<div class="loading-state">Loading appeal details...</div>';
+    
+    // Simulate API call
+    setTimeout(() => {
+        const mockAppeal = {
+            id: appealId,
+            username: 'BannedUser#1234',
+            userId: '123456789',
+            serverName: 'Gaming Community',
+            reason: 'I was banned for spam, but I believe it was a misunderstanding.',
+            apology: 'I apologize for any confusion and will be more careful in the future.',
+            createdAt: '2023-12-01T10:30:00Z'
+        };
+        
+        appealDetails.innerHTML = `
+            <div class="appeal-detail-card">
+                <div class="appeal-user">
+                    <strong>User:</strong> ${mockAppeal.username} (${mockAppeal.userId})
+                </div>
+                <div class="appeal-server">
+                    <strong>Server:</strong> ${mockAppeal.serverName}
+                </div>
+                <div class="appeal-reason">
+                    <strong>Reason:</strong>
+                    <p>${mockAppeal.reason}</p>
+                </div>
+                ${mockAppeal.apology ? `
+                    <div class="appeal-apology">
+                        <strong>Apology:</strong>
+                        <p>${mockAppeal.apology}</p>
+                    </div>
+                ` : ''}
+                <div class="appeal-date">
+                    <strong>Submitted:</strong> ${formatDate(mockAppeal.createdAt)}
+                </div>
+            </div>
+        `;
+    }, 500);
+}
+
+function filterAppeals() {
+    const filter = document.getElementById('appealStatusFilter').value;
+    const appeals = document.querySelectorAll('.appeal-card');
+    
+    appeals.forEach(appeal => {
+        if (filter === 'all' || appeal.classList.contains(filter)) {
+            appeal.style.display = 'block';
+        } else {
+            appeal.style.display = 'none';
+        }
+    });
+}
+
+function respondToAppeal(appealId, action) {
+    const modal = document.getElementById('responseModal');
+    modal.dataset.appealId = appealId;
+    showResponseModal(appealId);
+}
+
+function createAppealForServer(serverId, serverName) {
+    const modal = document.getElementById('appealModal');
+    const serverSelect = document.getElementById('appealServer');
+    
+    if (serverSelect) {
+        // Pre-select the server
+        serverSelect.innerHTML = `<option value="${serverId}" selected>${serverName}</option>`;
+    }
+    
+    showAppealModal();
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        'pending': 'Pending',
+        'approved': 'Approved',
+        'denied': 'Denied'
+    };
+    return statusMap[status] || status;
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('da-DK', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'info'}-circle"></i>
+        <span>${message}</span>
+        <button class="notification-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+    
+    // Close button
+    notification.querySelector('.notification-close').addEventListener('click', () => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    });
 }
 
 // Setup scroll animations

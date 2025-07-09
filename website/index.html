@@ -28,15 +28,38 @@
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="enhanced-styles.css">
+    <link rel="stylesheet" href="modern-utilities.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Preload important resources -->
     <link rel="preload" href="assets/axion-logo.svg" as="image">
     <link rel="preload" href="enhanced.js" as="script">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
+    
+    <!-- Performance optimizations -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- Scripts -->
-    <script src="enhanced.js" defer></script>
+    <script src="enhanced-v2.js" defer></script>
+    
+    <!-- Service Worker for caching -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
     
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -59,6 +82,7 @@
     <!-- Loading Animation -->
     <div class="loading-overlay">
         <div class="loading-spinner"></div>
+        <div class="loading-text">Indlæser Axion Bot...</div>
     </div>
 
     <!-- Navigation -->
