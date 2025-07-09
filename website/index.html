@@ -3,11 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axion Bot - Den Ultimative Discord Bot</title>
+    <title>Axion Bot - Den Ultimative Discord Bot til Moderation og Underholdning</title>
+    <meta name="description" content="Axion Bot er en kraftfuld Discord bot med intelligent auto-moderation, musik streaming, gaming features og omfattende server management. Tilføj til din server gratis i dag!">
+    <meta name="keywords" content="Discord bot, moderation, musik bot, gaming, server management, auto-moderation, spam protection">
+    <meta name="author" content="Axion Bot Team">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Axion Bot - Den Ultimative Discord Bot">
+    <meta property="og:description" content="Kraftfuld Discord bot med intelligent auto-moderation, musik streaming og omfattende server management funktioner.">
+    <meta property="og:image" content="assets/axion-logo.svg">
+    <meta property="og:url" content="https://axion-bot.com">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Axion Bot - Den Ultimative Discord Bot">
+    <meta name="twitter:description" content="Kraftfuld Discord bot med intelligent auto-moderation, musik streaming og omfattende server management funktioner.">
+    <meta name="twitter:image" content="assets/axion-logo.svg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/axion-logo.svg">
+    <link rel="alternate icon" href="assets/favicon.ico">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Preload important resources -->
+    <link rel="preload" href="assets/axion-logo.svg" as="image">
+    <link rel="preload" href="enhanced.js" as="script">
+    
+    <!-- Scripts -->
     <script src="enhanced.js" defer></script>
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Axion Bot",
+        "description": "Kraftfuld Discord bot med intelligent auto-moderation, musik streaming og omfattende server management funktioner.",
+        "applicationCategory": "CommunicationApplication",
+        "operatingSystem": "Discord",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "DKK"
+        }
+    }
+    </script>
 </head>
 <body>
     <!-- Loading Animation -->
@@ -16,24 +62,32 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="assets/axion-logo.svg" alt="Axion Bot" class="logo-img">
+                <img src="assets/axion-logo.svg" alt="Axion Bot Logo" class="logo-img">
                 <span class="logo-text">Axion Bot</span>
             </div>
             <div class="nav-menu">
                 <a href="#home" class="nav-link">Hjem</a>
                 <a href="#features" class="nav-link">Funktioner</a>
                 <a href="commands.html" class="nav-link">Kommandoer</a>
-                <a href="pricing.html" class="nav-link">Priser</a>
+                <a href="#demo" class="nav-link">Demo</a>
+                <a href="#community" class="nav-link">Community</a>
                 <a href="#support" class="nav-link">Support</a>
             </div>
             <div class="nav-buttons">
-                <a href="login.html" class="btn btn-secondary" id="loginBtn">Login</a>
-                <a href="#invite" class="btn btn-primary" id="inviteBtn">Tilføj til Server</a>
+                <a href="dashboard.html" class="btn btn-secondary" id="dashboardBtn">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=8&scope=bot%20applications.commands" 
+                   class="btn btn-primary" id="inviteBtn" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-discord"></i>
+                    Tilføj til Server
+                </a>
             </div>
-            <div class="hamburger">
+            <div class="hamburger" role="button" aria-label="Toggle navigation menu" tabindex="0">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -51,17 +105,17 @@
                 </h1>
                 <p class="hero-description">
                     Axion Bot revolutionerer din Discord server med kraftfulde funktioner, 
-                    intelligent moderation og uendelige tilpasningsmuligheder. Opdag hvorfor 
-                    tusindvis af servere vælger Axion.
+                    intelligent auto-moderation og uendelige tilpasningsmuligheder. Opdag hvorfor 
+                    over 50.000 servere vælger Axion Bot.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#invite" class="btn btn-primary btn-large">
+                    <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=8&scope=bot%20applications.commands" class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">
                         <i class="fab fa-discord"></i>
                         Tilføj til Discord
                     </a>
                     <a href="#features" class="btn btn-outline btn-large">
                         <i class="fas fa-play"></i>
-                        Se Demo
+                        Se Funktioner
                     </a>
                 </div>
                 <div class="hero-stats">
@@ -102,7 +156,8 @@
                                     </div>
                                     <div class="message-content">
                                         <span class="message-author">Admin</span>
-                                        <span class="message-text">!play Imagine Dragons</span>
+                                        <span class="message-timestamp">i dag kl. 14:32</span>
+                                        <div class="message-text">/ban @spammer reason:Spam beskeder</div>
                                     </div>
                                 </div>
                                 <div class="discord-message bot-message">
@@ -111,7 +166,20 @@
                                     </div>
                                     <div class="message-content">
                                         <span class="message-author bot-name">Axion Bot</span>
-                                        <span class="message-text">🎵 Nu afspiller: **Believer - Imagine Dragons** | Tilføjet til køen af Admin</span>
+                                        <span class="message-timestamp bot-tag">BOT</span>
+                                        <div class="message-text">
+                                            <div class="embed-message">
+                                                <div class="embed-header">
+                                                    <i class="fas fa-shield-alt"></i>
+                                                    <span>Bruger Banned</span>
+                                                </div>
+                                                <div class="embed-content">
+                                                    <strong>Bruger:</strong> @spammer<br>
+                                                    <strong>Årsag:</strong> Spam beskeder<br>
+                                                    <strong>Moderator:</strong> Admin
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="discord-message">
@@ -120,7 +188,8 @@
                                     </div>
                                     <div class="message-content">
                                         <span class="message-author">Member</span>
-                                        <span class="message-text">!stats</span>
+                                        <span class="message-timestamp">i dag kl. 14:33</span>
+                                        <div class="message-text">/help</div>
                                     </div>
                                 </div>
                             </div>
@@ -145,47 +214,50 @@
                     <div class="feature-icon">
                         <i class="fas fa-shield-alt"></i>
                     </div>
-                    <h3 class="feature-title">Smart Moderation</h3>
+                    <h3 class="feature-title">Intelligent Auto-Moderation</h3>
                     <p class="feature-description">
-                        Avanceret AI-drevet moderation der automatisk håndterer spam, toxic chat og upassende indhold.
+                        Avanceret AI-drevet moderation der automatisk håndterer spam, toxic chat og upassende indhold med præcision og effektivitet.
                     </p>
                     <ul class="feature-list">
-                        <li>Auto-ban system</li>
-                        <li>Toxic chat detection</li>
-                        <li>Spam beskyttelse</li>
-                        <li>Custom filter regler</li>
+                        <li><i class="fas fa-check"></i> Auto-ban system med intelligent eskalering</li>
+                        <li><i class="fas fa-check"></i> Toxic chat detection med 99% nøjagtighed</li>
+                        <li><i class="fas fa-check"></i> Real-time spam beskyttelse</li>
+                        <li><i class="fas fa-check"></i> Brugerdefinerede filter regler</li>
+                        <li><i class="fas fa-check"></i> Raid protection og mass-join detection</li>
                     </ul>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-music"></i>
+                        <i class="fas fa-gavel"></i>
                     </div>
-                    <h3 class="feature-title">Musik & Underholdning</h3>
+                    <h3 class="feature-title">Professionelle Moderation Værktøjer</h3>
                     <p class="feature-description">
-                        High-quality musik streaming fra YouTube, Spotify og andre platforme med avancerede controls.
+                        Omfattende suite af moderation kommandoer med detaljeret logging og audit trail for transparent server administration.
                     </p>
                     <ul class="feature-list">
-                        <li>24/7 musik streaming</li>
-                        <li>Playlist management</li>
-                        <li>DJ roller og permissions</li>
-                        <li>Queue kontrol</li>
+                        <li><i class="fas fa-check"></i> Ban, kick og timeout kommandoer</li>
+                        <li><i class="fas fa-check"></i> Warn system med persistent tracking</li>
+                        <li><i class="fas fa-check"></i> Message purge og bulk deletion</li>
+                        <li><i class="fas fa-check"></i> Moderation statistikker og analytics</li>
+                        <li><i class="fas fa-check"></i> Audit logging for alle handlinger</li>
                     </ul>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-gamepad"></i>
+                        <i class="fas fa-globe"></i>
                     </div>
-                    <h3 class="feature-title">Gaming Features</h3>
+                    <h3 class="feature-title">Flersproget Support</h3>
                     <p class="feature-description">
-                        Omfattende gaming integration med statistikker, tournaments og community features.
+                        Fuld support for 40+ sprog med intelligent language detection og lokaliserede beskeder for global community support.
                     </p>
                     <ul class="feature-list">
-                        <li>Game stat tracking</li>
-                        <li>Tournament system</li>
-                        <li>Leaderboards</li>
-                        <li>Achievement system</li>
+                        <li><i class="fas fa-check"></i> 40+ sprog understøttelse</li>
+                        <li><i class="fas fa-check"></i> Automatisk sprog detection</li>
+                        <li><i class="fas fa-check"></i> Lokaliserede kommandoer og svar</li>
+                        <li><i class="fas fa-check"></i> Regional tilpasning</li>
+                        <li><i class="fas fa-check"></i> Dynamic language switching</li>
                     </ul>
                 </div>
                 
@@ -195,29 +267,31 @@
                     </div>
                     <h3 class="feature-title">Analytics & Insights</h3>
                     <p class="feature-description">
-                        Detaljerede server statistikker og bruger analytics for at optimere dit community.
+                        Detaljerede server statistikker og bruger analytics med real-time dashboards for at optimere dit community.
                     </p>
                     <ul class="feature-list">
-                        <li>Realtime dashboard</li>
-                        <li>Bruger aktivitet</li>
-                        <li>Kanal statistikker</li>
-                        <li>Growth metrics</li>
+                        <li><i class="fas fa-check"></i> Real-time server dashboard</li>
+                        <li><i class="fas fa-check"></i> Bruger aktivitet tracking</li>
+                        <li><i class="fas fa-check"></i> Kanal engagement statistikker</li>
+                        <li><i class="fas fa-check"></i> Growth metrics og trends</li>
+                        <li><i class="fas fa-check"></i> Export data til CSV/JSON</li>
                     </ul>
                 </div>
                 
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-cog"></i>
+                        <i class="fas fa-cogs"></i>
                     </div>
-                    <h3 class="feature-title">Tilpasning</h3>
+                    <h3 class="feature-title">Avanceret Tilpasning</h3>
                     <p class="feature-description">
-                        Uendelige tilpasningsmuligheder med custom commands, auto-roles og reaction roles.
+                        Uendelige tilpasningsmuligheder med custom commands, auto-roles, reaction roles og personaliserede workflows.
                     </p>
                     <ul class="feature-list">
-                        <li>Custom commands</li>
-                        <li>Auto-roles</li>
-                        <li>Reaction roles</li>
-                        <li>Welcome messages</li>
+                        <li><i class="fas fa-check"></i> Custom slash commands</li>
+                        <li><i class="fas fa-check"></i> Auto-roles ved join</li>
+                        <li><i class="fas fa-check"></i> Reaction roles system</li>
+                        <li><i class="fas fa-check"></i> Personaliserede welcome messages</li>
+                        <li><i class="fas fa-check"></i> Workflow automation</li>
                     </ul>
                 </div>
                 
@@ -227,13 +301,14 @@
                     </div>
                     <h3 class="feature-title">Web Dashboard</h3>
                     <p class="feature-description">
-                        Administrer din server fra hvor som helst med vores intuitive web dashboard.
+                        Administrer din server fra hvor som helst med vores intuitive, mobile-venlige web dashboard med live monitoring.
                     </p>
                     <ul class="feature-list">
-                        <li>Real-time konfiguration</li>
-                        <li>Remote management</li>
-                        <li>Mobile friendly</li>
-                        <li>Live monitoring</li>
+                        <li><i class="fas fa-check"></i> Real-time konfiguration</li>
+                        <li><i class="fas fa-check"></i> Remote server management</li>
+                        <li><i class="fas fa-check"></i> Mobile responsive design</li>
+                        <li><i class="fas fa-check"></i> Live monitoring og alerts</li>
+                        <li><i class="fas fa-check"></i> Sikker OAuth2 login</li>
                     </ul>
                 </div>
             </div>
@@ -293,23 +368,37 @@
     <section id="demo" class="interactive-demo">
         <div class="demo-container">
             <div class="demo-content">
-                <h2 class="section-title">Prøv Axion Bot Live</h2>
+                <h2 class="section-title">Oplev Axion Bot i Aktion</h2>
                 <p class="section-description">
-                    Oplev Axion Bots funktioner med vores interaktive demo. 
-                    Se hvordan botten reagerer på forskellige kommandoer.
+                    Prøv vores interaktive demo og se hvordan Axion Bot reagerer på forskellige kommandoer. 
+                    Oplev intelligente svar og professionelle embeds i real-time.
                 </p>
                 <div class="demo-features">
                     <div class="demo-feature">
                         <i class="fas fa-bolt"></i>
-                        <span>Lynhurtige svar</span>
+                        <span>Lynhurtige svar (&lt;50ms)</span>
                     </div>
                     <div class="demo-feature">
                         <i class="fas fa-brain"></i>
-                        <span>Intelligent respons</span>
+                        <span>AI-drevet intelligent respons</span>
                     </div>
                     <div class="demo-feature">
                         <i class="fas fa-palette"></i>
-                        <span>Flotte embeds</span>
+                        <span>Smukke Discord embeds</span>
+                    </div>
+                    <div class="demo-feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Real-time moderation</span>
+                    </div>
+                </div>
+                <div class="demo-commands">
+                    <h4>Prøv disse kommandoer:</h4>
+                    <div class="command-buttons">
+                        <button class="demo-cmd-btn" data-command="/help">📋 /help</button>
+                        <button class="demo-cmd-btn" data-command="/ping">🏓 /ping</button>
+                        <button class="demo-cmd-btn" data-command="/info">ℹ️ /info</button>
+                        <button class="demo-cmd-btn" data-command="/modstats">📊 /modstats</button>
+                        <button class="demo-cmd-btn" data-command="/warn @user spam">⚠️ /warn</button>
                     </div>
                 </div>
             </div>
@@ -322,17 +411,22 @@
                     </div>
                     <div class="chat-status online">
                         <span class="status-dot"></span>
-                        Online
+                        Axion Bot Online
                     </div>
                 </div>
                 
                 <div class="chat-messages">
-                    <!-- Messages will be dynamically added here -->
+                    <div class="demo-message system">
+                        <div class="message-content">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Velkommen til Axion Bot demo! Prøv kommandoer herunder eller brug knapperne til venstre.</span>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="chat-input">
-                    <input type="text" placeholder="Prøv kommandoer som !help, !play eller !stats..." maxlength="100">
-                    <button class="chat-send">
+                    <input type="text" placeholder="Prøv kommandoer som /help, /ping, /info eller /modstats..." maxlength="100" autocomplete="off">
+                    <button class="chat-send" aria-label="Send besked">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
@@ -352,45 +446,110 @@
             
             <div class="testimonials-grid">
                 <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
                     <div class="testimonial-content">
-                        Axion Bot har helt transformeret vores server! Moderationen er spot on, 
-                        og musikfunktionerne er i verdensklasse. Vores community elsker det!
+                        "Axion Bot har helt transformeret vores gaming server! Auto-moderationen er spot on, 
+                        og de danske oversættelser gør det perfekt for vores skandinaviske community. 
+                        Uptime er fantastisk, og support teamet reagerer lynhurtigt på alle henvendelser."
                     </div>
                     <div class="testimonial-author">
                         <div class="author-avatar">JM</div>
                         <div class="author-info">
                             <h4>Jakob Møller</h4>
-                            <p>Admin @ Gaming Legends (15.2k medlemmer)</p>
+                            <p>Server Administrator @ Gaming Legends</p>
+                            <span class="server-stats">15.2k medlemmer • 99.8% uptime</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
                     <div class="testimonial-content">
-                        Vi prøvede mange bots, men Axion er den eneste der lever op til løfterne. 
-                        Uptime er fantastisk, og support teamet er utroligt hjælpsomme!
+                        "Vi testede over 20 forskellige bots, men Axion er den eneste der lever op til alle løfter. 
+                        Moderation systemet er intelligent og præcist, og web dashboard'et gør administration så nemt. 
+                        Vores community elsker de personaliserede features!"
                     </div>
                     <div class="testimonial-author">
                         <div class="author-avatar">LA</div>
                         <div class="author-info">
                             <h4>Laura Andersen</h4>
-                            <p>Owner @ Creative Hub (8.7k medlemmer)</p>
+                            <p>Community Manager @ Creative Hub</p>
+                            <span class="server-stats">8.7k medlemmer • 47% monthly growth</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
                     <div class="testimonial-content">
-                        Dashboard'et gør det så nemt at administrere serveren. Jeg kan ændre 
-                        indstillinger fra min telefon, selv når jeg er på farten. Genial!
+                        "Som moderator på en stor server er Axion Bot uundværlig. Analytics funktionerne giver 
+                        os indsigt i server trends, og auto-moderation fanger problemer før de eskalerer. 
+                        Mobile dashboard'et betyder jeg kan moderere fra hvor som helst."
                     </div>
                     <div class="testimonial-author">
                         <div class="author-avatar">MH</div>
                         <div class="author-info">
                             <h4>Mikkel Hansen</h4>
-                            <p>Moderator @ Tech Talk (22.1k medlemmer)</p>
+                            <p>Head Moderator @ Tech Talk Danmark</p>
+                            <span class="server-stats">22.1k medlemmer • 250+ daily aktive</span>
                         </div>
                     </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="testimonial-content">
+                        "Perfekt til internationale communities! Axion Bot's flersprogede support betyder 
+                        at vores medlemmer fra hele verden får lokaliserede svar. Custom commands og 
+                        reaction roles har gjort vores onboarding process så meget mere engagerende."
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">KS</div>
+                        <div class="author-info">
+                            <h4>Katrine Svendsen</h4>
+                            <p>Community Lead @ Nordic Gamers</p>
+                            <span class="server-stats">35.8k medlemmer • 12 sprog support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="testimonial-stats">
+                <div class="stat-item">
+                    <span class="stat-number">4.9/5</span>
+                    <span class="stat-label">Gennemsnitlig Rating</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Anbefaler til andre</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">15.000+</span>
+                    <span class="stat-label">Positive Anmeldelser</span>
                 </div>
             </div>
         </div>
@@ -400,33 +559,59 @@
     <section id="cta" class="cta">
         <div class="container">
             <div class="cta-content">
-                <h2 class="cta-title">Klar til at Transformere Din Discord Server?</h2>
+                <h2 class="cta-title">Klar til at Revolutionere Din Discord Server?</h2>
                 <p class="cta-description">
-                    Tilslut dig tusindvis af servere der allerede bruger Axion Bot. 
-                    Få adgang til alle funktioner med det samme - ingen setup påkrævet!
+                    Tilslut dig 50.000+ servere der allerede bruger Axion Bot til intelligent moderation, 
+                    omfattende analytics og seamless server management. Kom i gang på under 2 minutter!
                 </p>
                 <div class="cta-buttons">
-                    <a href="#invite" class="btn btn-primary btn-large">
+                    <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=8&scope=bot%20applications.commands" 
+                       class="btn btn-primary btn-large" target="_blank" rel="noopener noreferrer">
                         <i class="fab fa-discord"></i>
                         Tilføj til Discord - Gratis
                     </a>
-                    <a href="pricing.html" class="btn btn-outline btn-large">
-                        <i class="fas fa-crown"></i>
-                        Se Premium Planer
+                    <a href="dashboard.html" class="btn btn-outline btn-large">
+                        <i class="fas fa-cog"></i>
+                        Åbn Dashboard
                     </a>
                 </div>
                 <div class="cta-trust">
                     <div class="trust-item">
                         <i class="fas fa-shield-check"></i>
-                        <span>100% Sikker</span>
+                        <span>100% Sikker & GDPR Compliant</span>
                     </div>
                     <div class="trust-item">
                         <i class="fas fa-clock"></i>
-                        <span>2 min setup</span>
+                        <span>Setup på under 2 minutter</span>
                     </div>
                     <div class="trust-item">
                         <i class="fas fa-heart"></i>
-                        <span>Gratis forever</span>
+                        <span>Gratis for evigt</span>
+                    </div>
+                    <div class="trust-item">
+                        <i class="fas fa-headset"></i>
+                        <span>24/7 Support på Dansk</span>
+                    </div>
+                </div>
+                <div class="cta-features">
+                    <h4>Hvad får du med det samme:</h4>
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-bolt"></i>
+                            <span>Intelligent auto-moderation</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-globe"></i>
+                            <span>40+ sprog support</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Real-time analytics</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Mobile dashboard</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -439,18 +624,26 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <div class="footer-logo">
-                        <img src="assets/axion-logo.svg" alt="Axion Bot">
+                        <img src="assets/axion-logo.svg" alt="Axion Bot Logo">
                         <span>Axion Bot</span>
                     </div>
                     <p class="footer-description">
                         Den ultimative Discord bot for moderne communities. 
-                        Kraftfuld, pålidelig og let at bruge.
+                        Kraftfuld, pålidelig og designet til at skalere med dit community.
                     </p>
                     <div class="social-links">
-                        <a href="#"><i class="fab fa-discord"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-github"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="https://discord.gg/axion-bot" target="_blank" rel="noopener noreferrer" aria-label="Discord Server">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                        <a href="https://twitter.com/axionbot" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://github.com/axion-bot" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://youtube.com/axionbot" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                            <i class="fab fa-youtube"></i>
+                        </a>
                     </div>
                 </div>
                 
@@ -460,43 +653,73 @@
                         <li><a href="#features">Funktioner</a></li>
                         <li><a href="commands.html">Kommandoer</a></li>
                         <li><a href="pricing.html">Priser</a></li>
-                        <li><a href="#">Changelog</a></li>
-                        <li><a href="#">API</a></li>
+                        <li><a href="changelog.html">Changelog</a></li>
+                        <li><a href="api-docs.html">API Dokumentation</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-section">
                     <h4>Support</h4>
                     <ul>
-                        <li><a href="#">Dokumentation</a></li>
-                        <li><a href="#">Discord Server</a></li>
-                        <li><a href="#">Status</a></li>
-                        <li><a href="#">Kontakt</a></li>
-                        <li><a href="#">Bug Reports</a></li>
+                        <li><a href="docs.html">Dokumentation</a></li>
+                        <li><a href="https://discord.gg/axion-bot" target="_blank" rel="noopener noreferrer">Discord Server</a></li>
+                        <li><a href="https://status.axion-bot.com" target="_blank" rel="noopener noreferrer">Status Side</a></li>
+                        <li><a href="contact.html">Kontakt os</a></li>
+                        <li><a href="https://github.com/axion-bot/issues" target="_blank" rel="noopener noreferrer">Bug Reports</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-section">
-                    <h4>Firma</h4>
+                    <h4>Virksomhed</h4>
                     <ul>
-                        <li><a href="#">Om os</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Karriere</a></li>
-                        <li><a href="#">Privatlivspolitik</a></li>
-                        <li><a href="#">Servicevilkår</a></li>
+                        <li><a href="about.html">Om Axion Bot</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="careers.html">Karriere</a></li>
+                        <li><a href="privacy.html">Privatlivspolitik</a></li>
+                        <li><a href="terms.html">Servicevilkår</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://discord.gg/axion-bot" target="_blank" rel="noopener noreferrer">Discord Server</a></li>
+                        <li><a href="community.html">Community Guidelines</a></li>
+                        <li><a href="testimonials.html">Testimonials</a></li>
+                        <li><a href="case-studies.html">Case Studies</a></li>
+                        <li><a href="partners.html">Partnere</a></li>
                     </ul>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2025 Axion Bot. Alle rettigheder forbeholdes.</p>
-                <div class="footer-badges">
-                    <span class="badge">Verificeret Bot</span>
-                    <span class="badge">GDPR Compliant</span>
-                    <span class="badge">SOC 2 Type II</span>
+                <div class="footer-left">
+                    <p>&copy; 2025 Axion Bot. Alle rettigheder forbeholdes.</p>
+                    <p class="footer-subtitle">Bygget med ❤️ i Danmark for det globale Discord community</p>
+                </div>
+                <div class="footer-right">
+                    <div class="footer-badges">
+                        <span class="badge verified">
+                            <i class="fas fa-check-circle"></i>
+                            Discord Verificeret
+                        </span>
+                        <span class="badge gdpr">
+                            <i class="fas fa-shield-alt"></i>
+                            GDPR Compliant
+                        </span>
+                        <span class="badge security">
+                            <i class="fas fa-lock"></i>
+                            SOC 2 Type II
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
     </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" aria-label="Tilbage til toppen">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 </body>
 </html>

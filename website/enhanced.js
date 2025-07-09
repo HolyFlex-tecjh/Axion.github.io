@@ -105,111 +105,140 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(el);
     });
     
-    // Interactive demo chat
-    const chatMessages = document.querySelector('.chat-messages');
+    // Demo Chat Functionality
     const chatInput = document.querySelector('.chat-input input');
     const chatSend = document.querySelector('.chat-send');
+    const chatMessages = document.querySelector('.chat-messages');
+    const demoCmdButtons = document.querySelectorAll('.demo-cmd-btn');
     
-    const demoMessages = [
-        { type: 'user', author: 'Admin', text: '!moderation setup' },
-        { type: 'bot', author: 'Axion Bot', text: '🛡️ Moderation system er nu konfigureret! Auto-moderation er aktiveret med spam beskyttelse og toxic chat filter.' },
-        { type: 'user', author: 'Member', text: '!play Imagine Dragons' },
-        { type: 'bot', author: 'Axion Bot', text: '🎵 Nu afspiller: **Believer - Imagine Dragons** | Tilføjet til køen af Member' },
-        { type: 'user', author: 'Admin', text: '!stats server' },
-        { type: 'bot', author: 'Axion Bot', text: '📊 **Server Statistikker**\n👥 Medlemmer: 1,247\n💬 Beskeder i dag: 3,891\n🎵 Sange afspillet: 156' }
-    ];
+    // Demo responses
+    const demoResponses = {
+        '/help': {
+            type: 'embed',
+            title: 'Axion Bot - Kommando Hjælp',
+            description: 'Her er en oversigt over tilgængelige kommandoer:',
+            fields: [
+                { name: 'Grundlæggende', value: '`/ping` - Test bot respons\n`/info` - Bot information\n`/help` - Vis denne hjælp' },
+                { name: 'Moderation', value: '`/ban` - Ban en bruger\n`/kick` - Kick en bruger\n`/warn` - Advar en bruger' },
+                { name: 'Statistikker', value: '`/modstats` - Moderation statistikker\n`/serverstats` - Server statistikker' }
+            ]
+        },
+        '/ping': {
+            type: 'simple',
+            text: '🏓 Pong! Latency: **23ms** | API Latency: **156ms**'
+        },
+        '/info': {
+            type: 'embed',
+            title: 'Axion Bot Information',
+            description: 'Den ultimative Discord bot til moderation og server management',
+            fields: [
+                { name: 'Version', value: '2.1.0' },
+                { name: 'Uptime', value: '15 dage, 7 timer' },
+                { name: 'Servere', value: '50,247' },
+                { name: 'Brugere', value: '2,145,891' }
+            ]
+        },
+        '/modstats': {
+            type: 'embed',
+            title: 'Moderation Statistikker',
+            description: 'Statistikker for denne server:',
+            fields: [
+                { name: 'Advarsler i dag', value: '12' },
+                { name: 'Automatiske handlinger', value: '45' },
+                { name: 'Spam beskeder blokeret', value: '127' },
+                { name: 'Moderation niveau', value: 'Standard' }
+            ]
+        },
+        '/warn': {
+            type: 'embed',
+            title: 'Bruger Advaret',
+            description: 'Advarsel givet til bruger',
+            fields: [
+                { name: 'Bruger', value: '@user' },
+                { name: 'Årsag', value: 'Spam beskeder' },
+                { name: 'Moderator', value: 'Demo User' },
+                { name: 'Totale advarsler', value: '1' }
+            ]
+        }
+    };
     
-    let messageIndex = 0;
-    let isTyping = false;
-    
-    function addMessage(message, delay = 0) {
-        setTimeout(() => {
-            const messageEl = document.createElement('div');
-            messageEl.className = `chat-message ${message.type}-message`;
-            messageEl.innerHTML = `
-                <div class="message-avatar">
-                    <i class="fas ${message.type === 'bot' ? 'fa-robot' : 'fa-user'}"></i>
+    function addMessage(content, isBot = false, isEmbed = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `demo-message ${isBot ? 'bot' : 'user'}`;
+        
+        if (isEmbed && isBot) {
+            messageDiv.innerHTML = `
+                <div class="message-avatar bot-avatar">
+                    <i class="fas fa-robot"></i>
                 </div>
                 <div class="message-content">
-                    <div class="message-author">${message.author}</div>
-                    <div class="message-text">${message.text}</div>
+                    <span class="message-author">Axion Bot</span>
+                    <span class="bot-tag">BOT</span>
+                    <div class="message-embed">
+                        <div class="embed-header">
+                            <i class="fas fa-info-circle"></i>
+                            <span>${content.title}</span>
+                        </div>
+                        <div class="embed-description">${content.description}</div>
+                        ${content.fields ? content.fields.map(field => `
+                            <div class="embed-field">
+                                <div class="field-name">${field.name}</div>
+                                <div class="field-value">${field.value}</div>
+                            </div>
+                        `).join('') : ''}
+                    </div>
                 </div>
             `;
-            
-            chatMessages.appendChild(messageEl);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // Animate message appearance
-            setTimeout(() => {
-                messageEl.style.opacity = '1';
-                messageEl.style.transform = 'translateY(0)';
-            }, 100);
-        }, delay);
-    }
-    
-    function startDemoChat() {
-        if (messageIndex < demoMessages.length) {
-            addMessage(demoMessages[messageIndex], messageIndex * 2000);
-            messageIndex++;
-            setTimeout(startDemoChat, 2000);
         } else {
-            // Reset demo after all messages
-            setTimeout(() => {
-                chatMessages.innerHTML = '';
-                messageIndex = 0;
-                startDemoChat();
-            }, 5000);
+            messageDiv.innerHTML = `
+                <div class="message-avatar ${isBot ? 'bot-avatar' : ''}">
+                    <i class="fas fa-${isBot ? 'robot' : 'user'}"></i>
+                </div>
+                <div class="message-content">
+                    <span class="message-author">${isBot ? 'Axion Bot' : 'Demo User'}</span>
+                    ${isBot ? '<span class="bot-tag">BOT</span>' : ''}
+                    <div class="message-text">${content}</div>
+                </div>
+            `;
         }
-    }
-    
-    // Start demo chat when section is visible
-    const demoSection = document.querySelector('.interactive-demo');
-    if (demoSection) {
-        const demoObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && messageIndex === 0) {
-                    setTimeout(startDemoChat, 1000);
-                }
-            });
-        }, { threshold: 0.5 });
         
-        demoObserver.observe(demoSection);
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
-    // Interactive chat input
+    function handleDemoCommand(command) {
+        // Add user message
+        addMessage(command);
+        
+        // Simulate typing delay
+        setTimeout(() => {
+            const response = demoResponses[command];
+            if (response) {
+                if (response.type === 'embed') {
+                    addMessage(response, true, true);
+                } else {
+                    addMessage(response.text, true);
+                }
+            } else {
+                addMessage('❌ Ukendt kommando. Prøv `/help` for at se tilgængelige kommandoer.', true);
+            }
+        }, 500);
+    }
+    
+    // Demo command buttons
+    demoCmdButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const command = button.dataset.command;
+            handleDemoCommand(command);
+        });
+    });
+    
+    // Chat input handling
     if (chatInput && chatSend) {
         function sendMessage() {
-            const text = chatInput.value.trim();
-            if (text && !isTyping) {
-                isTyping = true;
-                
-                // Add user message
-                addMessage({
-                    type: 'user',
-                    author: 'Du',
-                    text: text
-                });
-                
-                // Add bot response after delay
-                setTimeout(() => {
-                    const responses = [
-                        '🤖 Jeg er en demo! Prøv kommandoer som !help, !play eller !stats',
-                        '✨ Det var en fed kommando! Axion Bot kan meget mere end dette.',
-                        '🎵 Musik, moderation, og meget mere - alt sammen i én bot!',
-                        '📊 Axion Bot gør det nemt at administrere din Discord server.',
-                        '🛡️ Sikkerhed og moderering på højeste niveau med Axion Bot.'
-                    ];
-                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                    
-                    addMessage({
-                        type: 'bot',
-                        author: 'Axion Bot',
-                        text: randomResponse
-                    });
-                    
-                    isTyping = false;
-                }, 1500);
-                
+            const message = chatInput.value.trim();
+            if (message) {
+                handleDemoCommand(message);
                 chatInput.value = '';
             }
         }
@@ -222,21 +251,57 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Parallax effect for hero section
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        const hero = document.querySelector('.hero');
-        const heroContent = document.querySelector('.hero-content');
-        const heroImage = document.querySelector('.hero-image');
+    // Back to top button
+    const backToTopBtn = document.getElementById('backToTop');
+    if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
         
-        if (hero && scrolled < hero.offsetHeight) {
-            if (heroContent) {
-                heroContent.style.transform = `translateY(${scrolled * 0.2}px)`;
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+    
+    // Hamburger menu functionality (moved to avoid redeclaration)
+    const hamburgerMenu = document.querySelector('.hamburger');
+    const navigationMenu = document.querySelector('.nav-menu');
+    
+    if (hamburgerMenu && navigationMenu) {
+        hamburgerMenu.addEventListener('click', () => {
+            hamburgerMenu.classList.toggle('active');
+            navigationMenu.classList.toggle('active');
+        });
+        
+        // Close menu when clicking on nav links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburgerMenu.classList.remove('active');
+                navigationMenu.classList.remove('active');
+            });
+        });
+    }
+    
+    // Add loading state to buttons
+    document.querySelectorAll('.btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.href && this.href.includes('discord.com')) {
+                this.classList.add('loading');
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Åbner Discord...';
+                
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    this.innerHTML = '<i class="fab fa-discord"></i> Tilføj til Discord';
+                }, 3000);
             }
-            if (heroImage) {
-                heroImage.style.transform = `translateY(${scrolled * 0.1}px)`;
-            }
-        }
+        });
     });
     
     // Add dynamic particles
@@ -269,25 +334,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Create particles periodically
     setInterval(createParticle, 3000);
-    
-    // Mobile menu toggle
-    const hamburger = document.querySelector('.hamburger');
-    const navMenu = document.querySelector('.nav-menu');
-    
-    if (hamburger && navMenu) {
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-        });
-        
-        // Close menu when clicking on links
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
-            });
-        });
-    }
     
     // Add loading animation
     window.addEventListener('load', () => {
