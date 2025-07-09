@@ -86,6 +86,13 @@ public class UserModerationProfile {
             case TEMP_BAN:
                 banCount++;
                 break;
+            case NONE:
+            case DELETE_MESSAGE:
+            case LOG_ONLY:
+            case SYSTEM_ACTION:
+            case FLAG_FOR_REVIEW:
+                // No specific counters for these actions
+                break;
         }
         
         // Create violation record

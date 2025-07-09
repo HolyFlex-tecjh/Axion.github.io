@@ -89,15 +89,9 @@ public class AdvancedModerationSystem {
         
         // 1. Spam Detection (Enhanced)
         if (settings.isSpamProtectionEnabled()) {
-<<<<<<< HEAD
-            SpamDetectionEngine.SpamDetectionResult spamDetectionResult = spamEngine.analyzeMessage(event.getMessage(), profile);
-            ModerationResult spamResult = convertSpamDetectionResultToModerationResult(spamDetectionResult);
-            if (!spamResult.isAllowed()) {
-=======
             SpamDetectionEngine.SpamDetectionResult spamDetection = spamEngine.analyzeMessage(event.getMessage(), profile);
             if (spamDetection.isSpam()) {
                 ModerationResult spamResult = convertSpamDetectionToModerationResult(spamDetection);
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
                 detectionResults.add(spamResult);
             }
         }
@@ -112,13 +106,8 @@ public class AdvancedModerationSystem {
         
         // 3. Threat Intelligence
         if (settings.isThreatIntelEnabled()) {
-<<<<<<< HEAD
-            ThreatIntelligence.ThreatAnalysisResult threatAnalysisResult = threatIntel.analyzeContent(content, userId, guildId);
-            ModerationResult threatResult = convertThreatAnalysisResultToModerationResult(threatAnalysisResult);
-=======
             ThreatIntelligence.ThreatAnalysisResult threatAnalysis = threatIntel.analyzeContent(content, event.getAuthor().getId(), event.getChannel().getId());
             ModerationResult threatResult = convertThreatAnalysisToModerationResult(threatAnalysis);
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
             if (!threatResult.isAllowed()) {
                 detectionResults.add(threatResult);
             }
@@ -189,11 +178,7 @@ public class AdvancedModerationSystem {
                 profile.addSuspicionPoints(2);
                 return ModerationResult.warn(
                     "Suspicious username pattern detected",
-<<<<<<< HEAD
-                    ModerationAction.DELETE_AND_WARN
-=======
                     ModerationAction.FLAG_FOR_REVIEW
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
                 );
             }
         }
@@ -234,11 +219,7 @@ public class AdvancedModerationSystem {
                     profile.addPunishment(ModerationAction.TIMEOUT, finalDuration, reason);
                     
                     // Send notification to user (if enabled)
-<<<<<<< HEAD
-                    if (config != null && config.isSendUserNotifications()) {
-=======
                     if (config.isSendUserNotifications()) {
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
                         sendUserNotification(target.getUser(), "timeout", reason, finalDuration);
                     }
                     
@@ -307,11 +288,7 @@ public class AdvancedModerationSystem {
                         }
                         
                         // Send notification
-<<<<<<< HEAD
-                        if (config != null && config.isSendUserNotifications()) {
-=======
                         if (config.isSendUserNotifications()) {
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
                             sendUserNotification(target.getUser(), "ban", reason, duration);
                         }
                         
@@ -363,45 +340,7 @@ public class AdvancedModerationSystem {
             );
         }
     }
-<<<<<<< HEAD
-    // Helper methods and utility functions
-    /**
-     * Converts a SpamDetectionEngine.SpamDetectionResult to a ModerationResult.
-     */
-    private ModerationResult convertSpamDetectionResultToModerationResult(SpamDetectionEngine.SpamDetectionResult spamResult) {
-        if (spamResult == null) {
-            return ModerationResult.allowed();
-        }
-        if (spamResult.isSpam()) {
-            return ModerationResult.moderate(
-                spamResult.getReason() != null ? spamResult.getReason() : "Spam detected",
-                ModerationAction.DELETE_AND_WARN,
-                ModerationSeverity.LOW
-            );
-        }
-        return ModerationResult.allowed();
-    }
-
-    /**
-     * Converts a ThreatIntelligence.ThreatAnalysisResult to a ModerationResult.
-     */
-    private ModerationResult convertThreatAnalysisResultToModerationResult(ThreatIntelligence.ThreatAnalysisResult threatResult) {
-        if (threatResult == null) {
-            return ModerationResult.allowed();
-        }
-        if (threatResult.isThreat()) {
-            return ModerationResult.moderate(
-                threatResult.getReason() != null ? threatResult.getReason() : "Threat detected",
-                ModerationAction.DELETE_AND_WARN,
-                ModerationSeverity.MEDIUM
-            );
-        }
-        return ModerationResult.allowed();
-    }
-    }
-=======
     
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
     // Helper methods and utility functions
     
     private UserModerationProfile getUserProfile(String userId, String guildId) {
@@ -511,8 +450,6 @@ public class AdvancedModerationSystem {
         return userProfiles.get(key);
     }
     
-<<<<<<< HEAD
-=======
     public AntiRaidSystem getAntiRaidSystem() {
         return antiRaidSystem;
     }
@@ -606,7 +543,6 @@ public class AdvancedModerationSystem {
         return targetUserIds.size();
     }
     
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
     public void shutdown() {
         scheduler.shutdown();
         try {
@@ -629,13 +565,8 @@ public class AdvancedModerationSystem {
     private ModerationResult processViolations(List<ModerationResult> violations, UserModerationProfile profile, MessageReceivedEvent event, GuildModerationSettings settings) {
         // Process multiple violations and determine appropriate action
         ModerationResult mostSevere = violations.stream()
-<<<<<<< HEAD
-            .max(Comparator.comparing(r -> r.getSeverity().ordinal()))
-            .orElse(ModerationResult.allowed());
-=======
                 .max(Comparator.comparing(r -> r.getSeverity()))
                 .orElse(ModerationResult.allowed());
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
         
         profile.addViolation(mostSevere.getReason());
         return mostSevere;
@@ -681,8 +612,6 @@ public class AdvancedModerationSystem {
         logger.info("Moderation action: {} - {} - {} - {}", 
             log.getUsername(), log.getAction(), log.getReason(), log.getSeverity());
     }
-<<<<<<< HEAD
-=======
     
     private ModerationResult convertSpamDetectionToModerationResult(SpamDetectionEngine.SpamDetectionResult spamDetection) {
         if (!spamDetection.isSpam()) {
@@ -727,5 +656,4 @@ public class AdvancedModerationSystem {
                 return ModerationResult.allowed();
         }
     }
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
 }

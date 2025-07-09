@@ -73,12 +73,7 @@ public class AntiRaidSystem {
             if (status != null && status.isActive()) {
                 return ModerationResult.moderate(
                     "Suspicious account joining during raid alert",
-<<<<<<< HEAD
-                    ModerationAction.KICK,
-                    ModerationSeverity.HIGH
-=======
                     ModerationAction.KICK
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
                 );
             }
         }
@@ -222,12 +217,7 @@ public class AntiRaidSystem {
         if (result.getCharacteristics().isSuspicious()) {
             return ModerationResult.moderate(
                 "Account flagged during raid detection",
-<<<<<<< HEAD
-                ModerationAction.KICK,
-                ModerationSeverity.HIGH
-=======
                 ModerationAction.KICK
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
             );
         }
         
@@ -250,12 +240,7 @@ public class AntiRaidSystem {
         
         return ModerationResult.moderate(
             "Participating in coordinated spam attack",
-<<<<<<< HEAD
-            ModerationAction.DELETE_AND_TIMEOUT,
-            ModerationSeverity.HIGH
-=======
             ModerationAction.DELETE_AND_TIMEOUT
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
         );
     }
     
@@ -390,8 +375,6 @@ public class AntiRaidSystem {
         }
     }
     
-<<<<<<< HEAD
-=======
     /**
      * Get raid status for a guild
      */
@@ -429,7 +412,6 @@ public class AntiRaidSystem {
         }
     }
     
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
     // Inner classes for data structures
     
     private static class JoinEvent {
@@ -526,11 +508,7 @@ public class AntiRaidSystem {
         public boolean isSuspicious() { return suspicious; }
     }
     
-<<<<<<< HEAD
-    private static class RaidStatus {
-=======
     public static class RaidStatus {
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
         private boolean active;
         private final Instant startTime;
         private final RaidType type;

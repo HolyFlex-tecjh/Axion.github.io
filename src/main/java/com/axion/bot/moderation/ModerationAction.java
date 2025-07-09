@@ -53,9 +53,6 @@ public enum ModerationAction {
     /**
      * System handling - automatisk handling udført af systemet
      */
-<<<<<<< HEAD
-    SYSTEM_ACTION("System handling", 0);
-=======
     SYSTEM_ACTION("System handling", 0),
     
     /**
@@ -67,7 +64,6 @@ public enum ModerationAction {
      * Temporary ban from server
      */
     TEMP_BAN("Temporary ban", 4);
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
     
     private final String description;
     private final int severity;
@@ -150,11 +146,8 @@ public enum ModerationAction {
                 return "🔨";
             case SYSTEM_ACTION:
                 return "🤖";
-<<<<<<< HEAD
-=======
             case FLAG_FOR_REVIEW:
                 return "🚩";
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
             default:
                 return "❓";
         }
@@ -183,11 +176,8 @@ public enum ModerationAction {
                 return "Din besked blev slettet og du er blevet givet en timeout.";
             case SYSTEM_ACTION:
                 return "Automatisk system handling udført.";
-<<<<<<< HEAD
-=======
             case FLAG_FOR_REVIEW:
                 return "Din aktivitet er blevet flagget til manuel gennemgang.";
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
             default:
                 return "Moderation handling udført.";
         }
@@ -219,11 +209,8 @@ public enum ModerationAction {
                 return "📝 Loggede handling for **" + username + "**: " + reason;
             case SYSTEM_ACTION:
                 return emoji + " Automatisk system handling for **" + username + "**: " + reason;
-<<<<<<< HEAD
-=======
             case FLAG_FOR_REVIEW:
                 return emoji + " Flagget **" + username + "** til manuel gennemgang: " + reason;
->>>>>>> 7264671782849e6cd81d554807906b664cb5d408
             default:
                 return emoji + " Moderation handling udført på **" + username + "**: " + reason;
         }
