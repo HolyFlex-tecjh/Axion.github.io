@@ -1,11 +1,59 @@
 /* Commands Page Specific Styles */
 
+/* Global layout improvements */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Container base styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Ensure proper centering for all sections */
+section {
+    width: 100%;
+    position: relative;
+}
+
+/* Center all content within sections */
+.popular-commands,
+.commands,
+.cta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: auto;
+}
+
+.popular-commands .container,
+.commands .container,
+.cta .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Commands Hero Section */
 .commands-hero {
     min-height: 60vh;
     background: var(--gradient-dark);
     display: flex;
     align-items: center;
+    justify-content: center;
     position: relative;
     overflow: hidden;
     padding: 6rem 0;
@@ -21,6 +69,28 @@
     background: radial-gradient(ellipse at center, rgba(88, 101, 242, 0.1) 0%, transparent 70%);
 }
 
+.hero-title {
+    font-size: var(--font-size-5xl);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: var(--space-lg);
+    text-align: center;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-description {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--space-xl);
+    text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .hero-badge {
     display: inline-flex;
     align-items: center;
@@ -34,16 +104,57 @@
     color: var(--primary-color);
     margin-bottom: var(--space-lg);
     backdrop-filter: blur(10px);
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.hero-badge i {
-    color: var(--accent-color);
+/* Section headers centering */
+.section-header {
+    text-align: center;
+    margin-bottom: var(--space-xxl);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.section-title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+}
+
+.section-description {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    line-height: 1.6;
 }
 
 .hero-content {
     text-align: center;
     position: relative;
     z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.commands-hero .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.commands-hero .hero-content {
+    width: 100%;
+    max-width: 900px;
 }
 
 .hero-stats {
@@ -52,6 +163,9 @@
     gap: var(--space-xxl);
     margin-top: var(--space-xxl);
     flex-wrap: wrap;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .stat-item {
@@ -91,11 +205,20 @@
     background: var(--darker-bg);
 }
 
+.popular-commands .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
 .popular-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--space-xl);
     margin-top: var(--space-xxl);
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .popular-card {
@@ -185,12 +308,24 @@
 /* Commands Search and Filters */
 .commands {
     padding: 6rem 0;
-    background: var(--dark-bg);
+    background: var(--darker-bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.commands .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    width: 100%;
 }
 
 .commands-search-container {
-    margin-bottom: var(--space-xxl);
-    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto 3rem auto;
+    padding: 0 1rem;
 }
 
 .search-box {
@@ -297,6 +432,9 @@
     grid-template-columns: 300px 1fr;
     gap: var(--space-xxl);
     align-items: start;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 /* Commands Sidebar */
@@ -390,6 +528,9 @@
     border-radius: var(--radius-lg);
     overflow: hidden;
     backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .category-title {
@@ -435,14 +576,19 @@
     border-bottom: 1px solid var(--glass-border);
     transition: var(--transition-normal);
     cursor: pointer;
-}
-
-.command-item:last-child {
-    border-bottom: none;
+    margin-bottom: var(--space-lg);
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
 }
 
 .command-item:hover {
-    background: var(--card-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
 }
 
 .command-header {
@@ -666,24 +812,24 @@
 @media (max-width: 1024px) {
     .commands-content {
         grid-template-columns: 1fr;
-        gap: var(--space-xl);
+        gap: var(--space-lg);
     }
     
     .commands-sidebar {
-        position: relative;
-        top: auto;
+        order: -1;
     }
     
     .category-menu {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1px;
-        background: var(--glass-border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
     }
     
     .category-item {
-        border-bottom: none;
-        background: var(--card-bg);
+        flex: 1;
+        min-width: 150px;
+        text-align: center;
     }
 }
 
@@ -693,24 +839,32 @@
         min-height: 50vh;
     }
     
+    .hero-title {
+        font-size: var(--font-size-3xl);
+    }
+    
+    .hero-description {
+        font-size: var(--font-size-base);
+    }
+    
     .hero-stats {
         flex-direction: column;
+        gap: var(--space-md);
         align-items: center;
-        gap: var(--space-lg);
     }
     
     .stat-item {
-        width: 200px;
+        width: 100%;
+        max-width: 200px;
     }
     
     .popular-grid {
         grid-template-columns: 1fr;
+        max-width: 400px;
     }
     
-    .search-filters {
-        flex-direction: column;
-        align-items: center;
-        gap: var(--space-lg);
+    .commands-search-container {
+        padding: 0 1rem;
     }
     
     .filter-group {
