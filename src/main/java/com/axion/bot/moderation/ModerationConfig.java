@@ -32,6 +32,7 @@ public class ModerationConfig {
     private boolean autoBanEnabled = false;
     
     // Advanced features
+    private boolean advancedFeaturesEnabled = true;
     private boolean tempBanEnabled = true;
     private int maxTempBanHours = 168; // 1 uge
     private boolean escalationEnabled = true;
@@ -45,7 +46,28 @@ public class ModerationConfig {
     // Logging
     private boolean logModerationActions = true;
     private String logChannelId = null;
+    private String auditChannelId = null;
     private boolean detailedLogging = false;
+    private int logRetentionDays = 30;
+    
+    // Anti-raid protection
+    private boolean antiRaidEnabled = true;
+    private int raidDetectionThreshold = 5; // users joining within timeframe
+    private int raidDetectionTimeframe = 60; // seconds
+    private boolean autoLockdownEnabled = true;
+    private int lockdownDuration = 300; // seconds
+    
+    // Threat intelligence
+    private boolean threatIntelligenceEnabled = true;
+    private boolean phishingDetectionEnabled = true;
+    private boolean malwareDetectionEnabled = true;
+    private boolean scamDetectionEnabled = true;
+    
+    // Advanced timeout system
+    private boolean smartTimeoutEnabled = true;
+    private int baseTimeoutMinutes = 5;
+    private double timeoutMultiplier = 2.0;
+    private int maxTimeoutHours = 24;
     
     // Whitelist
     private boolean whitelistEnabled = false;
@@ -176,6 +198,22 @@ public class ModerationConfig {
         this.logChannelId = logChannelId;
     }
     
+    public String getAuditChannelId() {
+        return auditChannelId;
+    }
+    
+    public void setAuditChannelId(String auditChannelId) {
+        this.auditChannelId = auditChannelId;
+    }
+    
+    public int getLogRetentionDays() {
+        return logRetentionDays;
+    }
+    
+    public void setLogRetentionDays(int logRetentionDays) {
+        this.logRetentionDays = logRetentionDays;
+    }
+    
     // Whitelist
     public boolean isWhitelistEnabled() {
         return whitelistEnabled;
@@ -186,6 +224,9 @@ public class ModerationConfig {
     }
     
     // Advanced features getters and setters
+    public boolean isAdvancedFeaturesEnabled() { return advancedFeaturesEnabled; }
+    public void setAdvancedFeaturesEnabled(boolean advancedFeaturesEnabled) { this.advancedFeaturesEnabled = advancedFeaturesEnabled; }
+    
     public boolean isTempBanEnabled() { return tempBanEnabled; }
     public void setTempBanEnabled(boolean tempBanEnabled) { this.tempBanEnabled = tempBanEnabled; }
     
@@ -229,6 +270,48 @@ public class ModerationConfig {
     public void addWhitelistedRole(String roleId) { this.whitelistedRoles.add(roleId); }
     public void removeWhitelistedRole(String roleId) { this.whitelistedRoles.remove(roleId); }
     
+    // Anti-raid protection getters and setters
+    public boolean isAntiRaidEnabled() { return antiRaidEnabled; }
+    public void setAntiRaidEnabled(boolean antiRaidEnabled) { this.antiRaidEnabled = antiRaidEnabled; }
+    
+    public int getRaidDetectionThreshold() { return raidDetectionThreshold; }
+    public void setRaidDetectionThreshold(int raidDetectionThreshold) { this.raidDetectionThreshold = raidDetectionThreshold; }
+    
+    public int getRaidDetectionTimeframe() { return raidDetectionTimeframe; }
+    public void setRaidDetectionTimeframe(int raidDetectionTimeframe) { this.raidDetectionTimeframe = raidDetectionTimeframe; }
+    
+    public boolean isAutoLockdownEnabled() { return autoLockdownEnabled; }
+    public void setAutoLockdownEnabled(boolean autoLockdownEnabled) { this.autoLockdownEnabled = autoLockdownEnabled; }
+    
+    public int getLockdownDuration() { return lockdownDuration; }
+    public void setLockdownDuration(int lockdownDuration) { this.lockdownDuration = lockdownDuration; }
+    
+    // Threat intelligence getters and setters
+    public boolean isThreatIntelligenceEnabled() { return threatIntelligenceEnabled; }
+    public void setThreatIntelligenceEnabled(boolean threatIntelligenceEnabled) { this.threatIntelligenceEnabled = threatIntelligenceEnabled; }
+    
+    public boolean isPhishingDetectionEnabled() { return phishingDetectionEnabled; }
+    public void setPhishingDetectionEnabled(boolean phishingDetectionEnabled) { this.phishingDetectionEnabled = phishingDetectionEnabled; }
+    
+    public boolean isMalwareDetectionEnabled() { return malwareDetectionEnabled; }
+    public void setMalwareDetectionEnabled(boolean malwareDetectionEnabled) { this.malwareDetectionEnabled = malwareDetectionEnabled; }
+    
+    public boolean isScamDetectionEnabled() { return scamDetectionEnabled; }
+    public void setScamDetectionEnabled(boolean scamDetectionEnabled) { this.scamDetectionEnabled = scamDetectionEnabled; }
+    
+    // Advanced timeout system getters and setters
+    public boolean isSmartTimeoutEnabled() { return smartTimeoutEnabled; }
+    public void setSmartTimeoutEnabled(boolean smartTimeoutEnabled) { this.smartTimeoutEnabled = smartTimeoutEnabled; }
+    
+    public int getBaseTimeoutMinutes() { return baseTimeoutMinutes; }
+    public void setBaseTimeoutMinutes(int baseTimeoutMinutes) { this.baseTimeoutMinutes = baseTimeoutMinutes; }
+    
+    public double getTimeoutMultiplier() { return timeoutMultiplier; }
+    public void setTimeoutMultiplier(double timeoutMultiplier) { this.timeoutMultiplier = timeoutMultiplier; }
+    
+    public int getMaxTimeoutHours() { return maxTimeoutHours; }
+    public void setMaxTimeoutHours(int maxTimeoutHours) { this.maxTimeoutHours = maxTimeoutHours; }
+    
     /**
      * Opretter en standard konfiguration med moderate indstillinger
      */
@@ -241,6 +324,9 @@ public class ModerationConfig {
         config.setAutoTimeoutEnabled(true);
         config.setAutoKickEnabled(false);
         config.setAutoBanEnabled(false);
+        config.setAntiRaidEnabled(true);
+        config.setThreatIntelligenceEnabled(true);
+        config.setSmartTimeoutEnabled(true);
         config.addTrustedDomain("youtube.com");
         config.addTrustedDomain("github.com");
         config.addTrustedDomain("stackoverflow.com");
@@ -268,6 +354,17 @@ public class ModerationConfig {
         config.setAdvancedSpamDetectionEnabled(true);
         config.setAttachmentScanningEnabled(true);
         config.setDetailedLogging(true);
+        config.setAntiRaidEnabled(true);
+        config.setRaidDetectionThreshold(3);
+        config.setRaidDetectionTimeframe(30);
+        config.setAutoLockdownEnabled(true);
+        config.setThreatIntelligenceEnabled(true);
+        config.setPhishingDetectionEnabled(true);
+        config.setMalwareDetectionEnabled(true);
+        config.setScamDetectionEnabled(true);
+        config.setSmartTimeoutEnabled(true);
+        config.setBaseTimeoutMinutes(10);
+        config.setTimeoutMultiplier(2.5);
         return config;
     }
     
@@ -285,6 +382,10 @@ public class ModerationConfig {
         config.setAutoTimeoutEnabled(false);
         config.setAutoKickEnabled(false);
         config.setAutoBanEnabled(false);
+        config.setAntiRaidEnabled(false);
+        config.setThreatIntelligenceEnabled(false);
+        config.setSmartTimeoutEnabled(false);
+        config.setDetailedLogging(false);
         return config;
     }
     

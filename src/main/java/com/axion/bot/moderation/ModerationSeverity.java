@@ -90,6 +90,26 @@ public enum ModerationSeverity {
         }
     }
     
+    /**
+     * Konverterer fra ToxicitySeverity til ModerationSeverity
+     */
+    public static ModerationSeverity fromToxicity(ToxicityAnalyzer.ToxicitySeverity toxicitySeverity) {
+        switch (toxicitySeverity) {
+            case NONE:
+                return VERY_LOW;
+            case MILD:
+                return LOW;
+            case MODERATE:
+                return MEDIUM;
+            case SEVERE:
+                return HIGH;
+            case VERY_HIGH:
+                return VERY_HIGH;
+            default:
+                return LOW;
+        }
+    }
+    
     @Override
     public String toString() {
         return emoji + " " + description + " (" + level + "/5)";
