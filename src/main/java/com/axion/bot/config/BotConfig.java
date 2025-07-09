@@ -36,7 +36,7 @@ public class BotConfig {
     public static final String DEFAULT_FOOTER = "Axion Bot";
     public static final String GITHUB_URL = "https://github.com/axion-bot";
     public static final String SUPPORT_SERVER = "https://discord.gg/axion";
-    public static final String INVITE_URL = "https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=1375845727494&scope=bot%20applications.commands";
+    public static final String INVITE_URL = "https://discord.com/api/oauth2/authorize?client_id=618132700246704135&permissions=1375845727494&scope=bot%20applications.commands";
     public static final String WEBSITE_URL = "https://axion-bot.github.io";
     
     // Bot invite permissions (calculated value for all needed permissions)
