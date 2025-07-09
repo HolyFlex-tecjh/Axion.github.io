@@ -173,17 +173,7 @@ public class SlashCommandRegistrar {
             
             Commands.slash("resetlanguage", "Nulstil dit sprog til standard (engelsk)"),
             
-            Commands.slash("serverinfo", "Vis detaljeret information om serveren"),
-            
-            Commands.slash("userinfo", "Vis detaljeret information om en bruger")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren der skal vises information om", false)
-                ),
-            
-            Commands.slash("avatar", "Vis en brugers avatar")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren hvis avatar skal vises", false)
-                ),
+
             
             Commands.slash("lockdown", "Lås hele serveren ned (emergency)")
                 .addOptions(
@@ -337,147 +327,12 @@ public class SlashCommandRegistrar {
     public static void registerGuildCommands(JDA jda, String guildId) {
         logger.info("Registrerer guild-specifikke slash kommandoer for guild: {}", guildId);
         
+        // Guild commands are typically used for testing or guild-specific features
+        // For now, we'll register the same commands as global but they update instantly
         jda.getGuildById(guildId).updateCommands().addCommands(
-            // Samme kommandoer som globale, men opdateres øjeblikkeligt for denne guild
+            // Basic test commands for immediate testing
             Commands.slash("ping", "Teste om botten svarer"),
-            Commands.slash("hello", "Få en hilsen fra botten"),
-            Commands.slash("info", "Vis information om botten"),
-            Commands.slash("help", "Vis tilgængelige kommandoer"),
-            Commands.slash("time", "Vis nuværende tid"),
-            Commands.slash("uptime", "Vis hvor længe botten har kørt"),
-            Commands.slash("modhelp", "Vis moderation kommandoer"),
-            Commands.slash("invite", "Få invite link til at tilføje botten til din server"),
-            Commands.slash("support", "Få support og hjælp med botten"),
-            Commands.slash("about", "Detaljeret information om botten"),
-            
-            // Debug kommandoer (kun for udviklere)
-            Commands.slash("listcommands", "Vis alle registrerede slash kommandoer"),
-            Commands.slash("forcesync", "Force synkroniser slash kommandoer"),
-            
-            Commands.slash("ban", "Ban en bruger fra serveren")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren der skal bannes", true),
-                    new OptionData(OptionType.STRING, "reason", "Årsag til ban", false)
-                ),
-            
-            Commands.slash("kick", "Kick en bruger fra serveren")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren der skal kickes", true),
-                    new OptionData(OptionType.STRING, "reason", "Årsag til kick", false)
-                ),
-            
-            Commands.slash("timeout", "Giv en bruger timeout")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren der skal have timeout", true),
-                    new OptionData(OptionType.INTEGER, "duration", "Varighed i minutter (1-10080)", true)
-                        .setMinValue(1)
-                        .setMaxValue(10080),
-                    new OptionData(OptionType.STRING, "reason", "Årsag til timeout", false)
-                ),
-            
-            Commands.slash("warn", "Advar en bruger")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren der skal advares", true),
-                    new OptionData(OptionType.STRING, "reason", "Årsag til advarsel", true)
-                ),
-            
-            Commands.slash("unwarn", "Fjern alle advarsler fra en bruger")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren hvis advarsler skal fjernes", true)
-                ),
-            
-            Commands.slash("warnings", "Vis antal advarsler for en bruger")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren hvis advarsler skal vises", true)
-                ),
-            
-            Commands.slash("purge", "Slet et antal beskeder fra kanalen")
-                .addOptions(
-                    new OptionData(OptionType.INTEGER, "amount", "Antal beskeder at slette (1-100)", true)
-                        .setMinValue(1)
-                        .setMaxValue(100)
-                ),
-            
-            Commands.slash("modconfig", "Konfigurer moderation indstillinger")
-                .addOptions(
-                    new OptionData(OptionType.STRING, "level", "Moderation niveau", false)
-                        .addChoice("Mild", "mild")
-                        .addChoice("Standard", "standard")
-                        .addChoice("Streng", "strict")
-                ),
-            
-            Commands.slash("modstats", "Vis moderation statistikker"),
-            
-            Commands.slash("addfilter", "Tilføj et ord til custom filteret")
-                .addOptions(
-                    new OptionData(OptionType.STRING, "word", "Ordet der skal filtreres", true)
-                ),
-            
-            // Udvidede moderation kommandoer
-            Commands.slash("mute", "Mute en bruger (fjern tale rettigheder)")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren der skal mutes", true),
-                    new OptionData(OptionType.STRING, "reason", "Årsag til mute", false)
-                ),
-            
-            Commands.slash("unmute", "Unmute en bruger (gendan tale rettigheder)")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren der skal unmutes", true)
-                ),
-            
-            Commands.slash("slowmode", "Sæt slowmode for kanalen")
-                .addOptions(
-                    new OptionData(OptionType.INTEGER, "seconds", "Sekunder mellem beskeder (0-21600)", true)
-                        .setMinValue(0)
-                        .setMaxValue(21600)
-                ),
-            
-            Commands.slash("lock", "Lås kanalen (forhindre beskeder)")
-                .addOptions(
-                    new OptionData(OptionType.STRING, "reason", "Årsag til låsning", false)
-                ),
-            
-            Commands.slash("unlock", "Lås kanalen op (tillad beskeder igen)")
-                .addOptions(
-                    new OptionData(OptionType.STRING, "reason", "Årsag til oplåsning", false)
-                ),
-            
-            Commands.slash("unban", "Unban en bruger")
-                .addOptions(
-                    new OptionData(OptionType.STRING, "userid", "Bruger ID der skal unbans", true),
-                    new OptionData(OptionType.STRING, "reason", "Årsag til unban", false)
-                ),
-            
-            Commands.slash("massban", "Ban flere brugere på én gang")
-                .addOptions(
-                    new OptionData(OptionType.STRING, "userids", "Bruger IDs adskilt af komma", true),
-                    new OptionData(OptionType.STRING, "reason", "Årsag til masseban", false)
-                ),
-            
-            Commands.slash("nick", "Skift nickname på en bruger")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren hvis nickname skal ændres", true),
-                    new OptionData(OptionType.STRING, "nickname", "Nyt nickname (tom for at fjerne)", false)
-                ),
-            
-            Commands.slash("role", "Giv eller fjern en rolle fra en bruger")
-                .addOptions(
-                    new OptionData(OptionType.STRING, "action", "Handling", true)
-                        .addChoice("Giv", "add")
-                        .addChoice("Fjern", "remove"),
-                    new OptionData(OptionType.USER, "user", "Brugeren", true),
-                    new OptionData(OptionType.ROLE, "role", "Rollen", true)
-                ),
-            
-            // Sprog kommandoer
-            Commands.slash("setlanguage", "Skift dit sprog")
-                .addOptions(
-                    new OptionData(OptionType.STRING, "language", "Sprogkode (f.eks. da, en, de)", true)
-                ),
-            
-            Commands.slash("languages", "Vis tilgængelige sprog"),
-            
-            Commands.slash("resetlanguage", "Nulstil dit sprog til standard (engelsk)")
+            Commands.slash("info", "Vis information om botten")
         ).queue(
             success -> logger.info("Guild slash kommandoer registreret succesfuldt for guild: {}", guildId),
             error -> logger.error("Fejl ved registrering af guild slash kommandoer: {}", error.getMessage())
