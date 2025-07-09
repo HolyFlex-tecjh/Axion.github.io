@@ -85,6 +85,12 @@ public class UserModerationProfile {
             case BAN:
                 banCount++;
                 break;
+            case SYSTEM_ACTION:
+            case DELETE_MESSAGE:
+            case LOG_ONLY:
+            case NONE:
+                // No specific count tracking needed for these actions
+                break;
         }
         
         // Create violation record
