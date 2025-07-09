@@ -73,8 +73,12 @@ public class AntiRaidSystem {
             if (status != null && status.isActive()) {
                 return ModerationResult.moderate(
                     "Suspicious account joining during raid alert",
+<<<<<<< HEAD
                     ModerationAction.KICK,
                     ModerationSeverity.HIGH
+=======
+                    ModerationAction.KICK
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
                 );
             }
         }
@@ -218,8 +222,12 @@ public class AntiRaidSystem {
         if (result.getCharacteristics().isSuspicious()) {
             return ModerationResult.moderate(
                 "Account flagged during raid detection",
+<<<<<<< HEAD
                 ModerationAction.KICK,
                 ModerationSeverity.HIGH
+=======
+                ModerationAction.KICK
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
             );
         }
         
@@ -242,8 +250,12 @@ public class AntiRaidSystem {
         
         return ModerationResult.moderate(
             "Participating in coordinated spam attack",
+<<<<<<< HEAD
             ModerationAction.DELETE_AND_TIMEOUT,
             ModerationSeverity.HIGH
+=======
+            ModerationAction.DELETE_AND_TIMEOUT
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
         );
     }
     
@@ -378,6 +390,46 @@ public class AntiRaidSystem {
         }
     }
     
+<<<<<<< HEAD
+=======
+    /**
+     * Get raid status for a guild
+     */
+    public RaidStatus getRaidStatus(String guildId) {
+        return guildRaidStatus.get(guildId);
+    }
+    
+    /**
+     * Check if raid is detected for a specific guild
+     */
+    public boolean isRaidDetected(String guildId) {
+        return isGuildUnderRaidAlert(guildId);
+    }
+    
+    /**
+     * Activate server lockdown mode
+     */
+    public void activateServerLockdown(String guildId, String reason) {
+        RaidStatus status = guildRaidStatus.computeIfAbsent(guildId, 
+            k -> new RaidStatus(false, Instant.now(), RaidType.COORDINATED_ATTACK));
+        status.setActive(true);
+        status.setEnhancedVerification(true);
+        logger.info("Server lockdown activated for guild {} - Reason: {}", guildId, reason);
+    }
+    
+    /**
+     * Deactivate server lockdown mode
+     */
+    public void deactivateServerLockdown(String guildId) {
+        RaidStatus status = guildRaidStatus.get(guildId);
+        if (status != null) {
+            status.setActive(false);
+            status.setEnhancedVerification(false);
+            logger.info("Server lockdown deactivated for guild {}", guildId);
+        }
+    }
+    
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
     // Inner classes for data structures
     
     private static class JoinEvent {
@@ -486,7 +538,11 @@ public class AntiRaidSystem {
         public boolean isSuspicious() { return suspicious; }
     }
     
+<<<<<<< HEAD
     private static class RaidStatus {
+=======
+    public static class RaidStatus {
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
         private boolean active;
         private final Instant startTime;
         private final RaidType type;

@@ -1,6 +1,10 @@
 package com.axion.bot.moderation;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+<<<<<<< HEAD
+=======
+import java.time.Duration;
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,8 +91,12 @@ public class AutoModerationRule {
         
         return ModerationResult.moderate(
             String.format("Auto-moderation rule '%s' triggered: %s", name, description),
+<<<<<<< HEAD
             action,
             severity
+=======
+            action
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
         );
     }
     
@@ -195,7 +203,11 @@ public class AutoModerationRule {
     }
     
     private boolean shouldTrigger(UserModerationProfile profile) {
+<<<<<<< HEAD
         return profile.getRuleViolationCount(ruleId, triggerTimeframe) < triggerCount;
+=======
+        return profile.getRuleViolationCount(ruleId, Duration.ofMillis(triggerTimeframe)) < triggerCount;
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
     }
     
     private void recordTrigger() {

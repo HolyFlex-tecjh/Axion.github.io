@@ -67,6 +67,12 @@ public class AdvancedModerationConfig extends ModerationConfig {
     private boolean cacheUserProfilesEnabled = true;
     private int userProfileCacheSize = 10000;
     
+<<<<<<< HEAD
+=======
+    // User Notifications
+    private boolean sendUserNotifications = true;
+    
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
     public AdvancedModerationConfig() {
         super();
         // Enable advanced features by default
@@ -204,6 +210,13 @@ public class AdvancedModerationConfig extends ModerationConfig {
     public int getUserProfileCacheSize() { return userProfileCacheSize; }
     public void setUserProfileCacheSize(int size) { this.userProfileCacheSize = Math.max(100, size); }
     
+<<<<<<< HEAD
+=======
+    // User Notifications getters/setters
+    public boolean isSendUserNotifications() { return sendUserNotifications; }
+    public void setSendUserNotifications(boolean enabled) { this.sendUserNotifications = enabled; }
+    
+>>>>>>> 7264671782849e6cd81d554807906b664cb5d408
     /**
      * Create a default advanced configuration
      */
