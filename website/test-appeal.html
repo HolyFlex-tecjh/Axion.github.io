@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Appeal System - Axion Bot</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin-bottom: 3rem;
+        }
+        
+        .test-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #4752C4;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Appeal System Test</h1>
+        
+        <div class="test-section">
+            <h2 class="test-title">Admin Appeals</h2>
+            <div class="test-buttons">
+                <button class="btn btn-primary" onclick="testAdminAppeals()">
+                    <i class="fas fa-gavel"></i>
+                    Test Admin Appeals
+                </button>
+                <button class="btn btn-secondary" onclick="clearContent()">
+                    Clear
+                </button>
+            </div>
+            <div id="admin-appeals-content"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">User Appeals</h2>
+            <div class="test-buttons">
+                <button class="btn btn-primary" onclick="testUserAppeals()">
+                    <i class="fas fa-user"></i>
+                    Test User Appeals
+                </button>
+                <button class="btn btn-primary" onclick="showAppealModal()">
+                    <i class="fas fa-plus"></i>
+                    Create Appeal
+                </button>
+            </div>
+            <div id="user-appeals-content"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">Banned Servers</h2>
+            <div class="test-buttons">
+                <button class="btn btn-primary" onclick="testBannedServers()">
+                    <i class="fas fa-ban"></i>
+                    Test Banned Servers
+                </button>
+            </div>
+            <div id="banned-servers-content"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">Notifications</h2>
+            <div class="test-buttons">
+                <button class="btn btn-success" onclick="showNotification('Success message!', 'success')">
+                    Success Notification
+                </button>
+                <button class="btn btn-danger" onclick="showNotification('Error message!', 'error')">
+                    Error Notification
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Appeal Creation Modal -->
+    <div class="modal" id="appealModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Opret Ban Appeal</h3>
+                <button class="modal-close" id="closeAppealModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="appealForm">
+                    <div class="form-group">
+                        <label for="appealServer">Server:</label>
+                        <select id="appealServer" required>
+                            <option value="">Vælg server...</option>
+                            <option value="123456789">Gaming Community</option>
+                            <option value="987654321">Study Group</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appealReason">Grund til Appeal:</label>
+                        <textarea id="appealReason" placeholder="Forklar hvorfor du mener dit ban bør ophæves..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="appealApology">Undskyldning (valgfri):</label>
+                        <textarea id="appealApology" placeholder="Hvis du vil undskylde for dine handlinger..."></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelAppeal">Annuller</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Appeal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Test functions
+        function testAdminAppeals() {
+            const content = document.getElementById('admin-appeals-content');
+            content.innerHTML = `
+                <div class="appeals-grid">
+                    <div class="appeal-card pending">
+                        <div class="appeal-header">
+                            <div class="appeal-user">
+                                <img src="https://cdn.discordapp.com/avatars/123456789/avatar.png" alt="User" class="user-avatar">
+                                <div class="user-info">
+                                    <span class="username">BannedUser#1234</span>
+                                    <span class="user-id">123456789</span>
+                                </div>
+                            </div>
+                            <span class="appeal-status status-pending">Pending</span>
+                        </div>
+                        
+                        <div class="appeal-server">
+                            <i class="fas fa-server"></i>
+                            <span>Gaming Community</span>
+                        </div>
+                        
+                        <div class="appeal-content">
+                            <h4>Reason:</h4>
+                            <p>I was banned for spam, but I believe it was a misunderstanding. I was sharing a link to a helpful resource and didn't realize it would be considered spam.</p>
+                            
+                            <h4>Apology:</h4>
+                            <p>I apologize for any confusion and will be more careful about sharing links in the future.</p>
+                        </div>
+                        
+                        <div class="appeal-meta">
+                            <span class="appeal-date">
+                                <i class="fas fa-calendar"></i>
+                                1. december 2023 10:30
+                            </span>
+                        </div>
+                        
+                        <div class="appeal-actions">
+                            <button class="btn btn-success btn-sm">
+                                <i class="fas fa-check"></i>
+                                Approve
+                            </button>
+                            <button class="btn btn-danger btn-sm">
+                                <i class="fas fa-times"></i>
+                                Deny
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function testUserAppeals() {
+            const content = document.getElementById('user-appeals-content');
+            content.innerHTML = `
+                <div class="user-appeals-list">
+                    <div class="user-appeal-item status-pending">
+                        <div class="appeal-header">
+                            <div class="appeal-server">
+                                <i class="fas fa-server"></i>
+                                <span>Gaming Community</span>
+                            </div>
+                            <span class="appeal-status status-pending">Pending</span>
+                        </div>
+                        
+                        <div class="appeal-content">
+                            <p>I was banned for using inappropriate language, but I believe the punishment was too harsh.</p>
+                        </div>
+                        
+                        <div class="appeal-meta">
+                            <span class="appeal-date">
+                                <i class="fas fa-calendar"></i>
+                                Submitted: 1. december 2023 10:30
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="user-appeal-item status-denied">
+                        <div class="appeal-header">
+                            <div class="appeal-server">
+                                <i class="fas fa-server"></i>
+                                <span>Study Group</span>
+                            </div>
+                            <span class="appeal-status status-denied">Denied</span>
+                        </div>
+                        
+                        <div class="appeal-content">
+                            <p>I was banned for spam, but I was just trying to help with homework.</p>
+                        </div>
+                        
+                        <div class="appeal-response">
+                            <h4>Admin Response:</h4>
+                            <p>After review, the ban was justified due to repeated violations.</p>
+                            <div class="response-meta">
+                                <span>Responded by Admin#1234 on 29. november 2023 09:15</span>
+                            </div>
+                        </div>
+                        
+                        <div class="appeal-meta">
+                            <span class="appeal-date">
+                                <i class="fas fa-calendar"></i>
+                                Submitted: 28. november 2023 14:20
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function testBannedServers() {
+            const content = document.getElementById('banned-servers-content');
+            content.innerHTML = `
+                <div class="banned-servers-grid">
+                    <div class="banned-server-card">
+                        <div class="server-header">
+                            <img src="https://cdn.discordapp.com/icons/123456789/icon.png" alt="Server" class="server-icon">
+                            <div class="server-info">
+                                <h3>Gaming Community</h3>
+                                <span class="server-id">123456789</span>
+                            </div>
+                        </div>
+                        
+                        <div class="ban-details">
+                            <div class="ban-reason">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Reason:</strong> Inappropriate behavior
+                            </div>
+                            
+                            <div class="ban-meta">
+                                <div class="ban-date">
+                                    <i class="fas fa-calendar"></i>
+                                    Banned: 25. november 2023 16:30
+                                </div>
+                                <div class="banned-by">
+                                    <i class="fas fa-user"></i>
+                                    By: ModeratorBot#1234
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="server-actions">
+                            <button class="btn btn-primary btn-sm">
+                                <i class="fas fa-gavel"></i>
+                                Submit Appeal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function clearContent() {
+            document.getElementById('admin-appeals-content').innerHTML = '';
+            document.getElementById('user-appeals-content').innerHTML = '';
+            document.getElementById('banned-servers-content').innerHTML = '';
+        }
+        
+        function showAppealModal() {
+            const modal = document.getElementById('appealModal');
+            modal.style.display = 'flex';
+        }
+        
+        function hideModal(modal) {
+            modal.style.display = 'none';
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : 'info'}-circle"></i>
+                <span>${message}</span>
+                <button class="notification-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+            
+            // Close button
+            notification.querySelector('.notification-close').addEventListener('click', () => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            });
+        }
+        
+        // Modal event listeners
+        document.getElementById('closeAppealModal').addEventListener('click', () => {
+            hideModal(document.getElementById('appealModal'));
+        });
+        
+        document.getElementById('cancelAppeal').addEventListener('click', () => {
+            hideModal(document.getElementById('appealModal'));
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('appealModal');
+            if (e.target === modal) {
+                hideModal(modal);
+            }
+        });
+        
+        // Form submission
+        document.getElementById('appealForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showNotification('Appeal submitted successfully!', 'success');
+            hideModal(document.getElementById('appealModal'));
+            e.target.reset();
+        });
+        
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Appeal system test loaded!');
+        });
+    </script>
+</body>
+</html>
