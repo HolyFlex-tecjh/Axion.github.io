@@ -7,6 +7,7 @@ import com.axion.bot.utils.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
@@ -48,7 +49,7 @@ public class ModerationCommands {
         String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
         
         try {
-            event.getGuild().ban(targetUser, 0, TimeUnit.SECONDS)
+            event.getGuild().ban(UserSnowflake.fromId(targetUser.getId()), 0, TimeUnit.SECONDS)
                     .reason(reason + " (Banned by " + event.getUser().getName() + ")")
                     .queue(
                         success -> {

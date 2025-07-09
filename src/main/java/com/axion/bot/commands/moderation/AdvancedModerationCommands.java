@@ -6,6 +6,7 @@ import com.axion.bot.utils.CommandUtils;
 import com.axion.bot.utils.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
@@ -64,7 +65,7 @@ public class AdvancedModerationCommands {
             // Implementer temp ban logik
             Instant expiry = Instant.now().plus(hours, ChronoUnit.HOURS);
             
-            event.getGuild().ban(targetUser, 0, TimeUnit.SECONDS)
+            event.getGuild().ban(UserSnowflake.fromId(targetUser.getId()), 0, TimeUnit.SECONDS)
                     .reason(reason + " (Temp ban: " + hours + "h by " + event.getUser().getName() + ")")
                     .queue(
                         success -> {

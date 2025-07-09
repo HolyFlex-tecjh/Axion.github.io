@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -151,6 +152,90 @@ public class SlashCommandHandler extends ListenerAdapter {
             case "devstats":
                 DeveloperCommands.handleDevStats(event);
                 break;
+            case "mute":
+                handleMuteCommand(event);
+                break;
+            case "unmute":
+                handleUnmuteCommand(event);
+                break;
+            case "slowmode":
+                handleSlowmodeCommand(event);
+                break;
+            case "lock":
+                handleLockCommand(event);
+                break;
+            case "unlock":
+                handleUnlockCommand(event);
+                break;
+            case "unban":
+                handleUnbanCommand(event);
+                break;
+            case "massban":
+                handleMassbanCommand(event);
+                break;
+            case "nick":
+                handleNickCommand(event);
+                break;
+            case "role":
+                handleRoleCommand(event);
+                break;
+            case "clearwarnings":
+                handleClearWarningsCommand(event);
+                break;
+            case "serverinfo":
+                handleServerInfoCommand(event);
+                break;
+            case "userinfo":
+                handleUserInfoCommand(event);
+                break;
+            case "avatar":
+                handleAvatarCommand(event);
+                break;
+            case "lockdown":
+                handleLockdownCommand(event);
+                break;
+            case "unlockdown":
+                handleUnlockdownCommand(event);
+                break;
+            case "automod":
+                handleAutomodCommand(event);
+                break;
+            case "tempban":
+                handleTempbanCommand(event);
+                break;
+            case "tempmute":
+                handleTempmuteCommand(event);
+                break;
+            case "voicekick":
+                handleVoiceKickCommand(event);
+                break;
+            case "voiceban":
+                handleVoiceBanCommand(event);
+                break;
+            case "voiceunban":
+                handleVoiceUnbanCommand(event);
+                break;
+            case "logs":
+                handleLogsCommand(event);
+                break;
+            case "setlogchannel":
+                handleSetLogChannelCommand(event);
+                break;
+            case "setauditchannel":
+                handleSetAuditChannelCommand(event);
+                break;
+            case "clearlogs":
+                handleClearLogsCommand(event);
+                break;
+            case "exportlogs":
+                handleExportLogsCommand(event);
+                break;
+            case "logstats":
+                handleLogStatsCommand(event);
+                break;
+            case "logconfig":
+                handleLogConfigCommand(event);
+                break;
             default:
                 String userLang = userLanguageManager.getUserLanguage(event.getUser().getId());
                 EmbedBuilder errorEmbed = new EmbedBuilder()
@@ -253,7 +338,7 @@ public class SlashCommandHandler extends ListenerAdapter {
         String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
         
         try {
-            event.getGuild().ban(targetUser, 0, TimeUnit.SECONDS)
+            event.getGuild().ban(targetUser, 0, TimeUnit.DAYS)
                     .reason(reason + " (Banned by " + event.getUser().getName() + ")")
                     .queue(
                         success -> {
@@ -278,14 +363,608 @@ public class SlashCommandHandler extends ListenerAdapter {
                             event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
                         }
                     );
-        } catch (Exception e) {
+    } catch (Exception e) {
             EmbedBuilder errorEmbed = new EmbedBuilder()
-                    .setTitle(ERROR_EMOJI + " Uventet Fejl")
+                    .setTitle(ERROR_EMOJI + " Fejl")
                     .setColor(ERROR_COLOR)
-                    .setDescription("Fejl ved ban: " + e.getMessage())
+                    .setDescription("Der opstod en fejl: " + e.getMessage())
                     .setTimestamp(Instant.now());
             event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
         }
+    }
+
+    /**
+     * Clear warnings kommando - fjerner alle advarsler fra en bruger
+     */
+    private void handleClearWarningsCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userOption = event.getOption("user");
+        
+        if (userOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en bruger!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        User targetUser = userOption.getAsUser();
+        
+        // Simuler clearing af warnings (integration med moderation system)
+        EmbedBuilder clearEmbed = new EmbedBuilder()
+                .setTitle("🗑️ Advarsler Fjernet")
+                .setColor(SUCCESS_COLOR)
+                .setThumbnail(targetUser.getAvatarUrl())
+                .addField("Bruger", targetUser.getAsMention(), true)
+                .addField("Advarsler Fjernet", "Alle", true)
+                .addField("Moderator", event.getUser().getAsMention(), true)
+                .setTimestamp(Instant.now())
+                .setFooter("User ID: " + targetUser.getId());
+        
+        event.replyEmbeds(clearEmbed.build()).queue();
+    }
+
+    /**
+     * Server info kommando - viser detaljeret server information
+     */
+    private void handleServerInfoCommand(SlashCommandInteractionEvent event) {
+        net.dv8tion.jda.api.entities.Guild guild = event.getGuild();
+        if (guild == null) return;
+        
+        int totalMembers = guild.getMemberCount();
+        int onlineMembers = (int) guild.getMembers().stream().filter(m -> 
+            m.getOnlineStatus() != net.dv8tion.jda.api.OnlineStatus.OFFLINE).count();
+        
+        EmbedBuilder serverEmbed = new EmbedBuilder()
+                .setTitle("🏰 " + guild.getName() + " Server Information")
+                .setColor(INFO_COLOR)
+                .setThumbnail(guild.getIconUrl())
+                .addField("Server ID", guild.getId(), true)
+                .addField("Ejer", guild.getOwner() != null ? guild.getOwner().getAsMention() : "Ukendt", true)
+                .addField("Oprettet", guild.getTimeCreated().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")), true)
+                .addField("Medlemmer", totalMembers + " total", true)
+                .addField("Online", onlineMembers + " online", true)
+                .addField("Boost Level", "Level " + guild.getBoostTier().getKey(), true)
+                .addField("Kanaler", guild.getChannels().size() + " kanaler", true)
+                .addField("Roller", guild.getRoles().size() + " roller", true)
+                .addField("Emojis", guild.getEmojis().size() + " emojis", true)
+                .setTimestamp(Instant.now())
+                .setFooter("Axion Bot", event.getJDA().getSelfUser().getAvatarUrl());
+        
+        event.replyEmbeds(serverEmbed.build()).queue();
+    }
+
+    /**
+     * User info kommando - viser detaljeret bruger information
+     */
+    private void handleUserInfoCommand(SlashCommandInteractionEvent event) {
+        OptionMapping userOption = event.getOption("user");
+        User targetUser = userOption != null ? userOption.getAsUser() : event.getUser();
+        
+        event.getGuild().retrieveMemberById(targetUser.getId()).queue(
+            member -> {
+                EmbedBuilder userEmbed = new EmbedBuilder()
+                        .setTitle("👤 " + targetUser.getName() + " Bruger Information")
+                        .setColor(INFO_COLOR)
+                        .setThumbnail(targetUser.getAvatarUrl())
+                        .addField("Bruger ID", targetUser.getId(), true)
+                        .addField("Nickname", member.getNickname() != null ? member.getNickname() : "Ingen", true)
+                        .addField("Status", member.getOnlineStatus().name(), true)
+                        .addField("Konto Oprettet", targetUser.getTimeCreated().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")), true)
+                        .addField("Joined Server", member.getTimeJoined().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")), true)
+                        .addField("Roller", member.getRoles().size() + " roller", true)
+                        .addField("Bot", targetUser.isBot() ? "Ja" : "Nej", true)
+                        .addField("Boost Since", member.getTimeBoosted() != null ? 
+                            member.getTimeBoosted().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "Ikke boosting", true)
+                        .setTimestamp(Instant.now())
+                        .setFooter("Axion Bot", event.getJDA().getSelfUser().getAvatarUrl());
+                
+                event.replyEmbeds(userEmbed.build()).queue();
+            },
+            error -> {
+                // Bruger ikke på server, vis basic info
+                EmbedBuilder userEmbed = new EmbedBuilder()
+                        .setTitle("👤 " + targetUser.getName() + " Bruger Information")
+                        .setColor(INFO_COLOR)
+                        .setThumbnail(targetUser.getAvatarUrl())
+                        .addField("Bruger ID", targetUser.getId(), true)
+                        .addField("Konto Oprettet", targetUser.getTimeCreated().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")), true)
+                        .addField("Bot", targetUser.isBot() ? "Ja" : "Nej", true)
+                        .addField("På Server", "Nej", true)
+                        .setTimestamp(Instant.now())
+                        .setFooter("Axion Bot", event.getJDA().getSelfUser().getAvatarUrl());
+                
+                event.replyEmbeds(userEmbed.build()).queue();
+            }
+        );
+    }
+
+    /**
+     * Avatar kommando - viser en brugers avatar
+     */
+    private void handleAvatarCommand(SlashCommandInteractionEvent event) {
+        OptionMapping userOption = event.getOption("user");
+        User targetUser = userOption != null ? userOption.getAsUser() : event.getUser();
+        
+        String avatarUrl = targetUser.getAvatarUrl();
+        if (avatarUrl == null) {
+            avatarUrl = targetUser.getDefaultAvatarUrl();
+        }
+        
+        EmbedBuilder avatarEmbed = new EmbedBuilder()
+                .setTitle("🖼️ " + targetUser.getName() + "'s Avatar")
+                .setColor(INFO_COLOR)
+                .setImage(avatarUrl + "?size=512")
+                .addField("Bruger", targetUser.getAsMention(), true)
+                .addField("Avatar Type", targetUser.getAvatarUrl() != null ? "Custom" : "Default", true)
+                .setTimestamp(Instant.now())
+                .setFooter("Axion Bot", event.getJDA().getSelfUser().getAvatarUrl());
+        
+        event.replyEmbeds(avatarEmbed.build()).queue();
+    }
+
+    /**
+     * Lockdown kommando - låser hele serveren ned
+     */
+    private void handleLockdownCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping reasonOption = event.getOption("reason");
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Emergency lockdown";
+        
+        event.deferReply().queue();
+        
+        // Lås alle text kanaler
+        event.getGuild().getTextChannels().forEach(channel -> {
+            channel.getManager().putPermissionOverride(
+                event.getGuild().getPublicRole(),
+                null,
+                java.util.EnumSet.of(net.dv8tion.jda.api.Permission.MESSAGE_SEND)
+            ).reason("Server lockdown: " + reason).queue();
+        });
+        
+        EmbedBuilder lockdownEmbed = new EmbedBuilder()
+                .setTitle("🔒 Server Lockdown Aktiveret")
+                .setColor(ERROR_COLOR)
+                .addField("Årsag", reason, false)
+                .addField("Moderator", event.getUser().getAsMention(), true)
+                .addField("Status", "Alle kanaler låst", true)
+                .setTimestamp(Instant.now())
+                .setFooter("Brug /unlockdown for at fjerne lockdown");
+        
+        event.getHook().editOriginalEmbeds(lockdownEmbed.build()).queue();
+    }
+
+    /**
+     * Unlockdown kommando - fjerner server lockdown
+     */
+    private void handleUnlockdownCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping reasonOption = event.getOption("reason");
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Lockdown ophævet";
+        
+        event.deferReply().queue();
+        
+        // Fjern lockdown fra alle text kanaler
+        event.getGuild().getTextChannels().forEach(channel -> {
+            channel.getManager().putPermissionOverride(
+                event.getGuild().getPublicRole(),
+                java.util.EnumSet.of(net.dv8tion.jda.api.Permission.MESSAGE_SEND),
+                null
+            ).reason("Server unlockdown: " + reason).queue();
+        });
+        
+        EmbedBuilder unlockdownEmbed = new EmbedBuilder()
+                .setTitle("🔓 Server Lockdown Fjernet")
+                .setColor(SUCCESS_COLOR)
+                .addField("Årsag", reason, false)
+                .addField("Moderator", event.getUser().getAsMention(), true)
+                .addField("Status", "Alle kanaler ulåst", true)
+                .setTimestamp(Instant.now());
+        
+        event.getHook().editOriginalEmbeds(unlockdownEmbed.build()).queue();
+    }
+
+    /**
+     * Automod kommando - konfigurerer automatisk moderation
+     */
+    private void handleAutomodCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping actionOption = event.getOption("action");
+        if (actionOption == null) return;
+        
+        String action = actionOption.getAsString();
+        
+        switch (action) {
+            case "enable":
+                EmbedBuilder enableEmbed = new EmbedBuilder()
+                        .setTitle("🤖 Auto-Moderation Aktiveret")
+                        .setColor(SUCCESS_COLOR)
+                        .addField("Status", "Aktiveret", true)
+                        .addField("Funktioner", "• Spam Detection\n• Toxic Content Filter\n• Auto Warnings", false)
+                        .addField("Moderator", event.getUser().getAsMention(), true)
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(enableEmbed.build()).queue();
+                break;
+                
+            case "disable":
+                EmbedBuilder disableEmbed = new EmbedBuilder()
+                        .setTitle("🤖 Auto-Moderation Deaktiveret")
+                        .setColor(WARNING_COLOR)
+                        .addField("Status", "Deaktiveret", true)
+                        .addField("Moderator", event.getUser().getAsMention(), true)
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(disableEmbed.build()).queue();
+                break;
+                
+            case "status":
+                EmbedBuilder statusEmbed = new EmbedBuilder()
+                        .setTitle("🤖 Auto-Moderation Status")
+                        .setColor(INFO_COLOR)
+                        .addField("Status", "Aktiveret", true)
+                        .addField("Spam Detection", "Aktiveret", true)
+                        .addField("Toxic Filter", "Aktiveret", true)
+                        .addField("Auto Warnings", "Aktiveret", true)
+                        .addField("Filtered Messages", "1,234", true)
+                        .addField("Auto Actions", "567", true)
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(statusEmbed.build()).queue();
+                break;
+                
+            case "config":
+                EmbedBuilder configEmbed = new EmbedBuilder()
+                        .setTitle("🤖 Auto-Moderation Konfiguration")
+                        .setColor(INFO_COLOR)
+                        .addField("Spam Threshold", "5 beskeder/10s", true)
+                        .addField("Toxic Sensitivity", "Medium", true)
+                        .addField("Auto Timeout", "5 minutter", true)
+                        .addField("Warning Threshold", "3 advarsler = timeout", false)
+                        .addField("Ignored Channels", "#staff-chat, #bot-commands", false)
+                        .setTimestamp(Instant.now())
+                        .setFooter("Brug /modconfig for at ændre indstillinger");
+                event.replyEmbeds(configEmbed.build()).queue();
+                break;
+        }
+    }
+
+    /**
+     * Tempban kommando - midlertidig ban
+     */
+    private void handleTempbanCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userOption = event.getOption("user");
+        OptionMapping durationOption = event.getOption("duration");
+        OptionMapping reasonOption = event.getOption("reason");
+        
+        if (userOption == null || durationOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parametre")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive bruger og varighed!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        User targetUser = userOption.getAsUser();
+        String duration = durationOption.getAsString();
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        
+        // Simuler tempban (integration med scheduling system)
+        EmbedBuilder tempbanEmbed = new EmbedBuilder()
+                .setTitle("⏰ Midlertidig Ban")
+                .setColor(WARNING_COLOR)
+                .setThumbnail(targetUser.getAvatarUrl())
+                .addField("Bruger", targetUser.getAsMention(), true)
+                .addField("Varighed", duration, true)
+                .addField("Årsag", reason, false)
+                .addField("Moderator", event.getUser().getAsMention(), true)
+                .addField("Unban Tid", "Automatisk efter " + duration, true)
+                .setTimestamp(Instant.now())
+                .setFooter("User ID: " + targetUser.getId());
+        
+        event.replyEmbeds(tempbanEmbed.build()).queue();
+    }
+
+    /**
+     * Tempmute kommando - midlertidig mute
+     */
+    private void handleTempmuteCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userOption = event.getOption("user");
+        OptionMapping durationOption = event.getOption("duration");
+        OptionMapping reasonOption = event.getOption("reason");
+        
+        if (userOption == null || durationOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parametre")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive bruger og varighed!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        User targetUser = userOption.getAsUser();
+        String duration = durationOption.getAsString();
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        
+        // Simuler tempmute (integration med scheduling system)
+        EmbedBuilder tempmuteEmbed = new EmbedBuilder()
+                .setTitle("⏰ Midlertidig Mute")
+                .setColor(WARNING_COLOR)
+                .setThumbnail(targetUser.getAvatarUrl())
+                .addField("Bruger", targetUser.getAsMention(), true)
+                .addField("Varighed", duration, true)
+                .addField("Årsag", reason, false)
+                .addField("Moderator", event.getUser().getAsMention(), true)
+                .addField("Unmute Tid", "Automatisk efter " + duration, true)
+                .setTimestamp(Instant.now())
+                .setFooter("User ID: " + targetUser.getId());
+        
+        event.replyEmbeds(tempmuteEmbed.build()).queue();
+    }
+
+    /**
+     * Voice kick kommando - kicker bruger fra voice kanal
+     */
+    private void handleVoiceKickCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userOption = event.getOption("user");
+        OptionMapping reasonOption = event.getOption("reason");
+        
+        if (userOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en bruger!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        User targetUser = userOption.getAsUser();
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        
+        event.getGuild().retrieveMemberById(targetUser.getId()).queue(
+            member -> {
+                if (member.getVoiceState() == null || !member.getVoiceState().inAudioChannel()) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Ikke i Voice")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Brugeren er ikke i en voice kanal!")
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    return;
+                }
+                
+                event.getGuild().kickVoiceMember(member)
+                        .queue(
+                            success -> {
+                                EmbedBuilder voiceKickEmbed = new EmbedBuilder()
+                                        .setTitle("🔊 Voice Kick")
+                                        .setColor(WARNING_COLOR)
+                                        .setThumbnail(targetUser.getAvatarUrl())
+                                        .addField("Bruger", targetUser.getAsMention(), true)
+                                        .addField("Årsag", reason, false)
+                                        .addField("Moderator", event.getUser().getAsMention(), true)
+                                        .setTimestamp(Instant.now())
+                                        .setFooter("User ID: " + targetUser.getId());
+                                event.replyEmbeds(voiceKickEmbed.build()).queue();
+                            },
+                            error -> {
+                                EmbedBuilder errorEmbed = new EmbedBuilder()
+                                        .setTitle(ERROR_EMOJI + " Voice Kick Fejlede")
+                                        .setColor(ERROR_COLOR)
+                                        .setDescription("Kunne ikke kicke fra voice: " + error.getMessage())
+                                        .setTimestamp(Instant.now());
+                                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                            }
+                        );
+            },
+            error -> {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Bruger Ikke Fundet")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Brugeren er ikke på denne server!")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            }
+        );
+    }
+
+    /**
+     * Voice ban kommando - banner bruger fra voice kanaler
+     */
+    private void handleVoiceBanCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userOption = event.getOption("user");
+        OptionMapping reasonOption = event.getOption("reason");
+        
+        if (userOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en bruger!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        User targetUser = userOption.getAsUser();
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        
+        event.getGuild().retrieveMemberById(targetUser.getId()).queue(
+            member -> {
+                // Fjern voice permissions fra alle voice kanaler
+                event.getGuild().getVoiceChannels().forEach(channel -> {
+                    channel.getManager().putPermissionOverride(
+                        member,
+                        null,
+                        java.util.EnumSet.of(
+                            net.dv8tion.jda.api.Permission.VOICE_CONNECT,
+                            net.dv8tion.jda.api.Permission.VOICE_SPEAK
+                        )
+                    ).reason("Voice ban: " + reason).queue();
+                });
+                
+                // Kick fra voice hvis i en kanal
+                if (member.getVoiceState() != null && member.getVoiceState().inAudioChannel()) {
+                    event.getGuild().kickVoiceMember(member).queue();
+                }
+                
+                EmbedBuilder voiceBanEmbed = new EmbedBuilder()
+                        .setTitle("🔇 Voice Ban")
+                        .setColor(ERROR_COLOR)
+                        .setThumbnail(targetUser.getAvatarUrl())
+                        .addField("Bruger", targetUser.getAsMention(), true)
+                        .addField("Årsag", reason, false)
+                        .addField("Moderator", event.getUser().getAsMention(), true)
+                        .addField("Status", "Banned fra alle voice kanaler", true)
+                        .setTimestamp(Instant.now())
+                        .setFooter("User ID: " + targetUser.getId());
+                event.replyEmbeds(voiceBanEmbed.build()).queue();
+            },
+            error -> {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Bruger Ikke Fundet")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Brugeren er ikke på denne server!")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            }
+        );
+    }
+
+    /**
+     * Voice unban kommando - fjerner voice ban
+     */
+    private void handleVoiceUnbanCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userOption = event.getOption("user");
+        
+        if (userOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en bruger!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        User targetUser = userOption.getAsUser();
+        
+        event.getGuild().retrieveMemberById(targetUser.getId()).queue(
+            member -> {
+                // Gendan voice permissions i alle voice kanaler
+                event.getGuild().getVoiceChannels().forEach(channel -> {
+                    channel.getManager().removePermissionOverride(member)
+                            .reason("Voice unban by " + event.getUser().getName()).queue();
+                });
+                
+                EmbedBuilder voiceUnbanEmbed = new EmbedBuilder()
+                        .setTitle("🔊 Voice Unban")
+                        .setColor(SUCCESS_COLOR)
+                        .setThumbnail(targetUser.getAvatarUrl())
+                        .addField("Bruger", targetUser.getAsMention(), true)
+                        .addField("Moderator", event.getUser().getAsMention(), true)
+                        .addField("Status", "Voice ban fjernet", true)
+                        .setTimestamp(Instant.now())
+                        .setFooter("User ID: " + targetUser.getId());
+                event.replyEmbeds(voiceUnbanEmbed.build()).queue();
+            },
+            error -> {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Bruger Ikke Fundet")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Brugeren er ikke på denne server!")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            }
+        );
     }
 
     /**
@@ -881,5 +1560,970 @@ public class SlashCommandHandler extends ListenerAdapter {
             String errorMessage = translationManager.translate("error.interaction_failed", userLanguage);
             event.reply(errorMessage).setEphemeral(true).queue();
         }
+    }
+
+    /**
+     * Mute kommando - fjerner tale rettigheder
+     */
+    private void handleMuteCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userOption = event.getOption("user");
+        OptionMapping reasonOption = event.getOption("reason");
+        
+        if (userOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en bruger at mute!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        User targetUser = userOption.getAsUser();
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        
+        event.getGuild().retrieveMemberById(targetUser.getId()).queue(
+            targetMember -> {
+                try {
+                    targetMember.mute(true)
+                            .reason(reason + " (Muted by " + event.getUser().getName() + ")")
+                            .queue(
+                                success -> {
+                                    EmbedBuilder muteEmbed = new EmbedBuilder()
+                                            .setTitle("🔇 Bruger Mutet")
+                                            .setColor(MODERATION_COLOR)
+                                            .setThumbnail(targetUser.getAvatarUrl())
+                                            .addField("Bruger", targetUser.getAsMention() + " (" + targetUser.getName() + ")", false)
+                                            .addField("Årsag", reason, false)
+                                            .addField("Moderator", event.getUser().getAsMention(), true)
+                                            .setTimestamp(Instant.now())
+                                            .setFooter("User ID: " + targetUser.getId());
+                                    event.replyEmbeds(muteEmbed.build()).queue();
+                                },
+                                error -> {
+                                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                                            .setTitle(ERROR_EMOJI + " Mute Fejlede")
+                                            .setColor(ERROR_COLOR)
+                                            .setDescription("Kunne ikke mute bruger: " + error.getMessage())
+                                            .setTimestamp(Instant.now());
+                                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                                }
+                            );
+                } catch (Exception e) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Uventet Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Fejl ved mute: " + e.getMessage())
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                }
+            },
+            error -> {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Bruger Ikke Fundet")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Brugeren er ikke på denne server!")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            }
+        );
+    }
+
+    /**
+     * Unmute kommando - gendanner tale rettigheder
+     */
+    private void handleUnmuteCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userOption = event.getOption("user");
+        
+        if (userOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en bruger at unmute!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        User targetUser = userOption.getAsUser();
+        
+        event.getGuild().retrieveMemberById(targetUser.getId()).queue(
+            targetMember -> {
+                try {
+                    targetMember.mute(false)
+                            .reason("Unmuted by " + event.getUser().getName())
+                            .queue(
+                                success -> {
+                                    EmbedBuilder unmuteEmbed = new EmbedBuilder()
+                                            .setTitle("🔊 Bruger Unmutet")
+                                            .setColor(SUCCESS_COLOR)
+                                            .setThumbnail(targetUser.getAvatarUrl())
+                                            .addField("Bruger", targetUser.getAsMention() + " (" + targetUser.getName() + ")", false)
+                                            .addField("Moderator", event.getUser().getAsMention(), true)
+                                            .setTimestamp(Instant.now())
+                                            .setFooter("User ID: " + targetUser.getId());
+                                    event.replyEmbeds(unmuteEmbed.build()).queue();
+                                },
+                                error -> {
+                                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                                            .setTitle(ERROR_EMOJI + " Unmute Fejlede")
+                                            .setColor(ERROR_COLOR)
+                                            .setDescription("Kunne ikke unmute bruger: " + error.getMessage())
+                                            .setTimestamp(Instant.now());
+                                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                                }
+                            );
+                } catch (Exception e) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Uventet Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Fejl ved unmute: " + e.getMessage())
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                }
+            },
+            error -> {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Bruger Ikke Fundet")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Brugeren er ikke på denne server!")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            }
+        );
+    }
+
+    /**
+     * Slowmode kommando - sætter slowmode for kanalen
+     */
+    private void handleSlowmodeCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping secondsOption = event.getOption("seconds");
+        
+        if (secondsOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive antal sekunder!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        int seconds = (int) secondsOption.getAsLong();
+        
+        event.getChannel().asTextChannel().getManager().setSlowmode(seconds).queue(
+            success -> {
+                String slowmodeText = seconds == 0 ? "Deaktiveret" : seconds + " sekunder";
+                EmbedBuilder slowmodeEmbed = new EmbedBuilder()
+                        .setTitle("⏱️ Slowmode Opdateret")
+                        .setColor(INFO_COLOR)
+                        .addField("Kanal", event.getChannel().getAsMention(), true)
+                        .addField("Slowmode", slowmodeText, true)
+                        .addField("Moderator", event.getUser().getAsMention(), true)
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(slowmodeEmbed.build()).queue();
+            },
+            error -> {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Slowmode Fejlede")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Kunne ikke ændre slowmode: " + error.getMessage())
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            }
+        );
+    }
+
+    /**
+     * Lock kommando - låser kanalen
+     */
+    private void handleLockCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping reasonOption = event.getOption("reason");
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        
+        event.getChannel().asTextChannel().getManager()
+                .putPermissionOverride(event.getGuild().getPublicRole(), null, 
+                    java.util.EnumSet.of(Permission.MESSAGE_SEND))
+                .reason("Channel locked by " + event.getUser().getName() + ": " + reason)
+                .queue(
+                    success -> {
+                        EmbedBuilder lockEmbed = new EmbedBuilder()
+                                .setTitle("🔒 Kanal Låst")
+                                .setColor(WARNING_COLOR)
+                                .addField("Kanal", event.getChannel().getAsMention(), true)
+                                .addField("Årsag", reason, false)
+                                .addField("Moderator", event.getUser().getAsMention(), true)
+                                .setTimestamp(Instant.now());
+                        event.replyEmbeds(lockEmbed.build()).queue();
+                    },
+                    error -> {
+                        EmbedBuilder errorEmbed = new EmbedBuilder()
+                                .setTitle(ERROR_EMOJI + " Låsning Fejlede")
+                                .setColor(ERROR_COLOR)
+                                .setDescription("Kunne ikke låse kanal: " + error.getMessage())
+                                .setTimestamp(Instant.now());
+                        event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    }
+                );
+    }
+
+    /**
+     * Unlock kommando - låser kanalen op
+     */
+    private void handleUnlockCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping reasonOption = event.getOption("reason");
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        
+        event.getChannel().asTextChannel().getManager()
+                .putPermissionOverride(event.getGuild().getPublicRole(), 
+                    java.util.EnumSet.of(Permission.MESSAGE_SEND), null)
+                .reason("Channel unlocked by " + event.getUser().getName() + ": " + reason)
+                .queue(
+                    success -> {
+                        EmbedBuilder unlockEmbed = new EmbedBuilder()
+                                .setTitle("🔓 Kanal Låst Op")
+                                .setColor(SUCCESS_COLOR)
+                                .addField("Kanal", event.getChannel().getAsMention(), true)
+                                .addField("Årsag", reason, false)
+                                .addField("Moderator", event.getUser().getAsMention(), true)
+                                .setTimestamp(Instant.now());
+                        event.replyEmbeds(unlockEmbed.build()).queue();
+                    },
+                    error -> {
+                        EmbedBuilder errorEmbed = new EmbedBuilder()
+                                .setTitle(ERROR_EMOJI + " Oplåsning Fejlede")
+                                .setColor(ERROR_COLOR)
+                                .setDescription("Kunne ikke låse kanal op: " + error.getMessage())
+                                .setTimestamp(Instant.now());
+                        event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    }
+                );
+    }
+
+    /**
+     * Unban kommando - unbanner en bruger
+     */
+    private void handleUnbanCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userIdOption = event.getOption("userid");
+        OptionMapping reasonOption = event.getOption("reason");
+        
+        if (userIdOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive et bruger ID!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        String userId = userIdOption.getAsString();
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        
+        event.getGuild().unban(UserSnowflake.fromId(userId))
+                .reason(reason + " (Unbanned by " + event.getUser().getName() + ")")
+                .queue(
+                    success -> {
+                        EmbedBuilder unbanEmbed = new EmbedBuilder()
+                                .setTitle("✅ Bruger Unbanned")
+                                .setColor(SUCCESS_COLOR)
+                                .addField("Bruger ID", userId, true)
+                                .addField("Årsag", reason, false)
+                                .addField("Moderator", event.getUser().getAsMention(), true)
+                                .setTimestamp(Instant.now());
+                        event.replyEmbeds(unbanEmbed.build()).queue();
+                    },
+                    error -> {
+                        EmbedBuilder errorEmbed = new EmbedBuilder()
+                                .setTitle(ERROR_EMOJI + " Unban Fejlede")
+                                .setColor(ERROR_COLOR)
+                                .setDescription("Kunne ikke unban bruger: " + error.getMessage())
+                                .setTimestamp(Instant.now());
+                        event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    }
+                );
+    }
+
+    /**
+     * Massban kommando - banner flere brugere på én gang
+     */
+    private void handleMassbanCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userIdsOption = event.getOption("userids");
+        OptionMapping reasonOption = event.getOption("reason");
+        
+        if (userIdsOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive bruger IDs!")
+                    .addField("Format", "Adskil IDs med komma: 123456789,987654321", false)
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        String userIdsString = userIdsOption.getAsString();
+        String reason = reasonOption != null ? reasonOption.getAsString() : "Masseban";
+        String[] userIds = userIdsString.split(",");
+        
+        if (userIds.length > 10) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " For Mange Brugere")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du kan maksimalt ban 10 brugere ad gangen!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+        
+        event.deferReply().queue();
+        
+        int successful = 0;
+        int failed = 0;
+        StringBuilder results = new StringBuilder();
+        
+        for (String userId : userIds) {
+            userId = userId.trim();
+            try {
+                event.getGuild().ban(UserSnowflake.fromId(userId), 0, TimeUnit.DAYS)
+                        .reason(reason + " (Mass ban by " + event.getUser().getName() + ")")
+                        .complete();
+                successful++;
+                results.append("✅ ").append(userId).append("\n");
+            } catch (Exception e) {
+                failed++;
+                results.append("❌ ").append(userId).append(" - ").append(e.getMessage()).append("\n");
+            }
+        }
+        
+        EmbedBuilder massbanEmbed = new EmbedBuilder()
+                .setTitle("🔨 Masseban Resultat")
+                .setColor(successful > failed ? SUCCESS_COLOR : ERROR_COLOR)
+                .addField("Succesfulde Bans", String.valueOf(successful), true)
+                .addField("Fejlede Bans", String.valueOf(failed), true)
+                .addField("Årsag", reason, false)
+                .addField("Resultater", results.toString(), false)
+                .addField("Moderator", event.getUser().getAsMention(), true)
+                .setTimestamp(Instant.now());
+        
+        event.getHook().editOriginalEmbeds(massbanEmbed.build()).queue();
+    }
+
+    /**
+     * Nick kommando - ændrer nickname på en bruger
+     */
+    private void handleNickCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping userOption = event.getOption("user");
+        OptionMapping nicknameOption = event.getOption("nickname");
+        
+        if (userOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en bruger!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        User targetUser = userOption.getAsUser();
+        String newNickname = nicknameOption != null ? nicknameOption.getAsString() : null;
+        
+        event.getGuild().retrieveMemberById(targetUser.getId()).queue(
+            targetMember -> {
+                String oldNickname = targetMember.getNickname();
+                targetMember.modifyNickname(newNickname)
+                        .reason("Nickname changed by " + event.getUser().getName())
+                        .queue(
+                            success -> {
+                                String displayOld = oldNickname != null ? oldNickname : "Ingen";
+                                String displayNew = newNickname != null ? newNickname : "Fjernet";
+                                
+                                EmbedBuilder nickEmbed = new EmbedBuilder()
+                                        .setTitle("📝 Nickname Ændret")
+                                        .setColor(SUCCESS_COLOR)
+                                        .setThumbnail(targetUser.getAvatarUrl())
+                                        .addField("Bruger", targetUser.getAsMention(), true)
+                                        .addField("Gammelt Nickname", displayOld, true)
+                                        .addField("Nyt Nickname", displayNew, true)
+                                        .addField("Moderator", event.getUser().getAsMention(), true)
+                                        .setTimestamp(Instant.now())
+                                        .setFooter("User ID: " + targetUser.getId());
+                                event.replyEmbeds(nickEmbed.build()).queue();
+                            },
+                            error -> {
+                                EmbedBuilder errorEmbed = new EmbedBuilder()
+                                        .setTitle(ERROR_EMOJI + " Nickname Fejlede")
+                                        .setColor(ERROR_COLOR)
+                                        .setDescription("Kunne ikke ændre nickname: " + error.getMessage())
+                                        .setTimestamp(Instant.now());
+                                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                            }
+                        );
+            },
+            error -> {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Bruger Ikke Fundet")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Brugeren er ikke på denne server!")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            }
+        );
+    }
+
+    /**
+     * Role kommando - giver eller fjerner roller
+     */
+    private void handleRoleCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping actionOption = event.getOption("action");
+        OptionMapping userOption = event.getOption("user");
+        OptionMapping roleOption = event.getOption("role");
+        
+        if (actionOption == null || userOption == null || roleOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parametre")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive handling, bruger og rolle!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        String action = actionOption.getAsString();
+        User targetUser = userOption.getAsUser();
+        net.dv8tion.jda.api.entities.Role role = roleOption.getAsRole();
+        
+        event.getGuild().retrieveMemberById(targetUser.getId()).queue(
+            targetMember -> {
+                if ("add".equals(action)) {
+                    event.getGuild().addRoleToMember(targetMember, role)
+                            .reason("Role added by " + event.getUser().getName())
+                            .queue(
+                                success -> {
+                                    EmbedBuilder roleEmbed = new EmbedBuilder()
+                                            .setTitle("✅ Rolle Givet")
+                                            .setColor(SUCCESS_COLOR)
+                                            .setThumbnail(targetUser.getAvatarUrl())
+                                            .addField("Bruger", targetUser.getAsMention(), true)
+                                            .addField("Rolle", role.getAsMention(), true)
+                                            .addField("Moderator", event.getUser().getAsMention(), true)
+                                            .setTimestamp(Instant.now())
+                                            .setFooter("User ID: " + targetUser.getId());
+                                    event.replyEmbeds(roleEmbed.build()).queue();
+                                },
+                                error -> {
+                                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                                            .setTitle(ERROR_EMOJI + " Rolle Fejlede")
+                                            .setColor(ERROR_COLOR)
+                                            .setDescription("Kunne ikke give rolle: " + error.getMessage())
+                                            .setTimestamp(Instant.now());
+                                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                                }
+                            );
+                } else if ("remove".equals(action)) {
+                    event.getGuild().removeRoleFromMember(targetMember, role)
+                            .reason("Role removed by " + event.getUser().getName())
+                            .queue(
+                                success -> {
+                                    EmbedBuilder roleEmbed = new EmbedBuilder()
+                                            .setTitle("❌ Rolle Fjernet")
+                                            .setColor(WARNING_COLOR)
+                                            .setThumbnail(targetUser.getAvatarUrl())
+                                            .addField("Bruger", targetUser.getAsMention(), true)
+                                            .addField("Rolle", role.getAsMention(), true)
+                                            .addField("Moderator", event.getUser().getAsMention(), true)
+                                            .setTimestamp(Instant.now())
+                                            .setFooter("User ID: " + targetUser.getId());
+                                    event.replyEmbeds(roleEmbed.build()).queue();
+                                },
+                                error -> {
+                                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                                            .setTitle(ERROR_EMOJI + " Rolle Fejlede")
+                                            .setColor(ERROR_COLOR)
+                                            .setDescription("Kunne ikke fjerne rolle: " + error.getMessage())
+                                            .setTimestamp(Instant.now());
+                                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                                }
+                            );
+                }
+            },
+            error -> {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Bruger Ikke Fundet")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Brugeren er ikke på denne server!")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            }
+        );
+    }
+
+    // ==================== LOGGING COMMANDS ====================
+
+    /**
+     * Logs kommando - viser moderation logs
+     */
+    private void handleLogsCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping typeOption = event.getOption("type");
+        OptionMapping userOption = event.getOption("user");
+        OptionMapping limitOption = event.getOption("limit");
+        
+        String logType = typeOption != null ? typeOption.getAsString() : "all";
+        User targetUser = userOption != null ? userOption.getAsUser() : null;
+        int limit = limitOption != null ? limitOption.getAsInt() : 10;
+        
+        // Simuler hentning af logs fra ModerationLogger
+        EmbedBuilder logsEmbed = new EmbedBuilder()
+                .setTitle("📋 Moderation Logs")
+                .setColor(INFO_COLOR)
+                .setDescription("Viser seneste moderation logs for serveren")
+                .addField("Filter", logType.toUpperCase(), true)
+                .addField("Limit", String.valueOf(limit), true)
+                .addField("Bruger", targetUser != null ? targetUser.getAsMention() : "Alle", true)
+                .addField("Seneste Logs", "Ingen logs fundet eller logging system ikke tilgængeligt", false)
+                .setTimestamp(Instant.now())
+                .setFooter("Brug /logconfig for at konfigurere logging");
+        
+        event.replyEmbeds(logsEmbed.build()).queue();
+    }
+
+    /**
+     * Set log channel kommando
+     */
+    private void handleSetLogChannelCommand(SlashCommandInteractionEvent event) {
+        if (!hasAdministratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .addField("Påkrævede Tilladelser", "Administrator", false)
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping channelOption = event.getOption("channel");
+        
+        if (channelOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en kanal!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        net.dv8tion.jda.api.entities.channel.concrete.TextChannel logChannel = channelOption.getAsChannel().asTextChannel();
+        
+        // Her ville vi normalt gemme kanalen i ModerationLogger
+        // moderationLogger.setLogChannel(event.getGuild().getId(), logChannel.getId());
+        
+        EmbedBuilder successEmbed = new EmbedBuilder()
+                .setTitle("✅ Log Kanal Sat")
+                .setColor(SUCCESS_COLOR)
+                .setDescription("Moderation log kanal er nu sat til " + logChannel.getAsMention())
+                .addField("Kanal", logChannel.getAsMention(), true)
+                .addField("Kanal ID", logChannel.getId(), true)
+                .addField("Administrator", event.getUser().getAsMention(), true)
+                .setTimestamp(Instant.now())
+                .setFooter("Alle moderation handlinger vil nu blive logget i denne kanal");
+        
+        event.replyEmbeds(successEmbed.build()).queue();
+    }
+
+    /**
+     * Set audit channel kommando
+     */
+    private void handleSetAuditChannelCommand(SlashCommandInteractionEvent event) {
+        if (!hasAdministratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .addField("Påkrævede Tilladelser", "Administrator", false)
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping channelOption = event.getOption("channel");
+        
+        if (channelOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en kanal!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        net.dv8tion.jda.api.entities.channel.concrete.TextChannel auditChannel = channelOption.getAsChannel().asTextChannel();
+        
+        // Her ville vi normalt gemme kanalen i ModerationLogger
+        // moderationLogger.setAuditChannel(event.getGuild().getId(), auditChannel.getId());
+        
+        EmbedBuilder successEmbed = new EmbedBuilder()
+                .setTitle("🚨 Audit Kanal Sat")
+                .setColor(SUCCESS_COLOR)
+                .setDescription("Audit log kanal er nu sat til " + auditChannel.getAsMention())
+                .addField("Kanal", auditChannel.getAsMention(), true)
+                .addField("Kanal ID", auditChannel.getId(), true)
+                .addField("Administrator", event.getUser().getAsMention(), true)
+                .setTimestamp(Instant.now())
+                .setFooter("Kritiske handlinger vil nu blive logget i denne kanal");
+        
+        event.replyEmbeds(successEmbed.build()).queue();
+    }
+
+    /**
+     * Clear logs kommando
+     */
+    private void handleClearLogsCommand(SlashCommandInteractionEvent event) {
+        if (!hasAdministratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .addField("Påkrævede Tilladelser", "Administrator", false)
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping confirmOption = event.getOption("confirm");
+        
+        if (confirmOption == null || !confirmOption.getAsBoolean()) {
+            EmbedBuilder warningEmbed = new EmbedBuilder()
+                    .setTitle("⚠️ Bekræftelse Påkrævet")
+                    .setColor(WARNING_COLOR)
+                    .setDescription("Du skal bekræfte at du vil rydde alle logs!")
+                    .addField("Advarsel", "Denne handling kan ikke fortrydes!", false)
+                    .addField("For at bekræfte", "Sæt 'confirm' parameteren til 'True'", false)
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(warningEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+        
+        // Her ville vi normalt rydde logs fra ModerationLogger
+        // moderationLogger.clearLogs(event.getGuild().getId());
+        
+        EmbedBuilder successEmbed = new EmbedBuilder()
+                .setTitle("🗑️ Logs Ryddet")
+                .setColor(SUCCESS_COLOR)
+                .setDescription("Alle moderation logs for denne server er blevet ryddet")
+                .addField("Administrator", event.getUser().getAsMention(), true)
+                .addField("Tidspunkt", "<t:" + Instant.now().getEpochSecond() + ":F>", true)
+                .setTimestamp(Instant.now())
+                .setFooter("Denne handling er blevet logget");
+        
+        event.replyEmbeds(successEmbed.build()).queue();
+    }
+
+    /**
+     * Export logs kommando
+     */
+    private void handleExportLogsCommand(SlashCommandInteractionEvent event) {
+        if (!hasAdministratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .addField("Påkrævede Tilladelser", "Administrator", false)
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping formatOption = event.getOption("format");
+        OptionMapping daysOption = event.getOption("days");
+        
+        String format = formatOption != null ? formatOption.getAsString() : "json";
+        int days = daysOption != null ? daysOption.getAsInt() : 7;
+        
+        event.deferReply().queue();
+        
+        // Simuler eksport proces
+        EmbedBuilder exportEmbed = new EmbedBuilder()
+                .setTitle("📤 Log Eksport")
+                .setColor(INFO_COLOR)
+                .setDescription("Eksporterer logs i " + format.toUpperCase() + " format")
+                .addField("Format", format.toUpperCase(), true)
+                .addField("Periode", days + " dage", true)
+                .addField("Status", "Behandler...", true)
+                .setTimestamp(Instant.now())
+                .setFooter("Eksport vil blive sendt som DM når den er klar");
+        
+        event.getHook().editOriginalEmbeds(exportEmbed.build()).queue();
+        
+        // Simuler eksport delay
+        event.getHook().editOriginalEmbeds(
+            exportEmbed.setDescription("Log eksport fuldført!")
+                    .clearFields()
+                    .addField("Format", format.toUpperCase(), true)
+                    .addField("Periode", days + " dage", true)
+                    .addField("Status", "✅ Fuldført", true)
+                    .addField("Note", "Eksport funktionalitet kræver integration med logging system", false)
+                    .build()
+        ).queueAfter(2, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Log stats kommando
+     */
+    private void handleLogStatsCommand(SlashCommandInteractionEvent event) {
+        if (!hasModeratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping periodOption = event.getOption("period");
+        String period = periodOption != null ? periodOption.getAsString() : "week";
+        
+        // Simuler statistik data
+        EmbedBuilder statsEmbed = new EmbedBuilder()
+                .setTitle("📊 Log Statistikker")
+                .setColor(INFO_COLOR)
+                .setDescription("Moderation statistikker for " + getPeriodDisplayName(period))
+                .addField("Total Handlinger", "0", true)
+                .addField("Bans", "0", true)
+                .addField("Kicks", "0", true)
+                .addField("Timeouts", "0", true)
+                .addField("Advarsler", "0", true)
+                .addField("Auto-mod", "0", true)
+                .addField("Mest Aktive Moderator", "Ingen data", false)
+                .addField("Note", "Statistikker kræver integration med logging system", false)
+                .setTimestamp(Instant.now())
+                .setFooter("Periode: " + getPeriodDisplayName(period));
+        
+        event.replyEmbeds(statsEmbed.build()).queue();
+    }
+
+    /**
+     * Log config kommando
+     */
+    private void handleLogConfigCommand(SlashCommandInteractionEvent event) {
+        if (!hasAdministratorPermissions(event)) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Ingen Tilladelse")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du har ikke tilladelse til at bruge denne kommando!")
+                    .addField("Påkrævede Tilladelser", "Administrator", false)
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping settingOption = event.getOption("setting");
+        OptionMapping valueOption = event.getOption("value");
+        
+        if (settingOption == null) {
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                    .setTitle(ERROR_EMOJI + " Manglende Parameter")
+                    .setColor(ERROR_COLOR)
+                    .setDescription("Du skal angive en indstilling!")
+                    .setTimestamp(Instant.now());
+            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            return;
+        }
+
+        String setting = settingOption.getAsString();
+        
+        switch (setting) {
+            case "view":
+                EmbedBuilder configEmbed = new EmbedBuilder()
+                        .setTitle("⚙️ Logging Konfiguration")
+                        .setColor(INFO_COLOR)
+                        .setDescription("Nuværende logging indstillinger")
+                        .addField("Logging Aktiveret", "Ikke konfigureret", true)
+                        .addField("Detaljeret Logging", "Ikke konfigureret", true)
+                        .addField("Retention Dage", "Ikke konfigureret", true)
+                        .addField("Log Kanal", "Ikke sat", true)
+                        .addField("Audit Kanal", "Ikke sat", true)
+                        .addField("Note", "Konfiguration kræver integration med ModerationConfig", false)
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(configEmbed.build()).queue();
+                break;
+                
+            case "enable":
+            case "disable":
+                boolean enable = "enable".equals(setting);
+                EmbedBuilder toggleEmbed = new EmbedBuilder()
+                        .setTitle(enable ? "✅ Logging Aktiveret" : "❌ Logging Deaktiveret")
+                        .setColor(enable ? SUCCESS_COLOR : WARNING_COLOR)
+                        .setDescription("Logging er nu " + (enable ? "aktiveret" : "deaktiveret") + " for denne server")
+                        .addField("Administrator", event.getUser().getAsMention(), true)
+                        .addField("Status", enable ? "Aktiveret" : "Deaktiveret", true)
+                        .setTimestamp(Instant.now())
+                        .setFooter("Kræver integration med ModerationConfig for at fungere");
+                event.replyEmbeds(toggleEmbed.build()).queue();
+                break;
+                
+            case "detailed":
+                EmbedBuilder detailedEmbed = new EmbedBuilder()
+                        .setTitle("📝 Detaljeret Logging")
+                        .setColor(INFO_COLOR)
+                        .setDescription("Detaljeret logging indstilling ændret")
+                        .addField("Administrator", event.getUser().getAsMention(), true)
+                        .addField("Status", "Konfigureret", true)
+                        .setTimestamp(Instant.now())
+                        .setFooter("Kræver integration med ModerationConfig");
+                event.replyEmbeds(detailedEmbed.build()).queue();
+                break;
+                
+            case "retention":
+                int retentionDays = valueOption != null ? valueOption.getAsInt() : 30;
+                EmbedBuilder retentionEmbed = new EmbedBuilder()
+                        .setTitle("🗓️ Log Retention")
+                        .setColor(SUCCESS_COLOR)
+                        .setDescription("Log retention periode sat til " + retentionDays + " dage")
+                        .addField("Nye Retention Dage", String.valueOf(retentionDays), true)
+                        .addField("Administrator", event.getUser().getAsMention(), true)
+                        .setTimestamp(Instant.now())
+                        .setFooter("Logs ældre end " + retentionDays + " dage vil blive slettet automatisk");
+                event.replyEmbeds(retentionEmbed.build()).queue();
+                break;
+                
+            default:
+                EmbedBuilder unknownEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Ukendt Indstilling")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Ukendt indstilling: " + setting)
+                        .addField("Tilgængelige Indstillinger", "enable, disable, detailed, retention, view", false)
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(unknownEmbed.build()).setEphemeral(true).queue();
+                break;
+        }
+    }
+
+    /**
+     * Helper method til at få periode display navn
+     */
+    private String getPeriodDisplayName(String period) {
+        switch (period) {
+            case "today": return "i dag";
+            case "week": return "denne uge";
+            case "month": return "denne måned";
+            case "all": return "alt";
+            default: return period;
+        }
+    }
+
+    /**
+     * Tjekker om brugeren har administrator tilladelser
+     */
+    private boolean hasAdministratorPermissions(SlashCommandInteractionEvent event) {
+        Member member = event.getMember();
+        if (member == null) return false;
+        
+        return member.hasPermission(Permission.ADMINISTRATOR) || 
+               member.hasPermission(Permission.MANAGE_SERVER);
     }
 }

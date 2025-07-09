@@ -1,6 +1,7 @@
 package com.axion.bot;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
@@ -106,6 +107,62 @@ public class SlashCommandRegistrar {
                     new OptionData(OptionType.STRING, "word", "Ordet der skal filtreres", true)
                 ),
             
+            // Udvidede moderation kommandoer
+            Commands.slash("mute", "Mute en bruger (fjern tale rettigheder)")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal mutes", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til mute", false)
+                ),
+            
+            Commands.slash("unmute", "Unmute en bruger (gendan tale rettigheder)")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal unmutes", true)
+                ),
+            
+            Commands.slash("slowmode", "Sæt slowmode for kanalen")
+                .addOptions(
+                    new OptionData(OptionType.INTEGER, "seconds", "Sekunder mellem beskeder (0-21600)", true)
+                        .setMinValue(0)
+                        .setMaxValue(21600)
+                ),
+            
+            Commands.slash("lock", "Lås kanalen (forhindre beskeder)")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "reason", "Årsag til låsning", false)
+                ),
+            
+            Commands.slash("unlock", "Lås kanalen op (tillad beskeder igen)")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "reason", "Årsag til oplåsning", false)
+                ),
+            
+            Commands.slash("unban", "Unban en bruger")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "userid", "Bruger ID der skal unbans", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til unban", false)
+                ),
+            
+            Commands.slash("massban", "Ban flere brugere på én gang")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "userids", "Bruger IDs adskilt af komma", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til masseban", false)
+                ),
+            
+            Commands.slash("nick", "Skift nickname på en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren hvis nickname skal ændres", true),
+                    new OptionData(OptionType.STRING, "nickname", "Nyt nickname (tom for at fjerne)", false)
+                ),
+            
+            Commands.slash("role", "Giv eller fjern en rolle fra en bruger")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "action", "Handling", true)
+                        .addChoice("Giv", "add")
+                        .addChoice("Fjern", "remove"),
+                    new OptionData(OptionType.USER, "user", "Brugeren", true),
+                    new OptionData(OptionType.ROLE, "role", "Rollen", true)
+                ),
+            
             // Sprog kommandoer
             Commands.slash("setlanguage", "Skift dit sprog")
                 .addOptions(
@@ -116,7 +173,275 @@ public class SlashCommandRegistrar {
             
             Commands.slash("resetlanguage", "Nulstil dit sprog til standard (engelsk)"),
             
-            // Udvikler kommandoer (kun for udviklere)
+            // Yderligere moderation kommandoer
+            Commands.slash("clearwarnings", "Fjern alle advarsler fra en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren hvis advarsler skal fjernes", true)
+                ),
+            
+            Commands.slash("serverinfo", "Vis detaljeret information om serveren"),
+            
+            Commands.slash("userinfo", "Vis detaljeret information om en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal vises information om", false)
+                ),
+            
+            Commands.slash("avatar", "Vis en brugers avatar")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren hvis avatar skal vises", false)
+                ),
+            
+            Commands.slash("lockdown", "Lås hele serveren ned (emergency)")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "reason", "Årsag til lockdown", false)
+                ),
+            
+            Commands.slash("unlockdown", "Fjern server lockdown")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "reason", "Årsag til at fjerne lockdown", false)
+                ),
+            
+            Commands.slash("automod", "Konfigurer automatisk moderation")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "action", "Handling", true)
+                        .addChoice("Enable", "enable")
+                        .addChoice("Disable", "disable")
+                        .addChoice("Status", "status")
+                        .addChoice("Config", "config")
+                ),
+            
+            Commands.slash("tempban", "Midlertidig ban af en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal tempbans", true),
+                    new OptionData(OptionType.STRING, "duration", "Varighed (f.eks. 1d, 2h, 30m)", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til tempban", false)
+                ),
+            
+            Commands.slash("tempmute", "Midlertidig mute af en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal tempmutes", true),
+                    new OptionData(OptionType.STRING, "duration", "Varighed (f.eks. 1d, 2h, 30m)", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til tempmute", false)
+                ),
+            
+            Commands.slash("voicekick", "Kick en bruger fra voice kanal")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal voice kickes", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til voice kick", false)
+                ),
+            
+            Commands.slash("voiceban", "Ban en bruger fra alle voice kanaler")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal voice bans", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til voice ban", false)
+                ),
+            
+            Commands.slash("voiceunban", "Unban en bruger fra voice kanaler")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal voice unbans", true)
+                ),
+            
+            // Logging kommandoer
+            Commands.slash("logs", "Vis moderation logs")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "type", "Type af logs", false)
+                        .addChoice("Alle", "all")
+                        .addChoice("Bans", "ban")
+                        .addChoice("Kicks", "kick")
+                        .addChoice("Timeouts", "timeout")
+                        .addChoice("Advarsler", "warn")
+                        .addChoice("Auto-mod", "automod"),
+                    new OptionData(OptionType.USER, "user", "Vis logs for specifik bruger", false),
+                    new OptionData(OptionType.INTEGER, "limit", "Antal logs at vise (1-50)", false)
+                        .setMinValue(1)
+                        .setMaxValue(50)
+                ),
+            
+            Commands.slash("setlogchannel", "Sæt moderation log kanal")
+                .addOptions(
+                    new OptionData(OptionType.CHANNEL, "channel", "Kanalen til moderation logs", true)
+                        .setChannelTypes(ChannelType.TEXT)
+                ),
+            
+            Commands.slash("setauditchannel", "Sæt audit log kanal")
+                .addOptions(
+                    new OptionData(OptionType.CHANNEL, "channel", "Kanalen til audit logs", true)
+                        .setChannelTypes(ChannelType.TEXT)
+                ),
+            
+            Commands.slash("clearlogs", "Ryd alle logs for serveren")
+                .addOptions(
+                    new OptionData(OptionType.BOOLEAN, "confirm", "Bekræft at du vil rydde alle logs", true)
+                ),
+            
+            Commands.slash("exportlogs", "Eksporter logs til fil")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "format", "Filformat", true)
+                        .addChoice("JSON", "json")
+                        .addChoice("CSV", "csv")
+                        .addChoice("TXT", "txt"),
+                    new OptionData(OptionType.INTEGER, "days", "Antal dage tilbage (1-30)", false)
+                        .setMinValue(1)
+                        .setMaxValue(30)
+                ),
+            
+            Commands.slash("logstats", "Vis log statistikker")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "period", "Tidsperiode", false)
+                        .addChoice("I dag", "today")
+                        .addChoice("Denne uge", "week")
+                        .addChoice("Denne måned", "month")
+                        .addChoice("Alt", "all")
+                ),
+            
+            Commands.slash("logconfig", "Konfigurer logging indstillinger")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "setting", "Indstilling", true)
+                        .addChoice("Enable logging", "enable")
+                        .addChoice("Disable logging", "disable")
+                        .addChoice("Detailed logging", "detailed")
+                        .addChoice("Retention days", "retention")
+                        .addChoice("View config", "view"),
+                    new OptionData(OptionType.INTEGER, "value", "Værdi (for retention days)", false)
+                        .setMinValue(1)
+                        .setMaxValue(365)
+                ),
+            
+            // Yderligere moderation kommandoer
+            Commands.slash("clearwarnings", "Fjern alle advarsler fra en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren hvis advarsler skal fjernes", true)
+                ),
+            
+            Commands.slash("serverinfo", "Vis detaljeret information om serveren"),
+            
+            Commands.slash("userinfo", "Vis detaljeret information om en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal vises information om", false)
+                ),
+            
+            Commands.slash("avatar", "Vis en brugers avatar")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren hvis avatar skal vises", false)
+                ),
+            
+            Commands.slash("lockdown", "Lås hele serveren ned (emergency)")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "reason", "Årsag til lockdown", false)
+                ),
+            
+            Commands.slash("unlockdown", "Fjern server lockdown")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "reason", "Årsag til at fjerne lockdown", false)
+                ),
+            
+            Commands.slash("automod", "Konfigurer automatisk moderation")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "action", "Handling", true)
+                        .addChoice("Enable", "enable")
+                        .addChoice("Disable", "disable")
+                        .addChoice("Status", "status")
+                        .addChoice("Config", "config")
+                ),
+            
+            Commands.slash("tempban", "Midlertidig ban af en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal tempbans", true),
+                    new OptionData(OptionType.STRING, "duration", "Varighed (f.eks. 1d, 2h, 30m)", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til tempban", false)
+                ),
+            
+            Commands.slash("tempmute", "Midlertidig mute af en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal tempmutes", true),
+                    new OptionData(OptionType.STRING, "duration", "Varighed (f.eks. 1d, 2h, 30m)", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til tempmute", false)
+                ),
+            
+            Commands.slash("voicekick", "Kick en bruger fra voice kanal")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal voice kickes", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til voice kick", false)
+                ),
+            
+            Commands.slash("voiceban", "Ban en bruger fra alle voice kanaler")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal voice bans", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til voice ban", false)
+                ),
+            
+            Commands.slash("voiceunban", "Unban en bruger fra voice kanaler")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal voice unbans", true)
+                ),
+            
+            // Logging kommandoer
+            Commands.slash("logs", "Vis moderation logs")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "type", "Type af logs", false)
+                        .addChoice("Alle", "all")
+                        .addChoice("Bans", "ban")
+                        .addChoice("Kicks", "kick")
+                        .addChoice("Timeouts", "timeout")
+                        .addChoice("Advarsler", "warn")
+                        .addChoice("Auto-mod", "automod"),
+                    new OptionData(OptionType.USER, "user", "Vis logs for specifik bruger", false),
+                    new OptionData(OptionType.INTEGER, "limit", "Antal logs at vise (1-50)", false)
+                        .setMinValue(1)
+                        .setMaxValue(50)
+                ),
+            
+            Commands.slash("setlogchannel", "Sæt moderation log kanal")
+                .addOptions(
+                    new OptionData(OptionType.CHANNEL, "channel", "Kanalen til moderation logs", true)
+                        .setChannelTypes(ChannelType.TEXT)
+                ),
+            
+            Commands.slash("setauditchannel", "Sæt audit log kanal")
+                .addOptions(
+                    new OptionData(OptionType.CHANNEL, "channel", "Kanalen til audit logs", true)
+                        .setChannelTypes(ChannelType.TEXT)
+                ),
+            
+            Commands.slash("clearlogs", "Ryd alle logs for serveren")
+                .addOptions(
+                    new OptionData(OptionType.BOOLEAN, "confirm", "Bekræft at du vil rydde alle logs", true)
+                ),
+            
+            Commands.slash("exportlogs", "Eksporter logs til fil")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "format", "Filformat", true)
+                        .addChoice("JSON", "json")
+                        .addChoice("CSV", "csv")
+                        .addChoice("TXT", "txt"),
+                    new OptionData(OptionType.INTEGER, "days", "Antal dage tilbage (1-30)", false)
+                        .setMinValue(1)
+                        .setMaxValue(30)
+                ),
+            
+            Commands.slash("logstats", "Vis log statistikker")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "period", "Tidsperiode", false)
+                        .addChoice("I dag", "today")
+                        .addChoice("Denne uge", "week")
+                        .addChoice("Denne måned", "month")
+                        .addChoice("Alt", "all")
+                ),
+            
+            Commands.slash("logconfig", "Konfigurer logging indstillinger")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "setting", "Indstilling", true)
+                        .addChoice("Enable logging", "enable")
+                        .addChoice("Disable logging", "disable")
+                        .addChoice("Detailed logging", "detailed")
+                        .addChoice("Retention days", "retention")
+                        .addChoice("View config", "view"),
+                    new OptionData(OptionType.INTEGER, "value", "Værdi (for retention days)", false)
+                        .setMinValue(1)
+                        .setMaxValue(365)
+                ),
+            
+            // Yderligere moderation kommandoer (kun for udviklere)
             Commands.slash("devinfo", "Vis udvikler information (kun for udviklere)"),
             
             Commands.slash("devstats", "Vis detaljerede bot statistikker (kun for udviklere)")
@@ -208,6 +533,62 @@ public class SlashCommandRegistrar {
             Commands.slash("addfilter", "Tilføj et ord til custom filteret")
                 .addOptions(
                     new OptionData(OptionType.STRING, "word", "Ordet der skal filtreres", true)
+                ),
+            
+            // Udvidede moderation kommandoer
+            Commands.slash("mute", "Mute en bruger (fjern tale rettigheder)")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal mutes", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til mute", false)
+                ),
+            
+            Commands.slash("unmute", "Unmute en bruger (gendan tale rettigheder)")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren der skal unmutes", true)
+                ),
+            
+            Commands.slash("slowmode", "Sæt slowmode for kanalen")
+                .addOptions(
+                    new OptionData(OptionType.INTEGER, "seconds", "Sekunder mellem beskeder (0-21600)", true)
+                        .setMinValue(0)
+                        .setMaxValue(21600)
+                ),
+            
+            Commands.slash("lock", "Lås kanalen (forhindre beskeder)")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "reason", "Årsag til låsning", false)
+                ),
+            
+            Commands.slash("unlock", "Lås kanalen op (tillad beskeder igen)")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "reason", "Årsag til oplåsning", false)
+                ),
+            
+            Commands.slash("unban", "Unban en bruger")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "userid", "Bruger ID der skal unbans", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til unban", false)
+                ),
+            
+            Commands.slash("massban", "Ban flere brugere på én gang")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "userids", "Bruger IDs adskilt af komma", true),
+                    new OptionData(OptionType.STRING, "reason", "Årsag til masseban", false)
+                ),
+            
+            Commands.slash("nick", "Skift nickname på en bruger")
+                .addOptions(
+                    new OptionData(OptionType.USER, "user", "Brugeren hvis nickname skal ændres", true),
+                    new OptionData(OptionType.STRING, "nickname", "Nyt nickname (tom for at fjerne)", false)
+                ),
+            
+            Commands.slash("role", "Giv eller fjern en rolle fra en bruger")
+                .addOptions(
+                    new OptionData(OptionType.STRING, "action", "Handling", true)
+                        .addChoice("Giv", "add")
+                        .addChoice("Fjern", "remove"),
+                    new OptionData(OptionType.USER, "user", "Brugeren", true),
+                    new OptionData(OptionType.ROLE, "role", "Rollen", true)
                 ),
             
             // Sprog kommandoer
