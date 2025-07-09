@@ -1,5 +1,6 @@
 package com.axion.bot.moderation;
 
+
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -399,6 +400,23 @@ public class ModerationManager {
     }
     
     /**
+     * Flagger en bruger til manuel gennemgang
+     */
+    private void flagUserForReview(Guild guild, Member member, String reason) {
+        if (member == null) return;
+        
+        String userId = member.getUser().getId();
+        String username = member.getUser().getName();
+        
+        // Log handlingen
+        logModerationAction(userId, username, "SYSTEM", "AutoMod", 
+                          ModerationAction.FLAG_FOR_REVIEW, reason, 
+                          guild.getId(), null, null, 1, true);
+        
+        logger.warn("User flagged for review: {} (ID: {}) - Reason: {}", username, userId, reason);
+    }
+    
+    /**
      * Får temp ban status for en bruger
      */
     public Instant getTempBanExpiry(String userId) {
@@ -549,6 +567,21 @@ public class ModerationManager {
                     );
                 }
                 break;
+                
+            case TEMP_BAN:
+                addTempBan(event.getAuthor().getId(), 24);
+                if (member != null && guild.getSelfMember().canInteract(member)) {
+                    guild.ban(member, 0, TimeUnit.SECONDS).reason(result.getReason()).queue(
+                        success -> logger.info("Temp banned {}: {}", member.getUser().getName(), result.getReason()),
+                        error -> logger.error("Kunne ikke temp banne bruger", error)
+                    );
+                }
+                break;
+                
+            case FLAG_FOR_REVIEW:
+                flagUserForReview(event.getGuild(), event.getMember(), result.getReason());
+                break;
+                
             case LOG_ONLY:
                 logger.info("LOG_ONLY moderation action for user {}: {}", event.getAuthor().getName(), result.getReason());
                 break;
@@ -582,6 +615,10 @@ public class ModerationManager {
             case NONE:
                 // Ingen handling
                 logger.info("NONE moderation action for user {}: {}", event.getAuthor().getName(), result.getReason());
+                break;
+            case SYSTEM_ACTION:
+                // System handling - automatisk handling
+                logger.info("SYSTEM_ACTION moderation action for user {}: {}", event.getAuthor().getName(), result.getReason());
                 break;
         }
     }

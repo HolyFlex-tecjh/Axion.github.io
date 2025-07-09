@@ -83,13 +83,8 @@ public class UserModerationProfile {
                 kickCount++;
                 break;
             case BAN:
+            case TEMP_BAN:
                 banCount++;
-                break;
-            case SYSTEM_ACTION:
-            case DELETE_MESSAGE:
-            case LOG_ONLY:
-            case NONE:
-                // No specific count tracking needed for these actions
                 break;
         }
         
@@ -431,8 +426,6 @@ public class UserModerationProfile {
      */
     public boolean hasRecentDuplicateMessage(String content, long timeframeMs) {
         if (content == null || content.trim().isEmpty()) return false;
-        
-        Instant cutoff = Instant.now().minus(Duration.ofMillis(timeframeMs));
         
         // Check if we've seen this exact content recently
         // This is a simplified implementation - in practice you'd store recent message content

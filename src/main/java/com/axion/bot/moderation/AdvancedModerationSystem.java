@@ -43,11 +43,9 @@ public class AdvancedModerationSystem {
     
     // Configuration
     private final AdvancedModerationConfig config;
-    private final ModerationLogger moderationLogger;
     
     public AdvancedModerationSystem(AdvancedModerationConfig config) {
         this.config = config;
-        this.moderationLogger = new ModerationLogger();
         this.antiRaidSystem = new AntiRaidSystem(this);
         this.toxicityAnalyzer = new ToxicityAnalyzer();
         this.spamEngine = new SpamDetectionEngine();
@@ -692,7 +690,6 @@ public class AdvancedModerationSystem {
         }
         
         String reason = spamDetection.getDescription();
-        ModerationAction action = ModerationAction.DELETE_MESSAGE;
         
         // Determine severity based on spam score and likelihood
         switch (spamDetection.getLikelihood()) {

@@ -146,10 +146,34 @@ public class AdvancedModerationConfig extends ModerationConfig {
     public void setMinAccountAgeHours(int hours) { this.minAccountAgeHours = Math.max(0, hours); }
     
     // Threat Intelligence getters/setters
+    public boolean isAdvancedSpamDetectionEnabled() { return advancedSpamDetectionEnabled; }
+    public void setAdvancedSpamDetectionEnabled(boolean enabled) { this.advancedSpamDetectionEnabled = enabled; }
+    
+    public boolean isThreatIntelligenceEnabled() { return threatIntelligenceEnabled; }
+    public void setThreatIntelligenceEnabled(boolean enabled) { this.threatIntelligenceEnabled = enabled; }
+    
+    public boolean isPhishingDetectionEnabled() { return phishingDetectionEnabled; }
+    public void setPhishingDetectionEnabled(boolean enabled) { this.phishingDetectionEnabled = enabled; }
+    
+    public boolean isMalwareDetectionEnabled() { return malwareDetectionEnabled; }
+    public void setMalwareDetectionEnabled(boolean enabled) { this.malwareDetectionEnabled = enabled; }
+    
+    public boolean isScamDetectionEnabled() { return scamDetectionEnabled; }
+    public void setScamDetectionEnabled(boolean enabled) { this.scamDetectionEnabled = enabled; }
+    
     public boolean isIpReputationCheckEnabled() { return ipReputationCheckEnabled; }
     public void setIpReputationCheckEnabled(boolean enabled) { this.ipReputationCheckEnabled = enabled; }
     
     // Advanced Timeout System getters/setters
+    public boolean isSmartTimeoutEnabled() { return smartTimeoutEnabled; }
+    public void setSmartTimeoutEnabled(boolean enabled) { this.smartTimeoutEnabled = enabled; }
+    
+    public int getBaseTimeoutMinutes() { return baseTimeoutMinutes; }
+    public void setBaseTimeoutMinutes(int minutes) { this.baseTimeoutMinutes = Math.max(1, minutes); }
+    
+    public int getMaxTimeoutHours() { return maxTimeoutHours; }
+    public void setMaxTimeoutHours(int hours) { this.maxTimeoutHours = Math.max(1, hours); }
+    
     public double getTimeoutEscalationMultiplier() { return timeoutEscalationMultiplier; }
     public void setTimeoutEscalationMultiplier(double multiplier) { 
         this.timeoutEscalationMultiplier = Math.max(1.0, multiplier); 

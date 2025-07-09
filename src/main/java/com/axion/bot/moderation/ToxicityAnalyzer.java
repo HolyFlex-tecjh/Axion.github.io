@@ -1,7 +1,7 @@
 package com.axion.bot.moderation;
 
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * Uses multiple detection methods while respecting user privacy
  */
 public class ToxicityAnalyzer {
-    // private static final Logger logger = LoggerFactory.getLogger(ToxicityAnalyzer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ToxicityAnalyzer.class);
     
     // Pattern-based detection
     private final Set<Pattern> toxicPatterns;
@@ -135,8 +135,8 @@ public class ToxicityAnalyzer {
         boolean isToxic = totalScore >= MILD_TOXICITY_THRESHOLD;
         
         if (isToxic) {
-            // logger.debug("Toxicity detected - User: {}, Channel: {}, Score: {}, Severity: {}", 
-            //     userId, channelId, totalScore, severity);
+            logger.debug("Toxicity detected - User: {}, Channel: {}, Score: {}, Severity: {}", 
+                userId, channelId, totalScore, severity);
         }
         
         return new ToxicityResult(isToxic, severity, totalScore, flags);
