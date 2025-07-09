@@ -24,6 +24,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Håndterer slash kommandoer for Axion Bot med moderne embeds
@@ -54,6 +56,7 @@ public class SlashCommandHandler extends ListenerAdapter {
     
     // Moderation system
     private final ModerationManager moderationManager;
+    private final ModerationLogger moderationLogger;
     private final TranslationManager translationManager;
     private final UserLanguageManager userLanguageManager;
     
@@ -61,6 +64,7 @@ public class SlashCommandHandler extends ListenerAdapter {
         // Initialiser moderation system med standard konfiguration
         ModerationConfig config = ModerationConfig.createDefault();
         this.moderationManager = new ModerationManager(config);
+        this.moderationLogger = new ModerationLogger();
         this.translationManager = TranslationManager.getInstance();
         this.userLanguageManager = UserLanguageManager.getInstance();
     }
@@ -342,6 +346,17 @@ public class SlashCommandHandler extends ListenerAdapter {
                     .reason(reason + " (Banned by " + event.getUser().getName() + ")")
                     .queue(
                         success -> {
+                            // Log the moderation action
+                            moderationLogger.logModerationAction(
+                                event.getGuild(),
+                                targetUser,
+                                event.getUser(),
+                                ModerationAction.BAN,
+                                reason,
+                                ModerationSeverity.HIGH,
+                                false
+                            );
+                            
                             EmbedBuilder successEmbed = new EmbedBuilder()
                                     .setTitle(HAMMER_EMOJI + " Bruger Bannet")
                                     .setColor(SUCCESS_COLOR)
@@ -1014,6 +1029,17 @@ public class SlashCommandHandler extends ListenerAdapter {
                     .reason(reason + " (Kicked by " + event.getUser().getName() + ")")
                     .queue(
                         success -> {
+                            // Log the moderation action
+                            moderationLogger.logModerationAction(
+                                event.getGuild(),
+                                targetUser,
+                                event.getUser(),
+                                ModerationAction.KICK,
+                                reason,
+                                ModerationSeverity.MEDIUM,
+                                false
+                            );
+                            
                             EmbedBuilder successEmbed = new EmbedBuilder()
                                     .setTitle(KICK_EMOJI + " Bruger Kicket")
                                     .setColor(WARNING_COLOR)
@@ -1086,6 +1112,17 @@ public class SlashCommandHandler extends ListenerAdapter {
                             .reason(reason + " (Timeout by " + event.getUser().getName() + ")")
                             .queue(
                                 success -> {
+                                    // Log the moderation action
+                                    moderationLogger.logModerationAction(
+                                        event.getGuild(),
+                                        targetUser,
+                                        event.getUser(),
+                                        ModerationAction.TIMEOUT,
+                                        reason + " (Duration: " + duration + " minutes)",
+                                        ModerationSeverity.MEDIUM,
+                                        false
+                                    );
+                                    
                                     EmbedBuilder timeoutEmbed = new EmbedBuilder()
                                             .setTitle(TIMEOUT_EMOJI + " Timeout Givet")
                                             .setColor(MODERATION_COLOR)
@@ -1160,6 +1197,17 @@ public class SlashCommandHandler extends ListenerAdapter {
         moderationManager.addWarning(targetUser.getId(), reason);
         int warningCount = moderationManager.getWarningCount(targetUser.getId());
         
+        // Log the moderation action
+        moderationLogger.logModerationAction(
+            event.getGuild(),
+            targetUser,
+            event.getUser(),
+            ModerationAction.WARN_USER,
+            reason + " (Warning #" + warningCount + ")",
+            warningCount >= 3 ? ModerationSeverity.MEDIUM : ModerationSeverity.LOW,
+            false
+        );
+        
         EmbedBuilder warnEmbed = new EmbedBuilder()
                 .setTitle(WARN_EMOJI + " Advarsel Givet")
                 .setColor(WARNING_COLOR)
@@ -1209,6 +1257,17 @@ public class SlashCommandHandler extends ListenerAdapter {
         User targetUser = userOption.getAsUser();
         int previousWarnings = moderationManager.getWarningCount(targetUser.getId());
         moderationManager.clearWarnings(targetUser.getId());
+        
+        // Log the moderation action
+        moderationLogger.logModerationAction(
+            event.getGuild(),
+            targetUser,
+            event.getUser(),
+            ModerationAction.SYSTEM_ACTION,
+            "Cleared " + previousWarnings + " warnings",
+            ModerationSeverity.LOW,
+            false
+        );
         
         EmbedBuilder unwarnEmbed = new EmbedBuilder()
                 .setTitle(SUCCESS_EMOJI + " Advarsler Fjernet")
@@ -2173,16 +2232,48 @@ public class SlashCommandHandler extends ListenerAdapter {
         User targetUser = userOption != null ? userOption.getAsUser() : null;
         int limit = limitOption != null ? limitOption.getAsInt() : 10;
         
-        // Simuler hentning af logs fra ModerationLogger
+        // Retrieve logs from ModerationLogger
+        List<ModerationLogger.LogEntry> logs;
+        if (targetUser != null) {
+            logs = moderationLogger.getRecentLogsForUser(event.getGuild().getId(), targetUser.getId());
+        } else {
+            logs = moderationLogger.getRecentLogs(event.getGuild().getId());
+        }
+        
+        // Apply limit
+        if (logs.size() > limit) {
+            logs = logs.subList(Math.max(0, logs.size() - limit), logs.size());
+        }
+        
         EmbedBuilder logsEmbed = new EmbedBuilder()
                 .setTitle("📋 Moderation Logs")
                 .setColor(INFO_COLOR)
                 .setDescription("Viser seneste moderation logs for serveren")
                 .addField("Filter", logType.toUpperCase(), true)
                 .addField("Limit", String.valueOf(limit), true)
-                .addField("Bruger", targetUser != null ? targetUser.getAsMention() : "Alle", true)
-                .addField("Seneste Logs", "Ingen logs fundet eller logging system ikke tilgængeligt", false)
-                .setTimestamp(Instant.now())
+                .addField("Bruger", targetUser != null ? targetUser.getAsMention() : "Alle", true);
+        
+        if (logs.isEmpty()) {
+            logsEmbed.addField("Seneste Logs", "Ingen logs fundet", false);
+        } else {
+            StringBuilder logText = new StringBuilder();
+            for (int i = logs.size() - 1; i >= 0; i--) {
+                ModerationLogger.LogEntry log = logs.get(i);
+                String timeStr = "<t:" + log.getTimestamp().getEpochSecond() + ":R>";
+                logText.append(String.format("**%s** - %s\n%s\n\n", 
+                    log.getAction().toString().replace("_", " "), 
+                    timeStr,
+                    log.getReason()));
+                
+                if (logText.length() > 800) {
+                    logText.append("... og flere");
+                    break;
+                }
+            }
+            logsEmbed.addField("Seneste Logs", logText.toString(), false);
+        }
+        
+        logsEmbed.setTimestamp(Instant.now())
                 .setFooter("Brug /logconfig for at konfigurere logging");
         
         event.replyEmbeds(logsEmbed.build()).queue();
@@ -2217,8 +2308,8 @@ public class SlashCommandHandler extends ListenerAdapter {
 
         net.dv8tion.jda.api.entities.channel.concrete.TextChannel logChannel = channelOption.getAsChannel().asTextChannel();
         
-        // Her ville vi normalt gemme kanalen i ModerationLogger
-        // moderationLogger.setLogChannel(event.getGuild().getId(), logChannel.getId());
+        // Set log channel using ModerationLogger
+        moderationLogger.setLogChannel(event.getGuild().getId(), logChannel.getId());
         
         EmbedBuilder successEmbed = new EmbedBuilder()
                 .setTitle("✅ Log Kanal Sat")
@@ -2262,8 +2353,8 @@ public class SlashCommandHandler extends ListenerAdapter {
 
         net.dv8tion.jda.api.entities.channel.concrete.TextChannel auditChannel = channelOption.getAsChannel().asTextChannel();
         
-        // Her ville vi normalt gemme kanalen i ModerationLogger
-        // moderationLogger.setAuditChannel(event.getGuild().getId(), auditChannel.getId());
+        // Set audit channel using ModerationLogger
+        moderationLogger.setAuditChannel(event.getGuild().getId(), auditChannel.getId());
         
         EmbedBuilder successEmbed = new EmbedBuilder()
                 .setTitle("🚨 Audit Kanal Sat")
@@ -2307,8 +2398,19 @@ public class SlashCommandHandler extends ListenerAdapter {
             return;
         }
         
-        // Her ville vi normalt rydde logs fra ModerationLogger
-        // moderationLogger.clearLogs(event.getGuild().getId());
+        // Clear logs using ModerationLogger
+        moderationLogger.clearLogs(event.getGuild().getId());
+        
+        // Log this administrative action
+        moderationLogger.logModerationAction(
+            event.getGuild(),
+            null, // No target user
+            event.getUser(),
+            ModerationAction.SYSTEM_ACTION,
+            "Administrator cleared all moderation logs",
+            ModerationSeverity.MEDIUM,
+            false // Manual action
+        );
         
         EmbedBuilder successEmbed = new EmbedBuilder()
                 .setTitle("🗑️ Logs Ryddet")
@@ -2387,19 +2489,27 @@ public class SlashCommandHandler extends ListenerAdapter {
         OptionMapping periodOption = event.getOption("period");
         String period = periodOption != null ? periodOption.getAsString() : "week";
         
-        // Simuler statistik data
+        // Get statistics from ModerationLogger
+        Map<String, Integer> stats = moderationLogger.getActionStatistics(event.getGuild().getId());
+        List<ModerationLogger.LogEntry> logs = moderationLogger.getRecentLogs(event.getGuild().getId());
+        
+        // Count specific actions
+        long bans = logs.stream().filter(log -> log.getAction() == ModerationAction.BAN).count();
+        long kicks = logs.stream().filter(log -> log.getAction() == ModerationAction.KICK).count();
+        long timeouts = logs.stream().filter(log -> log.getAction() == ModerationAction.TIMEOUT).count();
+        long warnings = logs.stream().filter(log -> log.getAction() == ModerationAction.WARN_USER).count();
+        
         EmbedBuilder statsEmbed = new EmbedBuilder()
                 .setTitle("📊 Log Statistikker")
                 .setColor(INFO_COLOR)
                 .setDescription("Moderation statistikker for " + getPeriodDisplayName(period))
-                .addField("Total Handlinger", "0", true)
-                .addField("Bans", "0", true)
-                .addField("Kicks", "0", true)
-                .addField("Timeouts", "0", true)
-                .addField("Advarsler", "0", true)
-                .addField("Auto-mod", "0", true)
-                .addField("Mest Aktive Moderator", "Ingen data", false)
-                .addField("Note", "Statistikker kræver integration med logging system", false)
+                .addField("Total Handlinger", String.valueOf(stats.getOrDefault("total", 0)), true)
+                .addField("Bans", String.valueOf(bans), true)
+                .addField("Kicks", String.valueOf(kicks), true)
+                .addField("Timeouts", String.valueOf(timeouts), true)
+                .addField("Advarsler", String.valueOf(warnings), true)
+                .addField("Automatiske", String.valueOf(stats.getOrDefault("automated", 0)), true)
+                .addField("Manuelle", String.valueOf(stats.getOrDefault("manual", 0)), true)
                 .setTimestamp(Instant.now())
                 .setFooter("Periode: " + getPeriodDisplayName(period));
         
