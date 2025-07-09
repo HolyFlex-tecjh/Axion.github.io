@@ -89,6 +89,24 @@
                         <i class="fas fa-trophy"></i>
                         <span>Leveling System</span>
                     </a>
+                    <a href="#appeals" class="menu-item">
+                        <i class="fas fa-gavel"></i>
+                        <span>Ban Appeals</span>
+                        <span class="notification-badge" id="appealNotification">0</span>
+                    </a>
+                </div>
+                
+                <div class="menu-section">
+                    <h4 class="menu-section-title">Personal</h4>
+                    <a href="#my-appeals" class="menu-item">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Mine Appeals</span>
+                    </a>
+                    <a href="#banned-servers" class="menu-item">
+                        <i class="fas fa-ban"></i>
+                        <span>Banned Fra Servere</span>
+                        <span class="notification-badge" id="bannedServersCount">0</span>
+                    </a>
                 </div>
             </div>
             
@@ -280,6 +298,149 @@
                     <div class="chart-container">
                         <h3>Command Brug</h3>
                         <canvas id="commandChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Ban Appeals Management Section (Admin View) -->
+                <div class="section" id="appeals-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-gavel"></i>
+                            Ban Appeals Management
+                        </h2>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" id="refreshAppeals">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
+                            <div class="filter-dropdown">
+                                <select id="appealStatusFilter">
+                                    <option value="all">Alle Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="denied">Denied</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="appeals-grid" id="appealsGrid">
+                        <!-- Appeals will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- User's Appeals Section -->
+                <div class="section" id="my-appeals-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-clipboard-list"></i>
+                            Mine Ban Appeals
+                        </h2>
+                        <div class="section-actions">
+                            <button class="btn btn-primary" id="createAppealBtn">
+                                <i class="fas fa-plus"></i>
+                                Ny Appeal
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="user-appeals-list" id="userAppealsList">
+                        <!-- User's appeals will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Banned Servers Section -->
+                <div class="section" id="banned-servers-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-ban"></i>
+                            Servere Du Er Banned Fra
+                        </h2>
+                        <div class="section-actions">
+                            <button class="btn btn-secondary" id="refreshBannedServers">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="banned-servers-grid" id="bannedServersGrid">
+                        <!-- Banned servers will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appeal Creation Modal -->
+            <div class="modal" id="appealModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Opret Ban Appeal</h3>
+                        <button class="modal-close" id="closeAppealModal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="appealForm">
+                            <div class="form-group">
+                                <label for="appealServer">Server:</label>
+                                <select id="appealServer" required>
+                                    <option value="">Vælg server...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="appealReason">Grund til Appeal:</label>
+                                <textarea id="appealReason" placeholder="Forklar hvorfor du mener dit ban bør ophæves..." required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="appealApology">Undskyldning (valgfri):</label>
+                                <textarea id="appealApology" placeholder="Hvis du vil undskylde for dine handlinger..."></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="cancelAppeal">Annuller</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Send Appeal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appeal Response Modal -->
+            <div class="modal" id="responseModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Responder på Appeal</h3>
+                        <button class="modal-close" id="closeResponseModal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="appeal-details" id="appealDetails">
+                            <!-- Appeal details will be loaded here -->
+                        </div>
+                        
+                        <form id="responseForm">
+                            <div class="form-group">
+                                <label for="responseReason">Grund til beslutning (valgfri):</label>
+                                <textarea id="responseReason" placeholder="Forklar hvorfor du godkender eller afviser denne appeal..."></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-danger" id="denyAppeal">
+                                    <i class="fas fa-times"></i>
+                                    Afvis Appeal
+                                </button>
+                                <button type="button" class="btn btn-success" id="approveAppeal">
+                                    <i class="fas fa-check"></i>
+                                    Godkend Appeal
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
