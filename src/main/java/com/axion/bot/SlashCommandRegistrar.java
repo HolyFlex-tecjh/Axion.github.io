@@ -173,12 +173,6 @@ public class SlashCommandRegistrar {
             
             Commands.slash("resetlanguage", "Nulstil dit sprog til standard (engelsk)"),
             
-            // Yderligere moderation kommandoer
-            Commands.slash("clearwarnings", "Fjern alle advarsler fra en bruger")
-                .addOptions(
-                    new OptionData(OptionType.USER, "user", "Brugeren hvis advarsler skal fjernes", true)
-                ),
-            
             Commands.slash("serverinfo", "Vis detaljeret information om serveren"),
             
             Commands.slash("userinfo", "Vis detaljeret information om en bruger")
