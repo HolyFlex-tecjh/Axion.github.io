@@ -48,7 +48,12 @@ public enum ModerationAction {
     /**
      * Log handlingen uden at tage action
      */
-    LOG_ONLY("Log kun", 0);
+    LOG_ONLY("Log kun", 0),
+    
+    /**
+     * System handling - automatisk handling udført af systemet
+     */
+    SYSTEM_ACTION("System handling", 0);
     
     private final String description;
     private final int severity;
@@ -127,6 +132,8 @@ public enum ModerationAction {
                 return "👢";
             case BAN:
                 return "🔨";
+            case SYSTEM_ACTION:
+                return "🤖";
             default:
                 return "❓";
         }
@@ -151,6 +158,8 @@ public enum ModerationAction {
                 return "Din besked blev slettet og du har modtaget en advarsel.";
             case DELETE_AND_TIMEOUT:
                 return "Din besked blev slettet og du er blevet givet en timeout.";
+            case SYSTEM_ACTION:
+                return "Automatisk system handling udført.";
             default:
                 return "Moderation handling udført.";
         }
@@ -178,6 +187,8 @@ public enum ModerationAction {
                 return emoji + " Slettet besked og givet timeout til **" + username + "**: " + reason;
             case LOG_ONLY:
                 return "📝 Loggede handling for **" + username + "**: " + reason;
+            case SYSTEM_ACTION:
+                return emoji + " Automatisk system handling for **" + username + "**: " + reason;
             default:
                 return emoji + " Moderation handling udført på **" + username + "**: " + reason;
         }
