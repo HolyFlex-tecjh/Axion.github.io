@@ -399,51 +399,53 @@ public class SlashCommandHandler extends ListenerAdapter {
         int duration = (int) durationOption.getAsLong();
         String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
         
-        Member targetMember = event.getGuild().getMember(targetUser);
-        if (targetMember == null) {
-            EmbedBuilder errorEmbed = new EmbedBuilder()
-                    .setTitle(ERROR_EMOJI + " Bruger Ikke Fundet")
-                    .setColor(ERROR_COLOR)
-                    .setDescription("Brugeren er ikke på denne server!")
-                    .setTimestamp(Instant.now());
-            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
-            return;
-        }
-        
-        try {
-            targetMember.timeoutFor(duration, TimeUnit.MINUTES)
-                    .reason(reason + " (Timeout by " + event.getUser().getName() + ")")
-                    .queue(
-                        success -> {
-                            EmbedBuilder timeoutEmbed = new EmbedBuilder()
-                                    .setTitle(TIMEOUT_EMOJI + " Timeout Givet")
-                                    .setColor(MODERATION_COLOR)
-                                    .setThumbnail(targetUser.getAvatarUrl())
-                                    .addField("Bruger", targetUser.getAsMention() + " (" + targetUser.getName() + ")", false)
-                                    .addField("Varighed", duration + " minutter", true)
-                                    .addField("Årsag", reason, false)
-                                    .addField("Moderator", event.getUser().getAsMention(), true)
-                                    .setTimestamp(Instant.now())
-                                    .setFooter("User ID: " + targetUser.getId());
-                            event.replyEmbeds(timeoutEmbed.build()).queue();
-                        },
-                        error -> {
-                            EmbedBuilder errorEmbed = new EmbedBuilder()
-                                    .setTitle(ERROR_EMOJI + " Timeout Fejlede")
-                                    .setColor(ERROR_COLOR)
-                                    .setDescription("Kunne ikke give timeout: " + error.getMessage())
-                                    .setTimestamp(Instant.now());
-                            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
-                        }
-                    );
-        } catch (Exception e) {
-            EmbedBuilder errorEmbed = new EmbedBuilder()
-                    .setTitle(ERROR_EMOJI + " Uventet Fejl")
-                    .setColor(ERROR_COLOR)
-                    .setDescription("Fejl ved timeout: " + e.getMessage())
-                    .setTimestamp(Instant.now());
-            event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
-        }
+        // Use retrieveMemberById instead of getMember to force fetch from Discord API
+        event.getGuild().retrieveMemberById(targetUser.getId()).queue(
+            targetMember -> {
+                try {
+                    targetMember.timeoutFor(duration, TimeUnit.MINUTES)
+                            .reason(reason + " (Timeout by " + event.getUser().getName() + ")")
+                            .queue(
+                                success -> {
+                                    EmbedBuilder timeoutEmbed = new EmbedBuilder()
+                                            .setTitle(TIMEOUT_EMOJI + " Timeout Givet")
+                                            .setColor(MODERATION_COLOR)
+                                            .setThumbnail(targetUser.getAvatarUrl())
+                                            .addField("Bruger", targetUser.getAsMention() + " (" + targetUser.getName() + ")", false)
+                                            .addField("Varighed", duration + " minutter", true)
+                                            .addField("Årsag", reason, false)
+                                            .addField("Moderator", event.getUser().getAsMention(), true)
+                                            .setTimestamp(Instant.now())
+                                            .setFooter("User ID: " + targetUser.getId());
+                                    event.replyEmbeds(timeoutEmbed.build()).queue();
+                                },
+                                error -> {
+                                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                                            .setTitle(ERROR_EMOJI + " Timeout Fejlede")
+                                            .setColor(ERROR_COLOR)
+                                            .setDescription("Kunne ikke give timeout: " + error.getMessage())
+                                            .setTimestamp(Instant.now());
+                                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                                }
+                            );
+                } catch (Exception e) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Uventet Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Fejl ved timeout: " + e.getMessage())
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                }
+            },
+            error -> {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Bruger Ikke Fundet")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Brugeren er ikke på denne server!")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+            }
+        );
     }
 
     /**
