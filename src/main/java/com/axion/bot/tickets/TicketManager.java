@@ -18,7 +18,6 @@ import java.awt.Color;
 import java.time.Instant;
 import java.util.*;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Håndterer ticket operationer og thread management
