@@ -107,6 +107,16 @@ public class TicketManager {
                 .setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK)
                 .complete();
 
+            // Slet den automatiske thread oprettelsesbesked
+            thread.getHistory().retrievePast(1).queue(messages -> {
+                if (!messages.isEmpty()) {
+                    messages.get(0).delete().queue(
+                        success -> logger.debug("Thread oprettelsesbesked slettet for ticket: {}", ticketId),
+                        error -> logger.debug("Kunne ikke slette thread oprettelsesbesked: {}", error.getMessage())
+                    );
+                }
+            });
+
             // Tilføj bruger til thread
             thread.addThreadMember(user).queue();
             
@@ -146,7 +156,7 @@ public class TicketManager {
     }
 
     /**
-     * Lukker en ticket
+     * Lukker en ticket og sletter den permanent
      */
     public boolean closeTicket(String ticketId, User closedBy, String reason) {
         try {
@@ -162,16 +172,7 @@ public class TicketManager {
                 return false;
             }
 
-            // Luk ticket
-            ticket.close(closedBy.getId(), reason);
-            
-            // Opdater i database
-            if (!ticketService.updateTicket(ticket)) {
-                logger.error("Kunne ikke opdatere ticket i database: {}", ticketId);
-                return false;
-            }
-
-            // Find thread og arkiver den
+            // Find thread og slet den
             Guild guild = closedBy.getJDA().getGuildById(ticket.getGuildId());
             if (guild != null) {
                 ThreadChannel thread = guild.getThreadChannelById(ticket.getThreadId());
@@ -180,23 +181,46 @@ public class TicketManager {
                         // Send lukkebesked
                         sendCloseMessage(thread, ticket, closedBy, reason);
                         
-                        // Arkiver thread efter 10 sekunder
-                        thread.getManager().setArchived(true).queueAfter(10, TimeUnit.SECONDS,
-                            success -> logger.info("Thread arkiveret for ticket: {}", ticketId),
-                            error -> logger.warn("Kunne ikke arkivere thread for ticket {}: {}", ticketId, error.getMessage())
+                        // Slet thread efter 5 sekunder
+                        thread.delete().queueAfter(5, TimeUnit.SECONDS,
+                            success -> {
+                                logger.info("Thread slettet for ticket: {}", ticketId);
+                                // Slet ticket fra database efter thread er slettet
+                                if (!ticketService.deleteTicket(ticketId)) {
+                                    logger.error("Kunne ikke slette ticket fra database: {}", ticketId);
+                                }
+                            },
+                            error -> {
+                                logger.warn("Kunne ikke slette thread for ticket {}: {}", ticketId, error.getMessage());
+                                // Slet ticket fra database selvom thread sletning fejlede
+                                if (!ticketService.deleteTicket(ticketId)) {
+                                    logger.error("Kunne ikke slette ticket fra database: {}", ticketId);
+                                }
+                            }
                         );
                     } catch (Exception e) {
-                        logger.warn("Kunne ikke sende lukkebesked eller arkivere thread for ticket {}: {}", ticketId, e.getMessage());
-                        // Ticket er stadig lukket i databasen, selvom thread operationer fejlede
+                        logger.warn("Kunne ikke sende lukkebesked eller slette thread for ticket {}: {}", ticketId, e.getMessage());
+                        // Slet ticket fra database selvom thread operationer fejlede
+                        if (!ticketService.deleteTicket(ticketId)) {
+                            logger.error("Kunne ikke slette ticket fra database: {}", ticketId);
+                        }
                     }
                 } else {
-                    logger.warn("Thread ikke fundet for ticket: {} - thread kan allerede være slettet", ticketId);
+                    logger.warn("Thread ikke fundet for ticket: {} - sletter ticket fra database", ticketId);
+                    // Slet ticket fra database selvom thread ikke findes
+                    if (!ticketService.deleteTicket(ticketId)) {
+                        logger.error("Kunne ikke slette ticket fra database: {}", ticketId);
+                    }
                 }
             } else {
-                logger.warn("Guild ikke fundet for ticket: {}", ticketId);
+                logger.warn("Guild ikke fundet for ticket: {} - sletter ticket fra database", ticketId);
+                // Slet ticket fra database selvom guild ikke findes
+                if (!ticketService.deleteTicket(ticketId)) {
+                    logger.error("Kunne ikke slette ticket fra database: {}", ticketId);
+                }
             }
 
-            logger.info("Ticket lukket: {} af bruger: {}", ticketId, closedBy.getId());
+            logger.info("Ticket lukket og slettet: {} af bruger: {}", ticketId, closedBy.getId());
             return true;
             
         } catch (Exception e) {

@@ -276,6 +276,36 @@ public class TicketService {
     }
 
     /**
+     * Sletter en ticket permanent fra databasen
+     */
+    public boolean deleteTicket(String ticketId) {
+        String sql = "DELETE FROM tickets WHERE ticket_id = ?";
+        
+        Connection connection = databaseService.getConnection();
+        if (connection == null) {
+            logger.error("Database forbindelse er null");
+            return false;
+        }
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, ticketId);
+            
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                logger.info("Ticket slettet permanent: {}", ticketId);
+                return true;
+            } else {
+                logger.warn("Ingen ticket fundet til sletning: {}", ticketId);
+                return false;
+            }
+            
+        } catch (SQLException e) {
+            logger.error("Fejl ved sletning af ticket: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Gemmer ticket konfiguration
      */
     public boolean saveTicketConfig(TicketConfig config) {
