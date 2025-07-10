@@ -145,8 +145,8 @@ public class ModerationCommands {
         User targetUser = userOption.getAsUser();
         String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
         
-        moderationManager.addWarning(targetUser.getId(), reason);
-        int warningCount = moderationManager.getWarningCount(targetUser.getId());
+        moderationManager.addWarning(targetUser.getId(), event.getGuild().getId(), reason, event.getUser().getId());
+        int warningCount = moderationManager.getWarnings(targetUser.getId(), event.getGuild().getId());
         
         EmbedBuilder warnEmbed = EmbedUtils.createModerationEmbed("Advarsel Givet", 
             "Brugeren har modtaget en advarsel", targetUser, event.getUser())

@@ -1,6 +1,7 @@
 package com.axion.bot;
 
 import com.axion.bot.moderation.*;
+import com.axion.bot.database.DatabaseService;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
@@ -16,10 +17,10 @@ public class CommandHandler extends ListenerAdapter {
     // Moderation system
     private final ModerationManager moderationManager;
 
-    public CommandHandler() {
+    public CommandHandler(DatabaseService databaseService) {
         // Initialiser moderation system med standard konfiguration
         ModerationConfig config = ModerationConfig.createDefault();
-        this.moderationManager = new ModerationManager(config);
+        this.moderationManager = new ModerationManager(config, databaseService);
     }
     
     @Override

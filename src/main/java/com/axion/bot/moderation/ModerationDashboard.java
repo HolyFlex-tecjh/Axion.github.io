@@ -141,13 +141,13 @@ public class ModerationDashboard {
     /**
      * Opretter seneste moderation logs embed
      */
-    public MessageEmbed createRecentLogsEmbed(int limit) {
+    public MessageEmbed createRecentLogsEmbed(String guildId, int limit) {
         EmbedBuilder embed = new EmbedBuilder()
             .setTitle("📋 Seneste Moderation Handlinger")
             .setColor(Color.ORANGE)
             .setTimestamp(Instant.now());
         
-        List<ModerationLog> recentLogs = moderationManager.getRecentModerationLogs(limit);
+        List<ModerationLog> recentLogs = moderationManager.getRecentModerationLogs(guildId, limit);
         
         if (recentLogs.isEmpty()) {
             embed.setDescription("📭 Ingen seneste moderation handlinger");

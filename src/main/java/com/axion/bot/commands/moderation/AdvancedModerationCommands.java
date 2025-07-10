@@ -108,7 +108,7 @@ public class AdvancedModerationCommands {
         }
 
         User targetUser = userOption.getAsUser();
-        List<ModerationLog> logs = moderationManager.getModerationLogs(targetUser.getId());
+        List<ModerationLog> logs = moderationManager.getModerationLogs(targetUser.getId(), event.getGuild().getId());
         
         EmbedBuilder logsEmbed = new EmbedBuilder()
                 .setTitle("📋 Moderation Logs for " + targetUser.getName())
@@ -120,7 +120,7 @@ public class AdvancedModerationCommands {
             logsEmbed.setDescription("Ingen moderation logs fundet for denne bruger.");
         } else {
             logsEmbed.addField("Total Logs", String.valueOf(logs.size()), true);
-            logsEmbed.addField("Violation Count", String.valueOf(moderationManager.getViolationCount(targetUser.getId())), true);
+            logsEmbed.addField("Violation Count", String.valueOf(moderationManager.getViolationCount(targetUser.getId(), event.getGuild().getId())), true);
             
             // Vis de sidste 5 logs
             StringBuilder logText = new StringBuilder();
@@ -158,8 +158,8 @@ public class AdvancedModerationCommands {
         }
 
         User targetUser = userOption.getAsUser();
-        int oldCount = moderationManager.getViolationCount(targetUser.getId());
-        moderationManager.resetViolationCount(targetUser.getId());
+        int oldCount = moderationManager.getViolationCount(targetUser.getId(), event.getGuild().getId());
+        moderationManager.resetViolationCount(targetUser.getId(), event.getGuild().getId());
         
         EmbedBuilder resetEmbed = new EmbedBuilder()
                 .setTitle("🔄 Violations Nulstillet")

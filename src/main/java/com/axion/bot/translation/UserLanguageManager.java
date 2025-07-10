@@ -1,11 +1,10 @@
 package com.axion.bot.translation;
 
+import com.axion.bot.database.DatabaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -15,10 +14,10 @@ public class UserLanguageManager {
     private static final Logger logger = LoggerFactory.getLogger(UserLanguageManager.class);
     private static UserLanguageManager instance;
     private final Map<String, String> userLanguages = new ConcurrentHashMap<>();
-    private final String DATA_FILE = "user_languages.properties";
+    private DatabaseService databaseService;
     
     private UserLanguageManager() {
-        loadUserLanguages();
+        // Cache will be loaded when DatabaseService is set
     }
     
     /**
@@ -32,12 +31,22 @@ public class UserLanguageManager {
     }
     
     /**
+     * Sætter DatabaseService og indlæser cache
+     */
+    public void setDatabaseService(DatabaseService databaseService) {
+        this.databaseService = databaseService;
+        loadUserLanguagesFromDatabase();
+    }
+    
+    /**
      * Sætter sprog for en bruger
      */
     public void setUserLanguage(String userId, String languageCode) {
         if (TranslationManager.getInstance().isLanguageSupported(languageCode)) {
             userLanguages.put(userId, languageCode);
-            saveUserLanguages();
+            if (databaseService != null) {
+                databaseService.setUserLanguage(userId, languageCode);
+            }
             logger.info("Set language for user {} to: {}", userId, languageCode);
         } else {
             logger.warn("Attempted to set unsupported language {} for user {}", languageCode, userId);
@@ -48,7 +57,22 @@ public class UserLanguageManager {
      * Henter sprog for en bruger
      */
     public String getUserLanguage(String userId) {
-        return userLanguages.getOrDefault(userId, "en");
+        // First check cache
+        String cachedLanguage = userLanguages.get(userId);
+        if (cachedLanguage != null) {
+            return cachedLanguage;
+        }
+        
+        // If not in cache and database is available, check database
+        if (databaseService != null) {
+            String dbLanguage = databaseService.getUserLanguage(userId);
+            if (dbLanguage != null && !dbLanguage.equals("en")) {
+                userLanguages.put(userId, dbLanguage); // Cache it
+                return dbLanguage;
+            }
+        }
+        
+        return "en"; // Default language
     }
     
     /**
@@ -56,7 +80,9 @@ public class UserLanguageManager {
      */
     public void resetUserLanguage(String userId) {
         userLanguages.remove(userId);
-        saveUserLanguages();
+        if (databaseService != null) {
+            databaseService.removeUserLanguage(userId);
+        }
         logger.info("Reset language for user {} to default", userId);
     }
     
@@ -88,71 +114,51 @@ public class UserLanguageManager {
     }
     
     /**
-     * Indlæser brugerspecifikke sprogindstillinger fra fil
+     * Indlæser brugerspecifikke sprogindstillinger fra database
      */
-    private void loadUserLanguages() {
-        File file = new File(DATA_FILE);
-        if (!file.exists()) {
-            logger.info("User languages file not found, starting with empty settings");
+    private void loadUserLanguagesFromDatabase() {
+        if (databaseService == null) {
+            logger.warn("DatabaseService not available, cannot load user languages");
             return;
         }
         
-        Properties props = new Properties();
-        try (FileInputStream fis = new FileInputStream(file)) {
-            props.load(fis);
+        try {
+            Map<String, String> dbLanguages = databaseService.getAllUserLanguages();
             
-            for (String key : props.stringPropertyNames()) {
-                String value = props.getProperty(key);
-                if (TranslationManager.getInstance().isLanguageSupported(value)) {
-                    userLanguages.put(key, value);
+            for (Map.Entry<String, String> entry : dbLanguages.entrySet()) {
+                String userId = entry.getKey();
+                String languageCode = entry.getValue();
+                
+                if (TranslationManager.getInstance().isLanguageSupported(languageCode)) {
+                    userLanguages.put(userId, languageCode);
                 } else {
-                    logger.warn("Skipping unsupported language {} for user {}", value, key);
+                    logger.warn("Skipping unsupported language {} for user {}", languageCode, userId);
                 }
             }
             
-            logger.info("Loaded {} user language settings", userLanguages.size());
+            logger.info("Loaded {} user language settings from database", userLanguages.size());
             
-        } catch (IOException e) {
-            logger.error("Error loading user languages from file: {}", e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error loading user languages from database: {}", e.getMessage());
         }
     }
     
-    /**
-     * Gemmer brugerspecifikke sprogindstillinger til fil
-     */
-    private void saveUserLanguages() {
-        Properties props = new Properties();
-        
-        for (Map.Entry<String, String> entry : userLanguages.entrySet()) {
-            props.setProperty(entry.getKey(), entry.getValue());
-        }
-        
-        try (FileOutputStream fos = new FileOutputStream(DATA_FILE)) {
-            props.store(fos, "Axion Bot User Language Settings");
-            logger.debug("Saved {} user language settings", userLanguages.size());
-            
-        } catch (IOException e) {
-            logger.error("Error saving user languages to file: {}", e.getMessage());
-        }
-    }
+
     
     /**
      * Rydder op i gamle eller ugyldige sprogindstillinger
      */
     public void cleanup() {
-        boolean changed = false;
-        
-        // Fjern ugyldige sprog
+        // Fjern ugyldige sprog fra cache og database
         userLanguages.entrySet().removeIf(entry -> {
             if (!TranslationManager.getInstance().isLanguageSupported(entry.getValue())) {
                 logger.info("Removing invalid language {} for user {}", entry.getValue(), entry.getKey());
+                if (databaseService != null) {
+                    databaseService.removeUserLanguage(entry.getKey());
+                }
                 return true;
             }
             return false;
         });
-        
-        if (changed) {
-            saveUserLanguages();
-        }
     }
 }

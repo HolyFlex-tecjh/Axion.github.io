@@ -5,6 +5,7 @@ import com.axion.bot.commands.utility.HelpCommands;
 import com.axion.bot.commands.LanguageCommands;
 import com.axion.bot.commands.developer.DeveloperCommands;
 import com.axion.bot.moderation.*;
+import com.axion.bot.database.DatabaseService;
 import com.axion.bot.translation.TranslationManager;
 import com.axion.bot.translation.UserLanguageManager;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -60,10 +61,10 @@ public class SlashCommandHandler extends ListenerAdapter {
     private final TranslationManager translationManager;
     private final UserLanguageManager userLanguageManager;
     
-    public SlashCommandHandler() {
+    public SlashCommandHandler(DatabaseService databaseService) {
         // Initialiser moderation system med standard konfiguration
         ModerationConfig config = ModerationConfig.createDefault();
-        this.moderationManager = new ModerationManager(config);
+        this.moderationManager = new ModerationManager(config, databaseService);
         this.moderationLogger = new ModerationLogger();
         this.translationManager = TranslationManager.getInstance();
         this.userLanguageManager = UserLanguageManager.getInstance();
@@ -1194,8 +1195,8 @@ public class SlashCommandHandler extends ListenerAdapter {
         User targetUser = userOption.getAsUser();
         String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
         
-        moderationManager.addWarning(targetUser.getId(), reason);
-        int warningCount = moderationManager.getWarningCount(targetUser.getId());
+        moderationManager.addWarning(targetUser.getId(), event.getGuild().getId(), reason, event.getUser().getId());
+        int warningCount = moderationManager.getWarnings(targetUser.getId(), event.getGuild().getId());
         
         // Log the moderation action
         moderationLogger.logModerationAction(
@@ -1255,8 +1256,8 @@ public class SlashCommandHandler extends ListenerAdapter {
         }
 
         User targetUser = userOption.getAsUser();
-        int previousWarnings = moderationManager.getWarningCount(targetUser.getId());
-        moderationManager.clearWarnings(targetUser.getId());
+        int previousWarnings = moderationManager.getWarnings(targetUser.getId(), event.getGuild().getId());
+        moderationManager.clearWarnings(targetUser.getId(), event.getGuild().getId());
         
         // Log the moderation action
         moderationLogger.logModerationAction(
@@ -1300,7 +1301,7 @@ public class SlashCommandHandler extends ListenerAdapter {
         }
 
         User targetUser = userOption.getAsUser();
-        int warningCount = moderationManager.getWarningCount(targetUser.getId());
+        int warningCount = moderationManager.getWarnings(targetUser.getId(), event.getGuild().getId());
         
         Color embedColor = warningCount == 0 ? SUCCESS_COLOR : 
                           warningCount < 3 ? WARNING_COLOR : ERROR_COLOR;

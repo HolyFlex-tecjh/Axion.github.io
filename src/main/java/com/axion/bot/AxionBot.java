@@ -1,5 +1,8 @@
 package com.axion.bot;
 
+import com.axion.bot.database.DatabaseManager;
+import com.axion.bot.database.DatabaseService;
+import com.axion.bot.translation.UserLanguageManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -20,9 +23,12 @@ public class AxionBot {
     private static final Logger logger = LoggerFactory.getLogger(AxionBot.class);
     private JDA jda;
     private String token;
+    private DatabaseManager databaseManager;
+    private DatabaseService databaseService;
 
     public AxionBot() {
         loadConfiguration();
+        initializeDatabase();
     }
 
     /**
@@ -40,6 +46,32 @@ public class AxionBot {
             token = properties.getProperty("discord.token");
         } catch (IOException ex) {
             logger.error("Fejl ved indlæsning af konfiguration", ex);
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Initialiserer database forbindelse
+     */
+    private void initializeDatabase() {
+        try {
+            // Brug SQLite som standard database
+            String databaseUrl = System.getenv("DATABASE_URL");
+            if (databaseUrl == null || databaseUrl.isEmpty()) {
+                databaseUrl = "jdbc:sqlite:axion_bot.db";
+                logger.info("Bruger standard SQLite database: axion_bot.db");
+            }
+            
+            databaseManager = new DatabaseManager(databaseUrl);
+            databaseManager.connect();
+            databaseService = new DatabaseService(databaseManager);
+            
+            // Initialize UserLanguageManager with DatabaseService
+            UserLanguageManager.getInstance().setDatabaseService(databaseService);
+            
+            logger.info("Database forbindelse etableret succesfuldt");
+        } catch (Exception e) {
+            logger.error("Fejl ved initialisering af database", e);
             System.exit(1);
         }
     }
@@ -63,8 +95,8 @@ public class AxionBot {
                     )
                     .setActivity(Activity.playing("Axion Bot v1.0 | /help for kommandoer"))
                     .addEventListeners(
-                            new CommandHandler(),     // Auto-moderation
-                            new SlashCommandHandler() // Slash commands (/)
+                            new CommandHandler(databaseService),     // Auto-moderation
+                            new SlashCommandHandler(databaseService) // Slash commands (/)
                     )
                     .build();
 
@@ -91,6 +123,24 @@ public class AxionBot {
             jda.shutdown();
             logger.info("Axion Bot er lukket ned");
         }
+        if (databaseManager != null) {
+            databaseManager.disconnect();
+            logger.info("Database forbindelse lukket");
+        }
+    }
+
+    /**
+     * Får database manager instans
+     */
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
+    /**
+     * Får database service instans
+     */
+    public DatabaseService getDatabaseService() {
+        return databaseService;
     }
 
     /**

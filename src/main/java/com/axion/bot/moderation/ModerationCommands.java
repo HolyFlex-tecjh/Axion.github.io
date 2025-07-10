@@ -347,7 +347,7 @@ public class ModerationCommands {
         Member targetMember = mentionedMembers.get(0);
         String userId = targetMember.getUser().getId();
         
-        moderationManager.clearWarnings(userId);
+        moderationManager.clearWarnings(userId, event.getGuild().getId());
         
         event.getChannel().sendMessage("✅ Fjernede alle advarsler for " + targetMember.getUser().getAsTag()).queue();
         logger.info("Cleared warnings for {} by {}", targetMember.getUser().getAsTag(), event.getAuthor().getAsTag());

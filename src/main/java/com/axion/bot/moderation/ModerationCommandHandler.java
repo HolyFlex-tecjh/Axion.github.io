@@ -149,7 +149,7 @@ public class ModerationCommandHandler {
                 
             case "logs":
                 int limit = event.getOption("limit", 10, OptionMapping::getAsInt);
-                event.replyEmbeds(dashboard.createRecentLogsEmbed(limit)).queue();
+                event.replyEmbeds(dashboard.createRecentLogsEmbed(event.getGuild().getId(), limit)).queue();
                 break;
                 
             case "config":
@@ -181,7 +181,7 @@ public class ModerationCommandHandler {
                     return;
                 }
                 
-                int violations = moderationManager.getViolationCount(violationUser.getId());
+                int violations = moderationManager.getViolationCount(violationUser.getId(), event.getGuild().getId());
                 EmbedBuilder violationEmbed = new EmbedBuilder()
                     .setTitle("👤 Bruger Overtrædelser")
                     .setColor(Color.ORANGE)

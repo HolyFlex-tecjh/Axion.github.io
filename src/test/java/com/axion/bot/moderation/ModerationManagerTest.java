@@ -3,6 +3,7 @@ package com.axion.bot.moderation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import com.axion.bot.database.DatabaseService;
 
 /**
  * Test klasse for ModerationManager
@@ -12,11 +13,13 @@ public class ModerationManagerTest {
     
     private ModerationManager moderationManager;
     private ModerationConfig config;
+    private DatabaseService databaseService;
     
     @BeforeEach
     void setUp() {
         config = ModerationConfig.createDefault();
-        moderationManager = new ModerationManager(config);
+        databaseService = null; // Mock or null for testing
+        moderationManager = new ModerationManager(config, databaseService);
     }
     
     @Test
@@ -141,13 +144,14 @@ public class ModerationManagerTest {
     @Test
     void testWarningsManagement() {
         String userId = "123456789";
+        String guildId = "987654321";
         
         // Test initial warnings
-        assertEquals(0, moderationManager.getWarnings(userId));
+        assertEquals(0, moderationManager.getWarnings(userId, guildId));
         
         // Test clear warnings
-        moderationManager.clearWarnings(userId);
-        assertEquals(0, moderationManager.getWarnings(userId));
+        moderationManager.clearWarnings(userId, guildId);
+        assertEquals(0, moderationManager.getWarnings(userId, guildId));
     }
     
     @Test
