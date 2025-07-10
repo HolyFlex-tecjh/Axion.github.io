@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.awt.Color;
 import java.time.Instant;
 import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Håndterer ticket operationer og thread management
@@ -330,26 +332,15 @@ public class TicketManager {
             
             boolean updated = ticketService.updateTicket(ticket);
             if (updated) {
-                // Send besked i thread
+                // Update the original welcome message embed with new priority
                 Guild guild = changedBy.getJDA().getGuildById(ticket.getGuildId());
                 if (guild != null) {
                     ThreadChannel thread = guild.getThreadChannelById(ticket.getThreadId());
                     if (thread != null) {
                         try {
-                            String userId = changedBy.getId();
-                            
-                            EmbedBuilder embed = new EmbedBuilder()
-                                .setTitle("\uD83D\uDCCA " + translate("ticket.priority.title", userId))
-                                .setDescription(translate("ticket.priority.description", userId, oldPriority, priority, changedBy.getAsMention()))
-                                .setColor(WARNING_COLOR)
-                                .setTimestamp(Instant.now());
-                            
-                            thread.sendMessageEmbeds(embed.build()).queue(
-                                success -> logger.debug("Prioritetsbesked sendt for ticket: {}", ticketId),
-                                error -> logger.warn("Kunne ikke sende prioritetsbesked for ticket {}: {}", ticketId, error.getMessage())
-                            );
+                            updateWelcomeMessagePriority(thread, ticket, changedBy);
                         } catch (Exception e) {
-                            logger.warn("Fejl ved sending af prioritetsbesked for ticket {}: {}", ticketId, e.getMessage());
+                            logger.warn("Fejl ved opdatering af velkomstbesked for ticket {}: {}", ticketId, e.getMessage());
                         }
                     } else {
                         logger.warn("Thread ikke fundet for ticket: {} ved prioritetsændring", ticketId);
@@ -418,6 +409,74 @@ public class TicketManager {
             success -> logger.debug("Lukkebesked sendt for ticket: {}", ticket.getTicketId()),
             error -> logger.warn("Kunne ikke sende lukkebesked for ticket {}: {}", ticket.getTicketId(), error.getMessage())
         );
+    }
+
+    /**
+     * Updates the welcome message embed with new priority
+     */
+    private void updateWelcomeMessagePriority(ThreadChannel thread, Ticket ticket, User changedBy) {
+        try {
+            String userId = changedBy.getId();
+            String priorityFieldName = translate("ticket.welcome.priority", userId);
+            
+            // Get the first message in the thread (welcome message)
+            thread.getHistory().retrievePast(1).queue(messages -> {
+                if (!messages.isEmpty()) {
+                    Message welcomeMessage = messages.get(0);
+                    if (!welcomeMessage.getEmbeds().isEmpty()) {
+                        MessageEmbed originalEmbed = welcomeMessage.getEmbeds().get(0);
+                        
+                        // Create updated embed with new priority
+                        EmbedBuilder updatedEmbed = new EmbedBuilder(originalEmbed);
+                        
+                        // Update the priority field in the embed
+                        String priorityEmoji = getPriorityEmoji(ticket.getPriority());
+                        String priorityText = priorityEmoji + ticket.getPriority().toString();
+                        
+                        // Find and update the priority field
+                        List<MessageEmbed.Field> fields = new ArrayList<>();
+                        for (MessageEmbed.Field field : originalEmbed.getFields()) {
+                            if (field.getName() != null && field.getName().equals(priorityFieldName)) {
+                                fields.add(new MessageEmbed.Field(field.getName(), priorityText, field.isInline()));
+                            } else {
+                                fields.add(field);
+                            }
+                        }
+                        
+                        updatedEmbed.clearFields();
+                        for (MessageEmbed.Field field : fields) {
+                            updatedEmbed.addField(field);
+                        }
+                        
+                        // Update the message
+                        welcomeMessage.editMessageEmbeds(updatedEmbed.build()).queue(
+                            success -> logger.debug("Velkomstbesked opdateret med ny prioritet for ticket: {}", ticket.getTicketId()),
+                            error -> logger.warn("Kunne ikke opdatere velkomstbesked for ticket {}: {}", ticket.getTicketId(), error.getMessage())
+                        );
+                    }
+                }
+            }, error -> logger.warn("Kunne ikke hente beskeder for ticket {}: {}", ticket.getTicketId(), error.getMessage()));
+        } catch (Exception e) {
+            logger.warn("Fejl ved opdatering af velkomstbesked for ticket {}: {}", ticket.getTicketId(), e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the emoji for a priority
+     */
+    private String getPriorityEmoji(TicketPriority priority) {
+        switch (priority) {
+            case LOW:
+                return "\uD83D\uDFE2 ";
+            case MEDIUM:
+                return "\uD83D\uDFE1 ";
+            case HIGH:
+                return "\uD83D\uDD34 ";
+            case URGENT:
+                return "\uD83D\uDFE3 ";
+            default:
+                return "\uD83D\uDFE1 ";
+        }
     }
 
     /**
