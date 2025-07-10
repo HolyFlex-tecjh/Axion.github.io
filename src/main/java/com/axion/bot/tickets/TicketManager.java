@@ -416,28 +416,41 @@ public class TicketManager {
         try {
             String userId = changedBy.getId();
             String priorityFieldName = translate("ticket.welcome.priority", userId);
+            logger.debug("Attempting to update priority field '{}' for ticket {}", priorityFieldName, ticket.getTicketId());
             
             // Get the first message in the thread (welcome message)
             thread.getHistory().retrievePast(1).queue(messages -> {
+                logger.debug("Retrieved {} messages from thread for ticket {}", messages.size(), ticket.getTicketId());
                 if (!messages.isEmpty()) {
                     Message welcomeMessage = messages.get(0);
+                    logger.debug("Welcome message has {} embeds for ticket {}", welcomeMessage.getEmbeds().size(), ticket.getTicketId());
                     if (!welcomeMessage.getEmbeds().isEmpty()) {
                         MessageEmbed originalEmbed = welcomeMessage.getEmbeds().get(0);
+                        logger.debug("Original embed has {} fields for ticket {}", originalEmbed.getFields().size(), ticket.getTicketId());
                         
                         // Create updated embed with new priority
                         EmbedBuilder updatedEmbed = new EmbedBuilder(originalEmbed);
                         
                         // Update the priority field in the embed
                         String priorityText = ticket.getPriority().toString();
+                        logger.debug("New priority text: '{}' for ticket {}", priorityText, ticket.getTicketId());
                         
                         // Find and update the priority field
                         List<MessageEmbed.Field> fields = new ArrayList<>();
+                        boolean fieldFound = false;
                         for (MessageEmbed.Field field : originalEmbed.getFields()) {
+                            logger.debug("Checking field '{}' against '{}' for ticket {}", field.getName(), priorityFieldName, ticket.getTicketId());
                             if (field.getName() != null && field.getName().equals(priorityFieldName)) {
                                 fields.add(new MessageEmbed.Field(field.getName(), priorityText, field.isInline()));
+                                fieldFound = true;
+                                logger.debug("Updated priority field for ticket {}", ticket.getTicketId());
                             } else {
                                 fields.add(field);
                             }
+                        }
+                        
+                        if (!fieldFound) {
+                            logger.warn("Priority field '{}' not found in embed for ticket {}", priorityFieldName, ticket.getTicketId());
                         }
                         
                         updatedEmbed.clearFields();
@@ -447,14 +460,18 @@ public class TicketManager {
                         
                         // Update the message
                         welcomeMessage.editMessageEmbeds(updatedEmbed.build()).queue(
-                            success -> logger.debug("Velkomstbesked opdateret med ny prioritet for ticket: {}", ticket.getTicketId()),
-                            error -> logger.warn("Kunne ikke opdatere velkomstbesked for ticket {}: {}", ticket.getTicketId(), error.getMessage())
+                            success -> logger.info("Successfully updated welcome message priority for ticket: {}", ticket.getTicketId()),
+                            error -> logger.error("Failed to update welcome message for ticket {}: {}", ticket.getTicketId(), error.getMessage())
                         );
+                    } else {
+                        logger.warn("Welcome message has no embeds for ticket {}", ticket.getTicketId());
                     }
+                } else {
+                    logger.warn("No messages found in thread for ticket {}", ticket.getTicketId());
                 }
-            }, error -> logger.warn("Kunne ikke hente beskeder for ticket {}: {}", ticket.getTicketId(), error.getMessage()));
+            }, error -> logger.error("Failed to retrieve messages for ticket {}: {}", ticket.getTicketId(), error.getMessage()));
         } catch (Exception e) {
-            logger.warn("Fejl ved opdatering af velkomstbesked for ticket {}: {}", ticket.getTicketId(), e.getMessage());
+            logger.error("Error updating welcome message for ticket {}: {}", ticket.getTicketId(), e.getMessage(), e);
         }
     }
 
