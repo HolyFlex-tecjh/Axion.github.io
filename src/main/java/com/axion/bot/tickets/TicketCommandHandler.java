@@ -263,6 +263,9 @@ public class TicketCommandHandler {
 
         Ticket ticket = ticketOpt.get();
         
+        // Defer reply to avoid interaction timeout
+        event.deferReply().queue();
+        
         // Tildel ticket
         if (ticketManager.assignTicket(ticket.getTicketId(), staff)) {
             EmbedBuilder embed = new EmbedBuilder()
@@ -271,9 +274,21 @@ public class TicketCommandHandler {
                 .setColor(SUCCESS_COLOR)
                 .setTimestamp(Instant.now());
             
-            event.replyEmbeds(embed.build()).queue();
+            event.getHook().editOriginalEmbeds(embed.build()).queue(
+                success -> logger.debug("Ticket assignment confirmation sent successfully"),
+                error -> logger.warn("Failed to send ticket assignment confirmation: {}", error.getMessage())
+            );
         } else {
-            sendErrorMessage(event, translate("ticket.assign.error.failed", userId));
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                .setTitle(ERROR_EMOJI + " " + translate("error.title", userId))
+                .setDescription(translate("ticket.assign.error.failed", userId))
+                .setColor(ERROR_COLOR)
+                .setTimestamp(Instant.now());
+            
+            event.getHook().editOriginalEmbeds(errorEmbed.build()).queue(
+                success -> logger.debug("Ticket assignment error sent successfully"),
+                error -> logger.warn("Failed to send ticket assignment error: {}", error.getMessage())
+            );
         }
     }
 
@@ -315,6 +330,9 @@ public class TicketCommandHandler {
 
         Ticket ticket = ticketOpt.get();
         
+        // Defer reply to avoid interaction timeout
+        event.deferReply().queue();
+        
         // Ændre prioritet
         if (ticketManager.setTicketPriority(ticket.getTicketId(), priority, user)) {
             EmbedBuilder embed = new EmbedBuilder()
@@ -323,9 +341,21 @@ public class TicketCommandHandler {
                 .setColor(SUCCESS_COLOR)
                 .setTimestamp(Instant.now());
             
-            event.replyEmbeds(embed.build()).queue();
+            event.getHook().editOriginalEmbeds(embed.build()).queue(
+                success -> logger.debug("Priority change confirmation sent successfully"),
+                error -> logger.warn("Failed to send priority change confirmation: {}", error.getMessage())
+            );
         } else {
-            sendErrorMessage(event, translate("ticket.priority.error.failed", userId));
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                .setTitle(ERROR_EMOJI + " " + translate("error.title", userId))
+                .setDescription(translate("ticket.priority.error.failed", userId))
+                .setColor(ERROR_COLOR)
+                .setTimestamp(Instant.now());
+            
+            event.getHook().editOriginalEmbeds(errorEmbed.build()).queue(
+                success -> logger.debug("Priority change error sent successfully"),
+                error -> logger.warn("Failed to send priority change error: {}", error.getMessage())
+            );
         }
     }
 
