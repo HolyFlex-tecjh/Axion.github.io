@@ -4,11 +4,11 @@ package com.axion.bot.moderation;
  * Enum representing different levels of spam likelihood
  */
 public enum SpamLikelihood {
-    VERY_LOW(0, "Very Low", "🟢"),
-    LOW(1, "Low", "🟡"),
-    MEDIUM(2, "Medium", "🟠"),
-    HIGH(3, "High", "🔴"),
-    VERY_HIGH(4, "Very High", "⚫");
+    VERY_LOW(0, "Very Low", "\uD83D\uDFE2"),
+    LOW(1, "Low", "\uD83D\uDFE1"),
+    MEDIUM(2, "Medium", "\uD83D\uDFE0"),
+    HIGH(3, "High", "\uD83D\uDD34"),
+    VERY_HIGH(4, "Very High", "\u26AB");
     
     private final int level;
     private final String description;

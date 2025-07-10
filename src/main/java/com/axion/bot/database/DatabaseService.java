@@ -23,6 +23,13 @@ public class DatabaseService {
         this.databaseManager = databaseManager;
     }
 
+    /**
+     * Henter database forbindelse
+     */
+    public Connection getConnection() {
+        return databaseManager.getConnection();
+    }
+
     // ==================== WARNING OPERATIONS ====================
 
     /**

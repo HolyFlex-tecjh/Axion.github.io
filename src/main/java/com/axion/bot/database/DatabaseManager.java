@@ -115,12 +115,75 @@ public class DatabaseManager {
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )""";
 
+        String createTicketsTable = """
+            CREATE TABLE IF NOT EXISTS tickets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticket_id TEXT UNIQUE NOT NULL,
+                user_id TEXT NOT NULL,
+                guild_id TEXT NOT NULL,
+                thread_id TEXT UNIQUE NOT NULL,
+                category TEXT NOT NULL DEFAULT 'general',
+                priority TEXT NOT NULL DEFAULT 'medium',
+                status TEXT NOT NULL DEFAULT 'open',
+                subject TEXT NOT NULL,
+                description TEXT,
+                assigned_staff_id TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                closed_at DATETIME,
+                closed_by TEXT,
+                close_reason TEXT
+            )""";
+
+        String createTicketMessagesTable = """
+            CREATE TABLE IF NOT EXISTS ticket_messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ticket_id TEXT NOT NULL,
+                user_id TEXT NOT NULL,
+                message_id TEXT NOT NULL,
+                content TEXT NOT NULL,
+                is_staff_message BOOLEAN DEFAULT false,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (ticket_id) REFERENCES tickets(ticket_id)
+            )""";
+
+        String createTicketCategoriesTable = """
+            CREATE TABLE IF NOT EXISTS ticket_categories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                guild_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                emoji TEXT,
+                staff_role_id TEXT,
+                auto_assign BOOLEAN DEFAULT false,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )""";
+
+        String createTicketConfigTable = """
+            CREATE TABLE IF NOT EXISTS ticket_config (
+                guild_id TEXT PRIMARY KEY,
+                enabled BOOLEAN DEFAULT true,
+                support_category_id TEXT,
+                staff_role_id TEXT,
+                admin_role_id TEXT,
+                transcript_channel_id TEXT,
+                max_tickets_per_user INTEGER DEFAULT 3,
+                auto_close_inactive_hours INTEGER DEFAULT 72,
+                welcome_message TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )""";
+
         try (PreparedStatement stmt1 = connection.prepareStatement(createWarningsTable);
              PreparedStatement stmt2 = connection.prepareStatement(createConfigTable);
              PreparedStatement stmt3 = connection.prepareStatement(createModerationLogsTable);
              PreparedStatement stmt4 = connection.prepareStatement(createUserViolationsTable);
              PreparedStatement stmt5 = connection.prepareStatement(createTempBansTable);
-             PreparedStatement stmt6 = connection.prepareStatement(createUserLanguagesTable)) {
+             PreparedStatement stmt6 = connection.prepareStatement(createUserLanguagesTable);
+             PreparedStatement stmt7 = connection.prepareStatement(createTicketsTable);
+             PreparedStatement stmt8 = connection.prepareStatement(createTicketMessagesTable);
+             PreparedStatement stmt9 = connection.prepareStatement(createTicketCategoriesTable);
+             PreparedStatement stmt10 = connection.prepareStatement(createTicketConfigTable)) {
             
             stmt1.execute();
             stmt2.execute();
@@ -128,6 +191,10 @@ public class DatabaseManager {
             stmt4.execute();
             stmt5.execute();
             stmt6.execute();
+            stmt7.execute();
+            stmt8.execute();
+            stmt9.execute();
+            stmt10.execute();
             logger.info("Database tabeller initialiseret succesfuldt");
             
         } catch (SQLException e) {

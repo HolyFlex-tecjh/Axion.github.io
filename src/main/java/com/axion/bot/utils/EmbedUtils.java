@@ -20,22 +20,22 @@ public class EmbedUtils {
     public static final Color MODERATION_COLOR = new Color(139, 69, 19); // Brun
     
     // Emojis til forskellige situationer
-    public static final String SUCCESS_EMOJI = "✅";
-    public static final String ERROR_EMOJI = "❌";
-    public static final String WARNING_EMOJI = "⚠️";
-    public static final String INFO_EMOJI = "ℹ️";
-    public static final String PING_EMOJI = "🏓";
-    public static final String HELLO_EMOJI = "👋";
-    public static final String TIME_EMOJI = "⏰";
-    public static final String HELP_EMOJI = "📚";
-    public static final String SHIELD_EMOJI = "🛡️";
-    public static final String HAMMER_EMOJI = "🔨";
-    public static final String KICK_EMOJI = "👢";
-    public static final String TIMEOUT_EMOJI = "⏳";
-    public static final String WARN_EMOJI = "⚠️";
-    public static final String TRASH_EMOJI = "🗑️";
-    public static final String STATS_EMOJI = "📊";
-    public static final String ROBOT_EMOJI = "🤖";
+    public static final String SUCCESS_EMOJI = "\u2705";
+    public static final String ERROR_EMOJI = "\u274C";
+    public static final String WARNING_EMOJI = "\u26A0\uFE0F";
+    public static final String INFO_EMOJI = "\u2139\uFE0F";
+    public static final String PING_EMOJI = "\uD83C\uDFD3";
+    public static final String HELLO_EMOJI = "\uD83D\uDC4B";
+    public static final String TIME_EMOJI = "\u23F0";
+    public static final String HELP_EMOJI = "\uD83D\uDCDA";
+    public static final String SHIELD_EMOJI = "\uD83D\uDEE1\uFE0F";
+    public static final String HAMMER_EMOJI = "\uD83D\uDD28";
+    public static final String KICK_EMOJI = "\uD83D\uDC62";
+    public static final String TIMEOUT_EMOJI = "\u23F3";
+    public static final String WARN_EMOJI = "\u26A0\uFE0F";
+    public static final String TRASH_EMOJI = "\uD83D\uDDD1\uFE0F";
+    public static final String STATS_EMOJI = "\uD83D\uDCCA";
+    public static final String ROBOT_EMOJI = "\uD83E\uDD16";
 
     /**
      * Opretter en success embed

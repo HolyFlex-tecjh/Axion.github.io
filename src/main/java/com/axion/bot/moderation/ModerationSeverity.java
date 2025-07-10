@@ -7,27 +7,27 @@ public enum ModerationSeverity {
     /**
      * Meget lav alvorlighed - kun logging
      */
-    VERY_LOW(1, "Meget Lav", "🟢"),
+    VERY_LOW(1, "Meget Lav", "\uD83D\uDFE2"),
     
     /**
      * Lav alvorlighed - advarsel
      */
-    LOW(2, "Lav", "🟡"),
+    LOW(2, "Lav", "\uD83D\uDFE1"),
     
     /**
      * Mellem alvorlighed - timeout
      */
-    MEDIUM(3, "Mellem", "🟠"),
+    MEDIUM(3, "Mellem", "\uD83D\uDFE0"),
     
     /**
      * Høj alvorlighed - kick
      */
-    HIGH(4, "Høj", "🔴"),
+    HIGH(4, "Høj", "\uD83D\uDD34"),
     
     /**
      * Meget høj alvorlighed - ban
      */
-    VERY_HIGH(5, "Meget Høj", "⚫");
+    VERY_HIGH(5, "Meget Høj", "\u26AB");
     
     private final int level;
     private final String description;

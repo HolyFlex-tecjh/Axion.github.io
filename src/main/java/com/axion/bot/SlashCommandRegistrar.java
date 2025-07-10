@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -312,7 +313,64 @@ public class SlashCommandRegistrar {
             // Yderligere moderation kommandoer (kun for udviklere)
             Commands.slash("devinfo", "Vis udvikler information (kun for udviklere)"),
             
-            Commands.slash("devstats", "Vis detaljerede bot statistikker (kun for udviklere)")
+            Commands.slash("devstats", "Vis detaljerede bot statistikker (kun for udviklere)"),
+            
+            // Ticket System kommandoer
+            Commands.slash("ticket", "Ticket system kommandoer")
+                .addSubcommands(
+                    new SubcommandData("create", "Opret en ny ticket")
+                        .addOptions(
+                            new OptionData(OptionType.STRING, "category", "Ticket kategori", false)
+                                .addChoice("General Support", "general")
+                                .addChoice("Technical Issue", "technical")
+                                .addChoice("Bug Report", "bug")
+                                .addChoice("Feature Request", "feature")
+                                .addChoice("Account Issue", "account")
+                                .addChoice("Other", "other"),
+                            new OptionData(OptionType.STRING, "subject", "Ticket emne", false),
+                            new OptionData(OptionType.STRING, "description", "Beskrivelse af problemet", false)
+                        ),
+                    new SubcommandData("close", "Luk den aktuelle ticket")
+                        .addOptions(
+                            new OptionData(OptionType.STRING, "reason", "Årsag til lukning", false)
+                        ),
+                    new SubcommandData("assign", "Tildel ticket til en staff medlem")
+                        .addOptions(
+                            new OptionData(OptionType.USER, "staff", "Staff medlem at tildele til", false)
+                        ),
+                    new SubcommandData("priority", "Ændre ticket prioritet")
+                        .addOptions(
+                            new OptionData(OptionType.STRING, "priority", "Ny prioritet", true)
+                                .addChoice("🟢 Lav", "low")
+                                .addChoice("🟡 Medium", "medium")
+                                .addChoice("🟠 Høj", "high")
+                                .addChoice("🔴 Akut", "urgent")
+                        ),
+                    new SubcommandData("list", "Vis alle tickets")
+                        .addOptions(
+                            new OptionData(OptionType.USER, "user", "Vis tickets for specifik bruger", false),
+                            new OptionData(OptionType.STRING, "status", "Filter efter status", false)
+                                .addChoice("Kun åbne", "open")
+                                .addChoice("Alle", "all")
+                        ),
+                    new SubcommandData("info", "Vis information om den aktuelle ticket")
+                ),
+            
+            Commands.slash("ticketconfig", "Konfigurer ticket systemet (kun administratorer)")
+                .addSubcommands(
+                    new SubcommandData("setup", "Opsæt ticket systemet")
+                        .addOptions(
+                            new OptionData(OptionType.CHANNEL, "category", "Kategori til ticket threads", false)
+                                .setChannelTypes(ChannelType.CATEGORY),
+                            new OptionData(OptionType.ROLE, "staff_role", "Staff rolle for ticket support", false),
+                            new OptionData(OptionType.INTEGER, "max_tickets", "Maksimum tickets per bruger (1-10)", false)
+                                .setMinValue(1)
+                                .setMaxValue(10)
+                        ),
+                    new SubcommandData("view", "Vis nuværende konfiguration"),
+                    new SubcommandData("enable", "Aktiver ticket systemet"),
+                    new SubcommandData("disable", "Deaktiver ticket systemet")
+                )
         ).queue(
             success -> logger.info("Slash kommandoer registreret succesfuldt!"),
             error -> logger.error("Fejl ved registrering af slash kommandoer: {}", error.getMessage())

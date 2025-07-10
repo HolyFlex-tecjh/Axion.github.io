@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -42,24 +43,26 @@ public class SlashCommandHandler extends ListenerAdapter {
     private static final Color MODERATION_COLOR = new Color(139, 69, 19); // Brun
     
     // Emojis til forskellige situationer
-    private static final String SUCCESS_EMOJI = "✅";
-    private static final String ERROR_EMOJI = "❌";
-    private static final String WARNING_EMOJI = "⚠️";
-    private static final String INFO_EMOJI = "ℹ️";
-    private static final String TIME_EMOJI = "⏰";
-    private static final String HAMMER_EMOJI = "🔨";
-    private static final String KICK_EMOJI = "👢";
-    private static final String TIMEOUT_EMOJI = "⏳";
-    private static final String WARN_EMOJI = "⚠️";
-    private static final String TRASH_EMOJI = "🗑️";
-    private static final String STATS_EMOJI = "📊";
-    private static final String ROBOT_EMOJI = "🤖";
+    private static final String SUCCESS_EMOJI = "\u2705";
+    private static final String ERROR_EMOJI = "\u274C";
+    private static final String WARNING_EMOJI = "\u26A0\uFE0F";
+    private static final String INFO_EMOJI = "\u2139\uFE0F";
+    private static final String LOCK_EMOJI = "\uD83D\uDD12";
+    private static final String HAMMER_EMOJI = "\uD83D\uDD28";
+    private static final String KICK_EMOJI = "\uD83D\uDC62";
+    private static final String MUTE_EMOJI = "\uD83D\uDD07";
+    private static final String WARN_EMOJI = "\u26A0\uFE0F";
+    private static final String TRASH_EMOJI = "\uD83D\uDDD1\uFE0F";
+    private static final String STATS_EMOJI = "\uD83D\uDCCA";
+    private static final String ROBOT_EMOJI = "\uD83E\uDD16";
     
     // Moderation system
     private final ModerationManager moderationManager;
     private final ModerationLogger moderationLogger;
     private final TranslationManager translationManager;
     private final UserLanguageManager userLanguageManager;
+    private final com.axion.bot.tickets.TicketManager ticketManager;
+    private final com.axion.bot.tickets.TicketCommandHandler ticketCommandHandler;
     
     public SlashCommandHandler(DatabaseService databaseService) {
         // Initialiser moderation system med standard konfiguration
@@ -68,6 +71,11 @@ public class SlashCommandHandler extends ListenerAdapter {
         this.moderationLogger = new ModerationLogger();
         this.translationManager = TranslationManager.getInstance();
         this.userLanguageManager = UserLanguageManager.getInstance();
+        
+        // Initialiser ticket system
+        com.axion.bot.tickets.TicketService ticketService = new com.axion.bot.tickets.TicketService(databaseService);
+        this.ticketManager = new com.axion.bot.tickets.TicketManager(ticketService);
+        this.ticketCommandHandler = new com.axion.bot.tickets.TicketCommandHandler(ticketManager);
     }
     
     @Override
@@ -240,6 +248,12 @@ public class SlashCommandHandler extends ListenerAdapter {
                 break;
             case "logconfig":
                 handleLogConfigCommand(event);
+                break;
+            case "ticket":
+                ticketCommandHandler.handleSlashCommand(event);
+                break;
+            case "ticketconfig":
+                ticketCommandHandler.handleSlashCommand(event);
                 break;
             default:
                 String userLang = userLanguageManager.getUserLanguage(event.getUser().getId());
@@ -559,7 +573,7 @@ public class SlashCommandHandler extends ListenerAdapter {
         });
         
         EmbedBuilder lockdownEmbed = new EmbedBuilder()
-                .setTitle("🔒 Server Lockdown Aktiveret")
+                .setTitle("\uD83D\uDD12 Server Lockdown Aktiveret")
                 .setColor(ERROR_COLOR)
                 .addField("Årsag", reason, false)
                 .addField("Moderator", event.getUser().getAsMention(), true)
@@ -1502,7 +1516,7 @@ public class SlashCommandHandler extends ListenerAdapter {
                 .addField("🔨 Bans Udført", "0", true)
                 .addField("🗑️ Beskeder Slettet", "0", true)
                 .addField("🤖 Auto-Handlinger", "Aktiveret", true)
-                .addField("📊 Total Handlinger", "0", true)
+                .addField("\uD83D\uDCCA Total Handlinger", "0", true)
                 .addField("📈 Denne Uge", "0 handlinger", true)
                 .setTimestamp(Instant.now())
                 .setFooter("Statistikker nulstilles hver måned");
@@ -1613,6 +1627,8 @@ public class SlashCommandHandler extends ListenerAdapter {
                 event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                 logger.info("Help embed sent for category: {}", selectedValue);
             }
+        } else if (componentId.startsWith("ticket_")) {
+            ticketCommandHandler.handleStringSelectInteraction(event);
         } else {
             // Handle other component interactions if needed in the future
             logger.warn("Unknown component interaction: {}", componentId);
@@ -1848,7 +1864,7 @@ public class SlashCommandHandler extends ListenerAdapter {
                 .queue(
                     success -> {
                         EmbedBuilder lockEmbed = new EmbedBuilder()
-                                .setTitle("🔒 Kanal Låst")
+                                .setTitle("\uD83D\uDD12 Kanal Låst")
                                 .setColor(WARNING_COLOR)
                                 .addField("Kanal", event.getChannel().getAsMention(), true)
                                 .addField("Årsag", reason, false)
@@ -2501,7 +2517,7 @@ public class SlashCommandHandler extends ListenerAdapter {
         long warnings = logs.stream().filter(log -> log.getAction() == ModerationAction.WARN_USER).count();
         
         EmbedBuilder statsEmbed = new EmbedBuilder()
-                .setTitle("📊 Log Statistikker")
+                .setTitle("\uD83D\uDCCA Log Statistikker")
                 .setColor(INFO_COLOR)
                 .setDescription("Moderation statistikker for " + getPeriodDisplayName(period))
                 .addField("Total Handlinger", String.valueOf(stats.getOrDefault("total", 0)), true)
@@ -2637,4 +2653,15 @@ public class SlashCommandHandler extends ListenerAdapter {
         return member.hasPermission(Permission.ADMINISTRATOR) || 
                member.hasPermission(Permission.MANAGE_SERVER);
     }
+
+    /**
+     * Handle button interactions for ticket system
+     */
+    @Override
+    public void onButtonInteraction(ButtonInteractionEvent event) {
+        if (event.getComponentId().startsWith("ticket_")) {
+            ticketCommandHandler.handleButtonInteraction(event);
+        }
+    }
+
 }

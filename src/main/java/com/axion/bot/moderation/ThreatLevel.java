@@ -4,11 +4,11 @@ package com.axion.bot.moderation;
  * Enum representing different threat levels
  */
 public enum ThreatLevel {
-    NONE(0, "No Threat", "🟢"),
-    LOW(1, "Low Threat", "🟡"),
-    MEDIUM(2, "Medium Threat", "🟠"),
-    HIGH(3, "High Threat", "🔴"),
-    VERY_HIGH(4, "Very High Threat", "⚫");
+    NONE(0, "No Threat", "\uD83D\uDFE2"),
+    LOW(1, "Low Threat", "\uD83D\uDFE1"),
+    MEDIUM(2, "Medium Threat", "\uD83D\uDFE0"),
+    HIGH(3, "High Threat", "\uD83D\uDD34"),
+    VERY_HIGH(4, "Very High Threat", "\u26AB");
     
     private final int level;
     private final String description;
