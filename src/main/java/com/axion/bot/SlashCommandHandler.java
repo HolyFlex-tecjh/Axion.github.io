@@ -55,6 +55,8 @@ public class SlashCommandHandler extends ListenerAdapter {
     private static final String TRASH_EMOJI = "\uD83D\uDDD1\uFE0F";
     private static final String STATS_EMOJI = "\uD83D\uDCCA";
     private static final String ROBOT_EMOJI = "\uD83E\uDD16";
+    private static final String TIME_EMOJI = "\uD83D\uDD70\uFE0F";
+    private static final String TIMEOUT_EMOJI = "\u23F0";
     
     // Moderation system
     private final ModerationManager moderationManager;
@@ -1676,8 +1678,8 @@ public class SlashCommandHandler extends ListenerAdapter {
                             .queue(
                                 success -> {
                                     EmbedBuilder muteEmbed = new EmbedBuilder()
-                                            .setTitle("🔇 Bruger Mutet")
-                                            .setColor(MODERATION_COLOR)
+                                                    .setTitle(MUTE_EMOJI + " Bruger Mutet")
+                                                    .setColor(MODERATION_COLOR)
                                             .setThumbnail(targetUser.getAvatarUrl())
                                             .addField("Bruger", targetUser.getAsMention() + " (" + targetUser.getName() + ")", false)
                                             .addField("Årsag", reason, false)
@@ -1864,7 +1866,7 @@ public class SlashCommandHandler extends ListenerAdapter {
                 .queue(
                     success -> {
                         EmbedBuilder lockEmbed = new EmbedBuilder()
-                                .setTitle("\uD83D\uDD12 Kanal Låst")
+                                .setTitle(LOCK_EMOJI + " Kanal Låst")
                                 .setColor(WARNING_COLOR)
                                 .addField("Kanal", event.getChannel().getAsMention(), true)
                                 .addField("Årsag", reason, false)

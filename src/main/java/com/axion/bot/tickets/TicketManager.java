@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
-import net.dv8tion.jda.api.entities.channel.forums.ForumTag;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import org.slf4j.Logger;
@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.Color;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -33,9 +32,6 @@ public class TicketManager {
     
     // Emojis
     private static final String TICKET_EMOJI = "\uD83C\uDFAB";
-    private static final String SUCCESS_EMOJI = "\u2705";
-    private static final String ERROR_EMOJI = "\u274C";
-    private static final String INFO_EMOJI = "\u2139\uFE0F";
     private static final String LOCK_EMOJI = "\uD83D\uDD12";
     private static final String STAFF_EMOJI = "\uD83D\uDC68\u200D\uD83D\uDCBC";
     

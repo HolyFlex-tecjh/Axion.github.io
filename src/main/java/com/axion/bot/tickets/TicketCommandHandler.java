@@ -9,7 +9,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import org.slf4j.Logger;
@@ -38,7 +37,6 @@ public class TicketCommandHandler {
     private static final String SUCCESS_EMOJI = "\u2705";
     private static final String ERROR_EMOJI = "\u274C";
     private static final String TICKET_EMOJI = "\uD83C\uDFAB";
-    private static final String INFO_EMOJI = "\u2139\uFE0F";
     private static final String SETTINGS_EMOJI = "\u2699\uFE0F";
     
     public TicketCommandHandler(TicketManager ticketManager) {
