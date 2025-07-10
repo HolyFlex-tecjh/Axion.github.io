@@ -747,10 +747,19 @@ public class TicketCommandHandler {
             String priorityValue = event.getValues().get(0);
             TicketPriority priority = TicketPriority.fromString(priorityValue);
             
+            // Defer reply to avoid interaction timeout
+            event.deferReply(true).queue();
+            
             if (ticketManager.setTicketPriority(ticketId, priority, user)) {
-                event.reply(translate("ticket.priority.changed_success", userId, priority)).setEphemeral(true).queue();
+                event.getHook().editOriginal(translate("ticket.priority.changed_success", userId, priority)).queue(
+                    success -> logger.debug("Priority selection confirmation sent successfully"),
+                    error -> logger.warn("Failed to send priority selection confirmation: {}", error.getMessage())
+                );
             } else {
-                event.reply(translate("ticket.priority.error.failed", userId)).setEphemeral(true).queue();
+                event.getHook().editOriginal(translate("ticket.priority.error.failed", userId)).queue(
+                    success -> logger.debug("Priority selection error sent successfully"),
+                    error -> logger.warn("Failed to send priority selection error: {}", error.getMessage())
+                );
             }
         }
     }
