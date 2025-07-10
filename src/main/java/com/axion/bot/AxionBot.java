@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Hovedklassen for Axion Bot
@@ -25,6 +28,7 @@ public class AxionBot {
     private String token;
     private DatabaseManager databaseManager;
     private DatabaseService databaseService;
+    private ScheduledExecutorService activityUpdater;
 
     public AxionBot() {
         loadConfiguration();
@@ -64,6 +68,13 @@ public class AxionBot {
             
             databaseManager = new DatabaseManager(databaseUrl);
             databaseManager.connect();
+            
+            // Kontroller at database forbindelse er etableret
+            if (!databaseManager.isConnected()) {
+                logger.error("Database forbindelse kunne ikke etableres!");
+                throw new RuntimeException("Database forbindelse fejlede");
+            }
+            
             databaseService = new DatabaseService(databaseManager);
             
             // Initialize UserLanguageManager with DatabaseService
@@ -93,7 +104,7 @@ public class AxionBot {
                             GatewayIntent.GUILD_MEMBERS,
                             GatewayIntent.GUILD_MODERATION
                     )
-                    .setActivity(Activity.playing("Axion Bot v1.0 | /help for kommandoer"))
+                    .setActivity(Activity.playing("Starter op..."))
                     .addEventListeners(
                             new CommandHandler(databaseService),     // Auto-moderation
                             new SlashCommandHandler(databaseService) // Slash commands (/)
@@ -108,10 +119,39 @@ public class AxionBot {
             // Registrer slash kommandoer
             SlashCommandRegistrar.registerGlobalCommands(jda);
             logger.info("Slash kommandoer registreret!");
+            
+            // Start activity updater der opdaterer hver 30 sekunder
+            startActivityUpdater();
 
         } catch (Exception e) {
             logger.error("Fejl ved start af bot", e);
             System.exit(1);
+        }
+    }
+    
+    /**
+     * Starter automatisk opdatering af bot aktivitet
+     */
+    private void startActivityUpdater() {
+        activityUpdater = Executors.newSingleThreadScheduledExecutor();
+        
+        // Opdater med det samme
+        updateBotActivity();
+        
+        // Planlæg opdateringer hver 30 sekunder
+        activityUpdater.scheduleAtFixedRate(this::updateBotActivity, 30, 30, TimeUnit.SECONDS);
+        logger.info("Activity updater startet - opdaterer hver 30 sekunder");
+    }
+    
+    /**
+     * Opdaterer bot aktivitet med aktuel server count
+     */
+    private void updateBotActivity() {
+        if (jda != null) {
+            int serverCount = jda.getGuilds().size();
+            String activity = String.format("på %d servere", serverCount);
+            jda.getPresence().setActivity(Activity.playing(activity));
+            logger.debug("Bot aktivitet opdateret: {}", activity);
         }
     }
 
@@ -119,10 +159,24 @@ public class AxionBot {
      * Stopper botten
      */
     public void shutdown() {
+        if (activityUpdater != null && !activityUpdater.isShutdown()) {
+            activityUpdater.shutdown();
+            try {
+                if (!activityUpdater.awaitTermination(5, TimeUnit.SECONDS)) {
+                    activityUpdater.shutdownNow();
+                }
+                logger.info("Activity updater stoppet");
+            } catch (InterruptedException e) {
+                activityUpdater.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+        
         if (jda != null) {
             jda.shutdown();
             logger.info("Axion Bot er lukket ned");
         }
+        
         if (databaseManager != null) {
             databaseManager.disconnect();
             logger.info("Database forbindelse lukket");

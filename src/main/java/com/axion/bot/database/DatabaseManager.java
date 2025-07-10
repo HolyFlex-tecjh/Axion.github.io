@@ -24,11 +24,24 @@ public class DatabaseManager {
      */
     public void connect() {
         try {
+            // Luk eksisterende forbindelse hvis den findes
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+            
             connection = DriverManager.getConnection(databaseUrl);
-            logger.info("Database forbindelse etableret");
+            logger.info("Database forbindelse etableret til: " + databaseUrl);
             initializeTables();
+            
+            // Verificer forbindelse
+            if (connection == null || connection.isClosed()) {
+                throw new SQLException("Database forbindelse blev ikke etableret korrekt");
+            }
+            
         } catch (SQLException e) {
             logger.severe("Fejl ved database forbindelse: " + e.getMessage());
+            connection = null; // Sæt til null for at indikere fejl
+            throw new RuntimeException("Database forbindelse fejlede", e);
         }
     }
 
@@ -211,9 +224,25 @@ public class DatabaseManager {
                 logger.warning("Database forbindelse er null eller lukket. Forsøger at genoprette forbindelse.");
                 connect();
             }
+            
+            // Dobbelttjek efter reconnect forsøg
+            if (connection == null) {
+                logger.severe("Database forbindelse kunne ikke genoprettes!");
+                return null;
+            }
+            
         } catch (SQLException e) {
             logger.severe("Fejl ved tjek af database forbindelse: " + e.getMessage());
-            connect();
+            try {
+                connect();
+                if (connection == null) {
+                    logger.severe("Database reconnect fejlede!");
+                    return null;
+                }
+            } catch (Exception reconnectError) {
+                logger.severe("Kritisk fejl ved database reconnect: " + reconnectError.getMessage());
+                return null;
+            }
         }
         return connection;
     }
