@@ -446,6 +446,11 @@ public class ThreatIntelligence {
         addMaliciousDomain("malicious-example.com", ThreatType.PHISHING, 90, "Threat Intelligence");
         addMaliciousDomain("scam-site.net", ThreatType.SCAM, 85, "Community Report");
         addMaliciousDomain("fake-discord.org", ThreatType.PHISHING, 95, "Security Research");
+        
+        // Initialize suspicious patterns
+        suspiciousPatterns.put("rapid-posting", new SuspiciousPattern("rapid-posting", "Rapid message posting detected", 15));
+        suspiciousPatterns.put("link-spam", new SuspiciousPattern("link-spam", "Excessive link posting", 20));
+        suspiciousPatterns.put("caps-abuse", new SuspiciousPattern("caps-abuse", "Excessive use of capital letters", 10));
     }
     
     // Data classes
