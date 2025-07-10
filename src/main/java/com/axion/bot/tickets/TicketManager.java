@@ -33,7 +33,6 @@ public class TicketManager {
     private static final Color SUCCESS_COLOR = new Color(34, 197, 94);
     private static final Color ERROR_COLOR = new Color(239, 68, 68);
     private static final Color INFO_COLOR = new Color(59, 130, 246);
-    private static final Color WARNING_COLOR = new Color(251, 191, 36);
     
     // Emojis
     private static final String TICKET_EMOJI = "\uD83C\uDFAB";
@@ -327,7 +326,6 @@ public class TicketManager {
             }
 
             Ticket ticket = ticketOpt.get();
-            TicketPriority oldPriority = ticket.getPriority();
             ticket.setPriority(priority);
             
             boolean updated = ticketService.updateTicket(ticket);
