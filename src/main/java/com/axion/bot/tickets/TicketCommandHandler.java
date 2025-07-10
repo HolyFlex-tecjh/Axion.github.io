@@ -198,6 +198,9 @@ public class TicketCommandHandler {
             return;
         }
 
+        // Defer reply before closing ticket to avoid channel deletion issues
+        event.deferReply().queue();
+        
         // Luk ticket
         if (ticketManager.closeTicket(ticket.getTicketId(), user, reason)) {
             EmbedBuilder embed = new EmbedBuilder()
@@ -208,9 +211,23 @@ public class TicketCommandHandler {
                 .setColor(SUCCESS_COLOR)
                 .setTimestamp(Instant.now());
             
-            event.replyEmbeds(embed.build()).queue();
+            // Use followup since we deferred the reply
+            event.getHook().editOriginalEmbeds(embed.build()).queue(
+                success -> logger.debug("Ticket close confirmation sent successfully"),
+                error -> logger.warn("Failed to send ticket close confirmation: {}", error.getMessage())
+            );
         } else {
-            sendErrorMessage(event, translate("ticket.close.error.failed", userId));
+            // Send error message using followup
+            EmbedBuilder errorEmbed = new EmbedBuilder()
+                .setTitle(ERROR_EMOJI + " " + translate("error.title", userId))
+                .setDescription(translate("ticket.close.error.failed", userId))
+                .setColor(ERROR_COLOR)
+                .setTimestamp(Instant.now());
+            
+            event.getHook().editOriginalEmbeds(errorEmbed.build()).queue(
+                success -> logger.debug("Ticket close error sent successfully"),
+                error -> logger.warn("Failed to send ticket close error: {}", error.getMessage())
+            );
         }
     }
 
