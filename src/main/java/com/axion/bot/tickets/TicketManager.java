@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.Color;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Håndterer ticket operationer og thread management
