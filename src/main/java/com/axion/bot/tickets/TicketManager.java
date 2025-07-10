@@ -367,7 +367,7 @@ public class TicketManager {
             .setDescription(config.getWelcomeMessage())
             .addField(translate("ticket.welcome.ticket_id", userId), "`" + ticket.getTicketId() + "`", true)
             .addField(translate("ticket.welcome.category", userId), ticket.getCategory(), true)
-            .addField(translate("ticket.welcome.priority", userId), ticket.getPriorityEmoji() + ticket.getPriority().toString(), true)
+            .addField(translate("ticket.welcome.priority", userId), ticket.getPriority().toString(), true)
             .addField(translate("ticket.welcome.subject", userId), ticket.getSubject(), false)
             .setColor(SUCCESS_COLOR)
             .setThumbnail(user.getAvatarUrl())
@@ -428,7 +428,7 @@ public class TicketManager {
                         EmbedBuilder updatedEmbed = new EmbedBuilder(originalEmbed);
                         
                         // Update the priority field in the embed
-                        String priorityText = ticket.getPriorityEmoji() + ticket.getPriority().toString();
+                        String priorityText = ticket.getPriority().toString();
                         
                         // Find and update the priority field
                         List<MessageEmbed.Field> fields = new ArrayList<>();
