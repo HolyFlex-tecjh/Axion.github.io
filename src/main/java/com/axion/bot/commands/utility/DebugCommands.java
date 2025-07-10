@@ -41,21 +41,36 @@ public class DebugCommands {
             }
 
             if (commandList.length() > 1024) {
-                // Split if too long
+                // Split into two parts with proper length checking
                 String[] parts = commandList.toString().split("\n");
                 StringBuilder part1 = new StringBuilder();
                 StringBuilder part2 = new StringBuilder();
                 
                 for (int i = 0; i < parts.length; i++) {
                     if (i < parts.length / 2) {
-                        part1.append(parts[i]).append("\n");
+                        if (part1.length() + parts[i].length() + 1 <= 1020) {
+                            part1.append(parts[i]).append("\n");
+                        }
                     } else {
-                        part2.append(parts[i]).append("\n");
+                        if (part2.length() + parts[i].length() + 1 <= 1020) {
+                            part2.append(parts[i]).append("\n");
+                        }
                     }
                 }
                 
-                embed.addField(tm.translate("debug.list.commands", userLang) + " (1/2)", part1.toString(), false);
-                embed.addField(tm.translate("debug.list.commands", userLang) + " (2/2)", part2.toString(), false);
+                // Ensure parts don't exceed 1024 characters
+                String part1Str = part1.toString();
+                String part2Str = part2.toString();
+                
+                if (part1Str.length() > 1024) {
+                    part1Str = part1Str.substring(0, 1020) + "...";
+                }
+                if (part2Str.length() > 1024) {
+                    part2Str = part2Str.substring(0, 1020) + "...";
+                }
+                
+                embed.addField(tm.translate("debug.list.commands", userLang) + " (1/2)", part1Str, false);
+                embed.addField(tm.translate("debug.list.commands", userLang) + " (2/2)", part2Str, false);
             } else {
                 embed.addField(tm.translate("debug.list.commands", userLang), commandList.toString(), false);
             }
@@ -65,10 +80,16 @@ public class DebugCommands {
             boolean hasSupport = commands.stream().anyMatch(cmd -> cmd.getName().equals("support"));
             boolean hasAbout = commands.stream().anyMatch(cmd -> cmd.getName().equals("about"));
 
-            embed.addField(tm.translate("debug.list.status", userLang), 
-                "🔗 `/invite`: " + (hasInvite ? tm.translate("debug.list.registered", userLang) : tm.translate("debug.list.missing", userLang)) + "\n" +
+            String statusFieldValue = "🔗 `/invite`: " + (hasInvite ? tm.translate("debug.list.registered", userLang) : tm.translate("debug.list.missing", userLang)) + "\n" +
                 "💬 `/support`: " + (hasSupport ? tm.translate("debug.list.registered", userLang) : tm.translate("debug.list.missing", userLang)) + "\n" +
-                "📊 `/about`: " + (hasAbout ? tm.translate("debug.list.registered", userLang) : tm.translate("debug.list.missing", userLang)), false);
+                "📊 `/about`: " + (hasAbout ? tm.translate("debug.list.registered", userLang) : tm.translate("debug.list.missing", userLang));
+            
+            // Ensure status field doesn't exceed 1024 characters
+            if (statusFieldValue.length() > 1024) {
+                statusFieldValue = statusFieldValue.substring(0, 1020) + "...";
+            }
+            
+            embed.addField(tm.translate("debug.list.status", userLang), statusFieldValue, false);
 
             embed.setFooter(tm.translate("debug.list.footer", userLang));
 
@@ -162,7 +183,12 @@ public class DebugCommands {
                                 statusReport.append("🎯 **Sync ID:** `").append(System.currentTimeMillis()).append("`\n");
                                 statusReport.append("🔄 **Method:** Dedicated refresh with verification");
                                 
-                                statusEmbed.setDescription(statusReport.toString());
+                                // Ensure description doesn't exceed Discord's limit (4096 characters)
+                                String description = statusReport.toString();
+                                if (description.length() > 4000) {
+                                    description = description.substring(0, 3900) + "\n\n... (truncated)";
+                                }
+                                statusEmbed.setDescription(description);
                                 
                                 // Send final status
                                 event.getHook().editOriginalEmbeds(statusEmbed.build())
@@ -180,7 +206,12 @@ public class DebugCommands {
                                 statusReport.append("💡 **Note:** Commands should still be working\n");
                                 statusReport.append("🎯 **Sync ID:** `").append(System.currentTimeMillis()).append("`");
                                 
-                                statusEmbed.setDescription(statusReport.toString());
+                                // Ensure description doesn't exceed Discord's limit (4096 characters)
+                                String description = statusReport.toString();
+                                if (description.length() > 4000) {
+                                    description = description.substring(0, 3900) + "\n\n... (truncated)";
+                                }
+                                statusEmbed.setDescription(description);
                                 
                                 event.getHook().editOriginalEmbeds(statusEmbed.build())
                                     .queueAfter(1, java.util.concurrent.TimeUnit.SECONDS);
@@ -216,7 +247,12 @@ public class DebugCommands {
         errorReport.append("💡 **Alternative:** Try using basic commands to test if sync worked partially\n\n");
         errorReport.append("🔄 **Fallback Option:** Bot will attempt automatic recovery on next restart");
         
-        errorEmbed.setDescription(errorReport.toString());
+        // Ensure description doesn't exceed Discord's limit (4096 characters)
+        String description = errorReport.toString();
+        if (description.length() > 4000) {
+            description = description.substring(0, 3900) + "\n\n... (truncated)";
+        }
+        errorEmbed.setDescription(description);
         
         event.getHook().editOriginalEmbeds(errorEmbed.build()).queue(
             success -> {},

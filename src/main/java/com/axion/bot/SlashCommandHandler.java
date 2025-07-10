@@ -728,6 +728,33 @@ public class SlashCommandHandler extends ListenerAdapter {
         String duration = durationOption.getAsString();
         String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
         
+        // Check hierarchy permissions
+        Member targetMember = event.getGuild().getMember(targetUser);
+        if (targetMember != null) {
+            Member selfMember = event.getGuild().getSelfMember();
+            Member moderator = event.getMember();
+            
+            if (!selfMember.canInteract(targetMember)) {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Jeg kan ikke temp banne denne bruger da de har en højere eller lige rolle som mig.")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                return;
+            }
+            
+            if (moderator != null && !moderator.canInteract(targetMember)) {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Du kan ikke temp banne denne bruger da de har en højere eller lige rolle som dig.")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                return;
+            }
+        }
+        
         // Simuler tempban (integration med scheduling system)
         EmbedBuilder tempbanEmbed = new EmbedBuilder()
                 .setTitle("⏰ Midlertidig Ban")
@@ -775,6 +802,33 @@ public class SlashCommandHandler extends ListenerAdapter {
         User targetUser = userOption.getAsUser();
         String duration = durationOption.getAsString();
         String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        
+        // Check hierarchy permissions
+        Member targetMember = event.getGuild().getMember(targetUser);
+        if (targetMember != null) {
+            Member selfMember = event.getGuild().getSelfMember();
+            Member moderator = event.getMember();
+            
+            if (!selfMember.canInteract(targetMember)) {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Jeg kan ikke temp mute denne bruger da de har en højere eller lige rolle som mig.")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                return;
+            }
+            
+            if (moderator != null && !moderator.canInteract(targetMember)) {
+                EmbedBuilder errorEmbed = new EmbedBuilder()
+                        .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                        .setColor(ERROR_COLOR)
+                        .setDescription("Du kan ikke temp mute denne bruger da de har en højere eller lige rolle som dig.")
+                        .setTimestamp(Instant.now());
+                event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                return;
+            }
+        }
         
         // Simuler tempmute (integration med scheduling system)
         EmbedBuilder tempmuteEmbed = new EmbedBuilder()
@@ -824,6 +878,29 @@ public class SlashCommandHandler extends ListenerAdapter {
         
         event.getGuild().retrieveMemberById(targetUser.getId()).queue(
             member -> {
+                // Check hierarchy permissions before attempting voice kick
+                Member selfMember = event.getGuild().getSelfMember();
+                if (!selfMember.canInteract(member)) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Kan ikke kicke en bruger fra voice med højere eller samme rolle som botten!")
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    return;
+                }
+                
+                Member moderatorMember = event.getMember();
+                if (moderatorMember != null && !moderatorMember.canInteract(member)) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Du kan ikke kicke en bruger fra voice med højere eller samme rolle som dig!")
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    return;
+                }
+                
                 if (member.getVoiceState() == null || !member.getVoiceState().inAudioChannel()) {
                     EmbedBuilder errorEmbed = new EmbedBuilder()
                             .setTitle(ERROR_EMOJI + " Ikke i Voice")
@@ -2089,6 +2166,30 @@ public class SlashCommandHandler extends ListenerAdapter {
         
         event.getGuild().retrieveMemberById(targetUser.getId()).queue(
             targetMember -> {
+                // Check if the bot can modify this member's nickname
+                Member selfMember = event.getGuild().getSelfMember();
+                if (!selfMember.canInteract(targetMember)) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Kan ikke ændre nickname på en bruger med højere eller samme rolle som botten!")
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    return;
+                }
+                
+                // Check if the moderator can interact with the target member
+                Member moderatorMember = event.getMember();
+                if (moderatorMember != null && !moderatorMember.canInteract(targetMember)) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Du kan ikke ændre nickname på en bruger med højere eller samme rolle som dig!")
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    return;
+                }
+                
                 String oldNickname = targetMember.getNickname();
                 targetMember.modifyNickname(newNickname)
                         .reason("Nickname changed by " + event.getUser().getName())
@@ -2164,6 +2265,41 @@ public class SlashCommandHandler extends ListenerAdapter {
         
         event.getGuild().retrieveMemberById(targetUser.getId()).queue(
             targetMember -> {
+                // Check hierarchy permissions
+                Member selfMember = event.getGuild().getSelfMember();
+                Member moderator = event.getMember();
+                
+                if (!selfMember.canInteract(targetMember)) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Jeg kan ikke ændre roller for denne bruger da de har en højere eller lige rolle som mig.")
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    return;
+                }
+                
+                if (moderator != null && !moderator.canInteract(targetMember)) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Hierarki Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Du kan ikke ændre roller for denne bruger da de har en højere eller lige rolle som dig.")
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    return;
+                }
+                
+                // Check if bot can manage the role
+                if (!selfMember.canInteract(role)) {
+                    EmbedBuilder errorEmbed = new EmbedBuilder()
+                            .setTitle(ERROR_EMOJI + " Rolle Hierarki Fejl")
+                            .setColor(ERROR_COLOR)
+                            .setDescription("Jeg kan ikke administrere denne rolle da den er højere end min højeste rolle.")
+                            .setTimestamp(Instant.now());
+                    event.replyEmbeds(errorEmbed.build()).setEphemeral(true).queue();
+                    return;
+                }
+                
                 if ("add".equals(action)) {
                     event.getGuild().addRoleToMember(targetMember, role)
                             .reason("Role added by " + event.getUser().getName())

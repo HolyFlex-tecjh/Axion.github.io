@@ -5,6 +5,7 @@ import com.axion.bot.moderation.ModerationLog;
 import com.axion.bot.utils.CommandUtils;
 import com.axion.bot.utils.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -59,6 +60,25 @@ public class AdvancedModerationCommands {
             event.replyEmbeds(EmbedUtils.createErrorEmbed("Ugyldig Varighed", 
                 "Varighed skal være mellem 1 og 168 timer (1 uge)").build()).setEphemeral(true).queue();
             return;
+        }
+        
+        // Check hierarchy permissions
+        Member targetMember = event.getGuild().getMember(targetUser);
+        if (targetMember != null) {
+            Member selfMember = event.getGuild().getSelfMember();
+            Member moderator = event.getMember();
+            
+            if (!selfMember.canInteract(targetMember)) {
+                event.replyEmbeds(EmbedUtils.createErrorEmbed("Hierarki Fejl", 
+                    "Jeg kan ikke banne denne bruger da de har en højere eller lige rolle som mig.").build()).setEphemeral(true).queue();
+                return;
+            }
+            
+            if (moderator != null && !moderator.canInteract(targetMember)) {
+                event.replyEmbeds(EmbedUtils.createErrorEmbed("Hierarki Fejl", 
+                    "Du kan ikke banne denne bruger da de har en højere eller lige rolle som dig.").build()).setEphemeral(true).queue();
+                return;
+            }
         }
         
         try {

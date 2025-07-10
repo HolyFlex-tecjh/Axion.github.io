@@ -48,6 +48,24 @@ public class ModerationCommands {
         User targetUser = userOption.getAsUser();
         String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
         
+        // Check hierarchy permissions before attempting ban
+        Member targetMember = event.getGuild().getMember(targetUser);
+        if (targetMember != null) {
+            Member selfMember = event.getGuild().getSelfMember();
+            if (!selfMember.canInteract(targetMember)) {
+                event.replyEmbeds(EmbedUtils.createErrorEmbed("Hierarki Fejl", 
+                    "Kan ikke banne en bruger med højere eller samme rolle som botten!").build()).setEphemeral(true).queue();
+                return;
+            }
+            
+            Member moderatorMember = event.getMember();
+            if (moderatorMember != null && !moderatorMember.canInteract(targetMember)) {
+                event.replyEmbeds(EmbedUtils.createErrorEmbed("Hierarki Fejl", 
+                    "Du kan ikke banne en bruger med højere eller samme rolle som dig!").build()).setEphemeral(true).queue();
+                return;
+            }
+        }
+        
         try {
             event.getGuild().ban(UserSnowflake.fromId(targetUser.getId()), 0, TimeUnit.SECONDS)
                     .reason(reason + " (Banned by " + event.getUser().getName() + ")")
@@ -97,6 +115,21 @@ public class ModerationCommands {
         if (targetMember == null) {
             event.replyEmbeds(EmbedUtils.createErrorEmbed("Bruger Ikke Fundet", 
                 "Brugeren er ikke på denne server!").build()).setEphemeral(true).queue();
+            return;
+        }
+        
+        // Check hierarchy permissions before attempting kick
+        Member selfMember = event.getGuild().getSelfMember();
+        if (!selfMember.canInteract(targetMember)) {
+            event.replyEmbeds(EmbedUtils.createErrorEmbed("Hierarki Fejl", 
+                "Kan ikke kicke en bruger med højere eller samme rolle som botten!").build()).setEphemeral(true).queue();
+            return;
+        }
+        
+        Member moderatorMember = event.getMember();
+        if (moderatorMember != null && !moderatorMember.canInteract(targetMember)) {
+            event.replyEmbeds(EmbedUtils.createErrorEmbed("Hierarki Fejl", 
+                "Du kan ikke kicke en bruger med højere eller samme rolle som dig!").build()).setEphemeral(true).queue();
             return;
         }
         
