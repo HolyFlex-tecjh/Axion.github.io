@@ -176,12 +176,24 @@ public class TicketManager {
             if (guild != null) {
                 ThreadChannel thread = guild.getThreadChannelById(ticket.getThreadId());
                 if (thread != null) {
-                    // Send lukkebesked
-                    sendCloseMessage(thread, ticket, closedBy, reason);
-                    
-                    // Arkiver thread efter 10 sekunder
-                    thread.getManager().setArchived(true).queueAfter(10, TimeUnit.SECONDS);
+                    try {
+                        // Send lukkebesked
+                        sendCloseMessage(thread, ticket, closedBy, reason);
+                        
+                        // Arkiver thread efter 10 sekunder
+                        thread.getManager().setArchived(true).queueAfter(10, TimeUnit.SECONDS,
+                            success -> logger.info("Thread arkiveret for ticket: {}", ticketId),
+                            error -> logger.warn("Kunne ikke arkivere thread for ticket {}: {}", ticketId, error.getMessage())
+                        );
+                    } catch (Exception e) {
+                        logger.warn("Kunne ikke sende lukkebesked eller arkivere thread for ticket {}: {}", ticketId, e.getMessage());
+                        // Ticket er stadig lukket i databasen, selvom thread operationer fejlede
+                    }
+                } else {
+                    logger.warn("Thread ikke fundet for ticket: {} - thread kan allerede være slettet", ticketId);
                 }
+            } else {
+                logger.warn("Guild ikke fundet for ticket: {}", ticketId);
             }
 
             logger.info("Ticket lukket: {} af bruger: {}", ticketId, closedBy.getId());
@@ -214,16 +226,27 @@ public class TicketManager {
                 if (guild != null) {
                     ThreadChannel thread = guild.getThreadChannelById(ticket.getThreadId());
                     if (thread != null) {
-                        String userId = staff.getId();
-                        
-                        EmbedBuilder embed = new EmbedBuilder()
-                            .setTitle(STAFF_EMOJI + " " + translate("ticket.assign.title", userId))
-                            .setDescription(translate("ticket.assign.description", userId, staff.getAsMention()))
-                            .setColor(INFO_COLOR)
-                            .setTimestamp(Instant.now());
-                        
-                        thread.sendMessageEmbeds(embed.build()).queue();
+                        try {
+                            String userId = staff.getId();
+                            
+                            EmbedBuilder embed = new EmbedBuilder()
+                                .setTitle(STAFF_EMOJI + " " + translate("ticket.assign.title", userId))
+                                .setDescription(translate("ticket.assign.description", userId, staff.getAsMention()))
+                                .setColor(INFO_COLOR)
+                                .setTimestamp(Instant.now());
+                            
+                            thread.sendMessageEmbeds(embed.build()).queue(
+                                success -> logger.debug("Tildelingsbesked sendt for ticket: {}", ticketId),
+                                error -> logger.warn("Kunne ikke sende tildelingsbesked for ticket {}: {}", ticketId, error.getMessage())
+                            );
+                        } catch (Exception e) {
+                            logger.warn("Fejl ved sending af tildelingsbesked for ticket {}: {}", ticketId, e.getMessage());
+                        }
+                    } else {
+                        logger.warn("Thread ikke fundet for ticket: {} ved tildeling", ticketId);
                     }
+                } else {
+                    logger.warn("Guild ikke fundet for ticket: {} ved tildeling", ticketId);
                 }
             }
             
@@ -256,16 +279,27 @@ public class TicketManager {
                 if (guild != null) {
                     ThreadChannel thread = guild.getThreadChannelById(ticket.getThreadId());
                     if (thread != null) {
-                        String userId = changedBy.getId();
-                        
-                        EmbedBuilder embed = new EmbedBuilder()
-                            .setTitle("\uD83D\uDCCA " + translate("ticket.priority.title", userId))
-                            .setDescription(translate("ticket.priority.description", userId, oldPriority, priority, changedBy.getAsMention()))
-                            .setColor(WARNING_COLOR)
-                            .setTimestamp(Instant.now());
-                        
-                        thread.sendMessageEmbeds(embed.build()).queue();
+                        try {
+                            String userId = changedBy.getId();
+                            
+                            EmbedBuilder embed = new EmbedBuilder()
+                                .setTitle("\uD83D\uDCCA " + translate("ticket.priority.title", userId))
+                                .setDescription(translate("ticket.priority.description", userId, oldPriority, priority, changedBy.getAsMention()))
+                                .setColor(WARNING_COLOR)
+                                .setTimestamp(Instant.now());
+                            
+                            thread.sendMessageEmbeds(embed.build()).queue(
+                                success -> logger.debug("Prioritetsbesked sendt for ticket: {}", ticketId),
+                                error -> logger.warn("Kunne ikke sende prioritetsbesked for ticket {}: {}", ticketId, error.getMessage())
+                            );
+                        } catch (Exception e) {
+                            logger.warn("Fejl ved sending af prioritetsbesked for ticket {}: {}", ticketId, e.getMessage());
+                        }
+                    } else {
+                        logger.warn("Thread ikke fundet for ticket: {} ved prioritetsændring", ticketId);
                     }
+                } else {
+                    logger.warn("Guild ikke fundet for ticket: {} ved prioritetsændring", ticketId);
                 }
             }
             
@@ -324,7 +358,10 @@ public class TicketManager {
             .setColor(ERROR_COLOR)
             .setTimestamp(Instant.now());
 
-        thread.sendMessageEmbeds(embed.build()).queue();
+        thread.sendMessageEmbeds(embed.build()).queue(
+            success -> logger.debug("Lukkebesked sendt for ticket: {}", ticket.getTicketId()),
+            error -> logger.warn("Kunne ikke sende lukkebesked for ticket {}: {}", ticket.getTicketId(), error.getMessage())
+        );
     }
 
     /**
