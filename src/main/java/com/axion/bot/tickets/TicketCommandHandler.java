@@ -663,9 +663,12 @@ public class TicketCommandHandler {
         User user = event.getUser();
         String userId = user.getId();
         
+        // Defer reply to avoid interaction timeout
+        event.deferReply(true).queue();
+        
         Optional<Ticket> ticketOpt = ticketManager.getTicketService().getTicket(ticketId);
         if (ticketOpt.isEmpty()) {
-            event.reply(translate("ticket.close.error.not_found", userId)).setEphemeral(true).queue();
+            event.getHook().editOriginal(translate("ticket.close.error.not_found", userId)).queue();
             return;
         }
 
@@ -675,14 +678,14 @@ public class TicketCommandHandler {
         // Tjek rettigheder
         if (!ticket.getUserId().equals(user.getId()) && 
             (member == null || !ticketManager.hasStaffPermissions(member, event.getGuild().getId()))) {
-            event.reply(translate("ticket.close.error.no_permission", userId)).setEphemeral(true).queue();
+            event.getHook().editOriginal(translate("ticket.close.error.no_permission", userId)).queue();
             return;
         }
 
         if (ticketManager.closeTicket(ticketId, user, translate("ticket.close.button_reason", userId))) {
-            event.reply(translate("ticket.close.success", userId)).setEphemeral(true).queue();
+            event.getHook().editOriginal(translate("ticket.close.success", userId)).queue();
         } else {
-            event.reply(translate("ticket.close.error.failed", userId)).setEphemeral(true).queue();
+            event.getHook().editOriginal(translate("ticket.close.error.failed", userId)).queue();
         }
     }
 
@@ -694,15 +697,18 @@ public class TicketCommandHandler {
         String userId = user.getId();
         Member member = event.getMember();
         
+        // Defer reply to avoid interaction timeout
+        event.deferReply(true).queue();
+        
         if (member == null || !ticketManager.hasStaffPermissions(member, event.getGuild().getId())) {
-            event.reply(translate("ticket.assign.error.no_permission", userId)).setEphemeral(true).queue();
+            event.getHook().editOriginal(translate("ticket.assign.error.no_permission", userId)).queue();
             return;
         }
 
         if (ticketManager.assignTicket(ticketId, user)) {
-            event.reply(translate("ticket.assign.button_success", userId)).setEphemeral(true).queue();
+            event.getHook().editOriginal(translate("ticket.assign.button_success", userId)).queue();
         } else {
-            event.reply(translate("ticket.assign.error.failed", userId)).setEphemeral(true).queue();
+            event.getHook().editOriginal(translate("ticket.assign.error.failed", userId)).queue();
         }
     }
 
@@ -715,7 +721,9 @@ public class TicketCommandHandler {
         Member member = event.getMember();
         
         if (member == null || !ticketManager.hasStaffPermissions(member, event.getGuild().getId())) {
-            event.reply(translate("ticket.priority.error.no_permission", userId)).setEphemeral(true).queue();
+            // Defer reply to avoid interaction timeout
+            event.deferReply(true).queue();
+            event.getHook().editOriginal(translate("ticket.priority.error.no_permission", userId)).queue();
             return;
         }
 
