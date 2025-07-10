@@ -682,11 +682,21 @@ public class TicketCommandHandler {
             return;
         }
 
-        if (ticketManager.closeTicket(ticketId, user, translate("ticket.close.button_reason", userId))) {
-            event.getHook().editOriginal(translate("ticket.close.success", userId)).queue();
-        } else {
-            event.getHook().editOriginal(translate("ticket.close.error.failed", userId)).queue();
-        }
+        // Send success message BEFORE closing ticket to avoid "Unknown Message" error
+        // since closeTicket deletes the thread which invalidates the interaction
+        event.getHook().editOriginal(translate("ticket.close.success", userId)).queue(
+            success -> {
+                // Close ticket after successful message send
+                if (!ticketManager.closeTicket(ticketId, user, translate("ticket.close.button_reason", userId))) {
+                    logger.warn("Failed to close ticket {} after sending success message", ticketId);
+                }
+            },
+            error -> {
+                logger.warn("Failed to send close success message for ticket {}: {}", ticketId, error.getMessage());
+                // Still try to close the ticket even if message failed
+                ticketManager.closeTicket(ticketId, user, translate("ticket.close.button_reason", userId));
+            }
+        );
     }
 
     /**

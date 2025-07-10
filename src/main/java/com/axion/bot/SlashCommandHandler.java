@@ -1706,7 +1706,7 @@ public class SlashCommandHandler extends ListenerAdapter {
                 event.replyEmbeds(embedBuilder.build()).setEphemeral(true).queue();
                 logger.info("Help embed sent for category: {}", selectedValue);
             }
-        } else if (componentId.startsWith("ticket_")) {
+        } else if (componentId.startsWith("ticket_") || componentId.startsWith("priority_select_")) {
             ticketCommandHandler.handleStringSelectInteraction(event);
         } else {
             // Handle other component interactions if needed in the future
