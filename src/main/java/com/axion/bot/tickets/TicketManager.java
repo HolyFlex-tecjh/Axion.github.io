@@ -415,17 +415,18 @@ public class TicketManager {
         try {
             String userId = changedBy.getId();
             String priorityFieldName = translate("ticket.welcome.priority", userId);
-            logger.debug("Attempting to update priority field '{}' for ticket {}", priorityFieldName, ticket.getTicketId());
+            logger.info("Attempting to update priority field '{}' for ticket {} (user language: {})", 
+                priorityFieldName, ticket.getTicketId(), userLanguageManager.getUserLanguage(userId));
             
             // Get the first message in the thread (welcome message)
             thread.getHistory().retrievePast(1).queue(messages -> {
-                logger.debug("Retrieved {} messages from thread for ticket {}", messages.size(), ticket.getTicketId());
+                logger.info("Retrieved {} messages from thread for ticket {}", messages.size(), ticket.getTicketId());
                 if (!messages.isEmpty()) {
                     Message welcomeMessage = messages.get(0);
-                    logger.debug("Welcome message has {} embeds for ticket {}", welcomeMessage.getEmbeds().size(), ticket.getTicketId());
+                    logger.info("Welcome message has {} embeds for ticket {}", welcomeMessage.getEmbeds().size(), ticket.getTicketId());
                     if (!welcomeMessage.getEmbeds().isEmpty()) {
                         MessageEmbed originalEmbed = welcomeMessage.getEmbeds().get(0);
-                        logger.debug("Original embed has {} fields for ticket {}", originalEmbed.getFields().size(), ticket.getTicketId());
+                        logger.info("Original embed has {} fields for ticket {}", originalEmbed.getFields().size(), ticket.getTicketId());
                         
                         // Create a completely new embed to ensure proper update
                         EmbedBuilder newEmbed = new EmbedBuilder()
@@ -439,31 +440,49 @@ public class TicketManager {
                         
                         // Add all fields, updating the priority field
                         String priorityText = ticket.getPriority().toString();
-                        logger.debug("New priority text: '{}' for ticket {}", priorityText, ticket.getTicketId());
+                        logger.info("New priority text: '{}' for ticket {}", priorityText, ticket.getTicketId());
                         
                         boolean fieldFound = false;
                         for (MessageEmbed.Field field : originalEmbed.getFields()) {
-                            logger.debug("Checking field '{}' against '{}' for ticket {}", field.getName(), priorityFieldName, ticket.getTicketId());
-                            if (field.getName() != null && field.getName().trim().equals(priorityFieldName.trim())) {
-                                newEmbed.addField(field.getName(), priorityText, field.isInline());
-                                fieldFound = true;
-                                logger.debug("Updated priority field for ticket {}", ticket.getTicketId());
+                            String fieldName = field.getName();
+                            if (fieldName != null) {
+                                // Normalize both strings for comparison (remove extra whitespace, normalize Unicode)
+                                String normalizedFieldName = fieldName.trim().replaceAll("\\s+", " ");
+                                String normalizedPriorityName = priorityFieldName.trim().replaceAll("\\s+", " ");
+                                
+                                logger.info("Comparing field '{}' (normalized: '{}') against '{}' (normalized: '{}') for ticket {}", 
+                                    fieldName, normalizedFieldName, priorityFieldName, normalizedPriorityName, ticket.getTicketId());
+                                
+                                if (normalizedFieldName.equals(normalizedPriorityName) || 
+                                    normalizedFieldName.equalsIgnoreCase(normalizedPriorityName) ||
+                                    fieldName.contains("Priority") || fieldName.contains("Prioritet")) {
+                                    newEmbed.addField(fieldName, priorityText, field.isInline());
+                                    fieldFound = true;
+                                    logger.info("✅ Successfully matched and updated priority field '{}' for ticket {}", fieldName, ticket.getTicketId());
+                                } else {
+                                    newEmbed.addField(fieldName, field.getValue(), field.isInline());
+                                }
                             } else {
-                                newEmbed.addField(field.getName(), field.getValue(), field.isInline());
+                                newEmbed.addField(fieldName, field.getValue(), field.isInline());
                             }
                         }
                         
                         if (!fieldFound) {
-                            logger.warn("Priority field '{}' not found in embed for ticket {}. Available fields:", priorityFieldName, ticket.getTicketId());
+                            logger.error("❌ Priority field '{}' not found in embed for ticket {}. Available fields:", priorityFieldName, ticket.getTicketId());
                             for (MessageEmbed.Field field : originalEmbed.getFields()) {
-                                logger.warn("  - '{}'", field.getName());
+                                logger.error("  - '{}' (length: {}, bytes: {})", field.getName(), 
+                                    field.getName() != null ? field.getName().length() : 0,
+                                    field.getName() != null ? java.util.Arrays.toString(field.getName().getBytes(java.nio.charset.StandardCharsets.UTF_8)) : "null");
                             }
+                            logger.error("Expected priority field name: '{}' (length: {}, bytes: {})", 
+                                priorityFieldName, priorityFieldName.length(), 
+                                java.util.Arrays.toString(priorityFieldName.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
                         }
                         
                         // Update the message with the new embed
                         welcomeMessage.editMessageEmbeds(newEmbed.build()).queue(
-                            success -> logger.info("Successfully updated welcome message priority for ticket: {}", ticket.getTicketId()),
-                            error -> logger.error("Failed to update welcome message for ticket {}: {}", ticket.getTicketId(), error.getMessage())
+                            success -> logger.info("✅ Successfully updated welcome message priority for ticket: {}", ticket.getTicketId()),
+                            error -> logger.error("❌ Failed to update welcome message for ticket {}: {}", ticket.getTicketId(), error.getMessage())
                         );
                     } else {
                         logger.warn("Welcome message has no embeds for ticket {}", ticket.getTicketId());
