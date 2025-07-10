@@ -130,10 +130,37 @@ public class TicketManager {
             if (config.getStaffRoleId() != null) {
                 Role staffRole = guild.getRoleById(config.getStaffRoleId());
                 if (staffRole != null) {
-                    guild.getMembersWithRoles(staffRole).forEach(member -> {
-                        thread.addThreadMember(member.getUser()).queue();
+                    logger.debug("Fandt staff rolle: {} for ticket: {}", staffRole.getName(), ticketId);
+                    
+                    // Load alle medlemmer med staff rollen
+                    guild.loadMembers().onSuccess(members -> {
+                        List<Member> staffMembers = guild.getMembersWithRoles(staffRole);
+                        logger.debug("Fandt {} staff medlemmer for ticket: {}", staffMembers.size(), ticketId);
+                        
+                        staffMembers.forEach(member -> {
+                            thread.addThreadMember(member.getUser()).queue(
+                                success -> logger.debug("Tilføjede staff medlem {} til ticket: {}", member.getUser().getName(), ticketId),
+                                failure -> logger.warn("Kunne ikke tilføje staff medlem {} til ticket {}: {}", member.getUser().getName(), ticketId, failure.getMessage())
+                            );
+                        });
+                    }).onError(loadError -> {
+                        logger.warn("Kunne ikke loade medlemmer for guild {}: {}", guild.getId(), loadError.getMessage());
+                        // Fallback til cached medlemmer
+                        List<Member> staffMembers = guild.getMembersWithRoles(staffRole);
+                        logger.debug("Fallback: Fandt {} cached staff medlemmer for ticket: {}", staffMembers.size(), ticketId);
+                        
+                        staffMembers.forEach(member -> {
+                            thread.addThreadMember(member.getUser()).queue(
+                                success -> logger.debug("Tilføjede cached staff medlem {} til ticket: {}", member.getUser().getName(), ticketId),
+                                failure -> logger.warn("Kunne ikke tilføje cached staff medlem {} til ticket {}: {}", member.getUser().getName(), ticketId, failure.getMessage())
+                            );
+                        });
                     });
+                } else {
+                    logger.warn("Staff rolle med ID {} ikke fundet i guild: {}", config.getStaffRoleId(), guild.getId());
                 }
+            } else {
+                logger.debug("Ingen staff rolle konfigureret for guild: {}", guild.getId());
             }
             
             // Tilføj bot selv til private thread

@@ -17,6 +17,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.axion.bot.CommandHandler;
+import com.axion.bot.SlashCommandRegistrar;
+
 /**
  * Hovedklassen for Axion Bot
  * En moderne Discord bot implementeret i Java med JDA
