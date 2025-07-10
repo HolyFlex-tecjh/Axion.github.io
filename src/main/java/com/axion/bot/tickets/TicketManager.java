@@ -1,5 +1,7 @@
 package com.axion.bot.tickets;
 
+import com.axion.bot.translation.TranslationManager;
+import com.axion.bot.translation.UserLanguageManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -23,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 public class TicketManager {
     private static final Logger logger = LoggerFactory.getLogger(TicketManager.class);
     private final TicketService ticketService;
+    private final TranslationManager translationManager;
+    private final UserLanguageManager userLanguageManager;
     
     // Farver til embeds
     private static final Color SUCCESS_COLOR = new Color(34, 197, 94);
@@ -37,6 +41,16 @@ public class TicketManager {
     
     public TicketManager(TicketService ticketService) {
         this.ticketService = ticketService;
+        this.translationManager = TranslationManager.getInstance();
+        this.userLanguageManager = UserLanguageManager.getInstance();
+    }
+    
+    /**
+     * Helper method to get translated text for a user
+     */
+    private String translate(String key, String userId, Object... params) {
+        String userLanguage = userLanguageManager.getUserLanguage(userId);
+        return translationManager.translate(key, userLanguage, params);
     }
 
     /**
@@ -197,9 +211,11 @@ public class TicketManager {
                 if (guild != null) {
                     ThreadChannel thread = guild.getThreadChannelById(ticket.getThreadId());
                     if (thread != null) {
+                        String userId = staff.getId();
+                        
                         EmbedBuilder embed = new EmbedBuilder()
-                            .setTitle(STAFF_EMOJI + " Ticket Tildelt")
-                            .setDescription(String.format("%s har overtaget denne ticket.", staff.getAsMention()))
+                            .setTitle(STAFF_EMOJI + " " + translate("ticket.assign.title", userId))
+                            .setDescription(translate("ticket.assign.description", userId, staff.getAsMention()))
                             .setColor(INFO_COLOR)
                             .setTimestamp(Instant.now());
                         
@@ -237,10 +253,11 @@ public class TicketManager {
                 if (guild != null) {
                     ThreadChannel thread = guild.getThreadChannelById(ticket.getThreadId());
                     if (thread != null) {
+                        String userId = changedBy.getId();
+                        
                         EmbedBuilder embed = new EmbedBuilder()
-                            .setTitle("\uD83D\uDCCA Prioritet Ændret")
-                            .setDescription(String.format("Prioritet ændret fra %s til %s af %s", 
-                                oldPriority, priority, changedBy.getAsMention()))
+                            .setTitle("\uD83D\uDCCA " + translate("ticket.priority.title", userId))
+                            .setDescription(translate("ticket.priority.description", userId, oldPriority, priority, changedBy.getAsMention()))
                             .setColor(WARNING_COLOR)
                             .setTimestamp(Instant.now());
                         
@@ -261,27 +278,29 @@ public class TicketManager {
      * Sender velkomstbesked til ny ticket
      */
     private void sendWelcomeMessage(ThreadChannel thread, Ticket ticket, User user, TicketConfig config) {
+        String userId = user.getId();
+        
         EmbedBuilder embed = new EmbedBuilder()
-            .setTitle(TICKET_EMOJI + " Ticket Oprettet")
+            .setTitle(TICKET_EMOJI + " " + translate("ticket.welcome.title", userId))
             .setDescription(config.getWelcomeMessage())
-            .addField("Ticket ID", "`" + ticket.getTicketId() + "`", true)
-            .addField("Kategori", ticket.getCategory(), true)
-            .addField("Prioritet", ticket.getPriority().toString(), true)
-            .addField("Emne", ticket.getSubject(), false)
+            .addField(translate("ticket.welcome.ticket_id", userId), "`" + ticket.getTicketId() + "`", true)
+            .addField(translate("ticket.welcome.category", userId), ticket.getCategory(), true)
+            .addField(translate("ticket.welcome.priority", userId), ticket.getPriority().toString(), true)
+            .addField(translate("ticket.welcome.subject", userId), ticket.getSubject(), false)
             .setColor(SUCCESS_COLOR)
             .setThumbnail(user.getAvatarUrl())
             .setTimestamp(Instant.now())
-            .setFooter("Oprettet af " + user.getName(), user.getAvatarUrl());
+            .setFooter(translate("ticket.welcome.created_by", userId, user.getName()), user.getAvatarUrl());
 
         if (ticket.getDescription() != null && !ticket.getDescription().trim().isEmpty()) {
-            embed.addField("Beskrivelse", ticket.getDescription(), false);
+            embed.addField(translate("ticket.welcome.description", userId), ticket.getDescription(), false);
         }
 
         // Tilføj knapper
         ActionRow buttons = ActionRow.of(
-            Button.danger("close_ticket_" + ticket.getTicketId(), "Luk Ticket").withEmoji(Emoji.fromUnicode("\uD83D\uDD12")),
-            Button.secondary("assign_ticket_" + ticket.getTicketId(), "Tildel Mig").withEmoji(Emoji.fromUnicode("\uD83D\uDC68\u200D\uD83D\uDCBC")),
-            Button.primary("priority_ticket_" + ticket.getTicketId(), "Ændre Prioritet").withEmoji(Emoji.fromUnicode("\uD83D\uDCCA"))
+            Button.danger("close_ticket_" + ticket.getTicketId(), translate("ticket.welcome.buttons.close", userId)).withEmoji(Emoji.fromUnicode("\uD83D\uDD12")),
+            Button.secondary("assign_ticket_" + ticket.getTicketId(), translate("ticket.welcome.buttons.assign", userId)).withEmoji(Emoji.fromUnicode("\uD83D\uDC68\u200D\uD83D\uDCBC")),
+            Button.primary("priority_ticket_" + ticket.getTicketId(), translate("ticket.welcome.buttons.priority", userId)).withEmoji(Emoji.fromUnicode("\uD83D\uDCCA"))
         );
 
         thread.sendMessageEmbeds(embed.build()).setComponents(buttons).queue();
@@ -291,12 +310,14 @@ public class TicketManager {
      * Sender lukkebesked til ticket
      */
     private void sendCloseMessage(ThreadChannel thread, Ticket ticket, User closedBy, String reason) {
+        String userId = closedBy.getId();
+        
         EmbedBuilder embed = new EmbedBuilder()
-            .setTitle(LOCK_EMOJI + " Ticket Lukket")
-            .setDescription("Denne ticket er blevet lukket.")
-            .addField("Lukket af", closedBy.getAsMention(), true)
-            .addField("Årsag", reason != null ? reason : "Ingen årsag angivet", true)
-            .addField("Varighed", calculateTicketDuration(ticket), true)
+            .setTitle(LOCK_EMOJI + " " + translate("ticket.close.title", userId))
+            .setDescription(translate("ticket.close.description", userId))
+            .addField(translate("ticket.close.closed_by", userId), closedBy.getAsMention(), true)
+            .addField(translate("ticket.close.reason", userId), reason != null ? reason : translate("ticket.close.no_reason", userId), true)
+            .addField(translate("ticket.close.duration", userId), calculateTicketDuration(ticket, userId), true)
             .setColor(ERROR_COLOR)
             .setTimestamp(Instant.now());
 
@@ -306,19 +327,19 @@ public class TicketManager {
     /**
      * Beregner ticket varighed
      */
-    private String calculateTicketDuration(Ticket ticket) {
+    private String calculateTicketDuration(Ticket ticket, String userId) {
         if (ticket.getClosedAt() == null) {
-            return "Ukendt";
+            return translate("ticket.duration.unknown", userId);
         }
         
         long minutes = java.time.Duration.between(ticket.getCreatedAt(), ticket.getClosedAt()).toMinutes();
         
         if (minutes < 60) {
-            return minutes + " minutter";
+            return translate("ticket.duration.minutes", userId, minutes);
         } else if (minutes < 1440) {
-            return (minutes / 60) + " timer";
+            return translate("ticket.duration.hours", userId, (minutes / 60));
         } else {
-            return (minutes / 1440) + " dage";
+            return translate("ticket.duration.days", userId, (minutes / 1440));
         }
     }
 

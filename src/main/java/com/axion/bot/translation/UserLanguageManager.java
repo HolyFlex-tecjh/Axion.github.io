@@ -57,22 +57,8 @@ public class UserLanguageManager {
      * Henter sprog for en bruger
      */
     public String getUserLanguage(String userId) {
-        // First check cache
-        String cachedLanguage = userLanguages.get(userId);
-        if (cachedLanguage != null) {
-            return cachedLanguage;
-        }
-        
-        // If not in cache and database is available, check database
-        if (databaseService != null) {
-            String dbLanguage = databaseService.getUserLanguage(userId);
-            if (dbLanguage != null && !dbLanguage.equals("en")) {
-                userLanguages.put(userId, dbLanguage); // Cache it
-                return dbLanguage;
-            }
-        }
-        
-        return "en"; // Default language
+        // Always return English as default language
+        return "en";
     }
     
     /**

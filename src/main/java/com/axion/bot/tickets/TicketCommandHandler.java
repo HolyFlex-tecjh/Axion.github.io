@@ -1,5 +1,7 @@
 package com.axion.bot.tickets;
 
+import com.axion.bot.translation.TranslationManager;
+import com.axion.bot.translation.UserLanguageManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -26,6 +28,8 @@ import java.util.Optional;
 public class TicketCommandHandler {
     private static final Logger logger = LoggerFactory.getLogger(TicketCommandHandler.class);
     private final TicketManager ticketManager;
+    private final TranslationManager translationManager;
+    private final UserLanguageManager userLanguageManager;
     
     // Farver
     private static final Color SUCCESS_COLOR = new Color(34, 197, 94);
@@ -41,6 +45,16 @@ public class TicketCommandHandler {
     
     public TicketCommandHandler(TicketManager ticketManager) {
         this.ticketManager = ticketManager;
+        this.translationManager = TranslationManager.getInstance();
+        this.userLanguageManager = UserLanguageManager.getInstance();
+    }
+    
+    /**
+     * Helper method to get translated text for a user
+     */
+    private String translate(String key, String userId, Object... params) {
+        String userLanguage = userLanguageManager.getUserLanguage(userId);
+        return translationManager.translate(key, userLanguage, params);
     }
 
     /**
@@ -106,7 +120,7 @@ public class TicketCommandHandler {
         User user = event.getUser();
         
         if (guild == null) {
-            sendErrorMessage(event, "Denne kommando kan kun bruges på en server!");
+            sendErrorMessage(event, translate("error.guild_only", user.getId()));
             return;
         }
 
@@ -115,11 +129,12 @@ public class TicketCommandHandler {
         Optional<TicketConfig> configOpt = ticketManager.getTicketService().getTicketConfig(guild.getId());
         TicketConfig config = configOpt.orElse(TicketConfig.createDefault(guild.getId()));
         
+        String userId = user.getId();
+        
         if (userTickets.size() >= config.getMaxTicketsPerUser()) {
             EmbedBuilder embed = new EmbedBuilder()
-                .setTitle(ERROR_EMOJI + " For mange åbne tickets")
-                .setDescription(String.format("Du har allerede %d åbne tickets. Maksimum er %d.", 
-                    userTickets.size(), config.getMaxTicketsPerUser()))
+                .setTitle(ERROR_EMOJI + " " + translate("ticket.create.error.max_tickets", userId))
+                .setDescription(translate("ticket.create.error.max_tickets_desc", userId, userTickets.size(), config.getMaxTicketsPerUser()))
                 .setColor(ERROR_COLOR)
                 .setTimestamp(Instant.now());
             
@@ -135,18 +150,18 @@ public class TicketCommandHandler {
             ThreadChannel thread = guild.getThreadChannelById(ticket.getThreadId());
             
             EmbedBuilder embed = new EmbedBuilder()
-                .setTitle(SUCCESS_EMOJI + " Ticket Oprettet")
-                .setDescription(String.format("Din ticket er blevet oprettet! %s", 
-                    thread != null ? thread.getAsMention() : "Thread ikke fundet"))
-                .addField("Ticket ID", "`" + ticket.getTicketId() + "`", true)
-                .addField("Kategori", ticket.getCategory(), true)
-                .addField("Emne", ticket.getSubject(), false)
+                .setTitle(SUCCESS_EMOJI + " " + translate("ticket.create.title", userId))
+                .setDescription(translate("ticket.create.description", userId, 
+                    thread != null ? thread.getAsMention() : translate("ticket.create.error.thread_not_found", userId)))
+                .addField(translate("ticket.create.id", userId), "`" + ticket.getTicketId() + "`", true)
+                .addField(translate("ticket.create.category", userId), ticket.getCategory(), true)
+                .addField(translate("ticket.create.subject", userId), ticket.getSubject(), false)
                 .setColor(SUCCESS_COLOR)
                 .setTimestamp(Instant.now());
             
             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
         } else {
-            sendErrorMessage(event, "Kunne ikke oprette ticket. Kontakt en administrator.");
+            sendErrorMessage(event, translate("ticket.create.error.failed", userId));
         }
     }
 
@@ -154,46 +169,48 @@ public class TicketCommandHandler {
      * Håndterer lukning af ticket
      */
     private void handleCloseTicket(SlashCommandInteractionEvent event) {
+        User user = event.getUser();
+        String userId = user.getId();
+        
         OptionMapping reasonOption = event.getOption("reason");
-        String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
+        String reason = reasonOption != null ? reasonOption.getAsString() : translate("ticket.close.no_reason", userId);
         
         // Tjek om kommandoen køres i en ticket thread
         if (!(event.getChannel() instanceof ThreadChannel thread)) {
-            sendErrorMessage(event, "Denne kommando kan kun bruges i en ticket thread!");
+            sendErrorMessage(event, translate("ticket.close.error.not_in_ticket", userId));
             return;
         }
 
         // Find ticket baseret på thread ID
         Optional<Ticket> ticketOpt = ticketManager.getTicketService().getTicketByThreadId(thread.getId());
         if (ticketOpt.isEmpty()) {
-            sendErrorMessage(event, "Kunne ikke finde ticket for denne thread!");
+            sendErrorMessage(event, translate("ticket.close.error.not_found", userId));
             return;
         }
 
         Ticket ticket = ticketOpt.get();
-        User user = event.getUser();
         Member member = event.getMember();
         
         // Tjek rettigheder - kun ticket ejer eller staff kan lukke
         if (!ticket.getUserId().equals(user.getId()) && 
             (member == null || !ticketManager.hasStaffPermissions(member, event.getGuild().getId()))) {
-            sendErrorMessage(event, "Du har ikke tilladelse til at lukke denne ticket!");
+            sendErrorMessage(event, translate("ticket.close.error.no_permission", userId));
             return;
         }
 
         // Luk ticket
         if (ticketManager.closeTicket(ticket.getTicketId(), user, reason)) {
             EmbedBuilder embed = new EmbedBuilder()
-                .setTitle(SUCCESS_EMOJI + " Ticket Lukket")
-                .setDescription("Ticketen er blevet lukket og vil blive arkiveret om kort tid.")
-                .addField("Lukket af", user.getAsMention(), true)
-                .addField("Årsag", reason, true)
+                .setTitle(SUCCESS_EMOJI + " " + translate("ticket.close.title", userId))
+                .setDescription(translate("ticket.close.description", userId))
+                .addField(translate("ticket.close.closed_by", userId), user.getAsMention(), true)
+                .addField(translate("ticket.close.reason", userId), reason, true)
                 .setColor(SUCCESS_COLOR)
                 .setTimestamp(Instant.now());
             
             event.replyEmbeds(embed.build()).queue();
         } else {
-            sendErrorMessage(event, "Kunne ikke lukke ticket. Prøv igen senere.");
+            sendErrorMessage(event, translate("ticket.close.error.failed", userId));
         }
     }
 
@@ -201,26 +218,29 @@ public class TicketCommandHandler {
      * Håndterer tildeling af ticket
      */
     private void handleAssignTicket(SlashCommandInteractionEvent event) {
+        User user = event.getUser();
+        String userId = user.getId();
+        
         OptionMapping staffOption = event.getOption("staff");
         User staff = staffOption != null ? staffOption.getAsUser() : event.getUser();
         
         // Tjek om kommandoen køres i en ticket thread
         if (!(event.getChannel() instanceof ThreadChannel thread)) {
-            sendErrorMessage(event, "Denne kommando kan kun bruges i en ticket thread!");
+            sendErrorMessage(event, translate("ticket.assign.error.not_in_ticket", userId));
             return;
         }
 
         // Tjek staff rettigheder
         Member member = event.getMember();
         if (member == null || !ticketManager.hasStaffPermissions(member, event.getGuild().getId())) {
-            sendErrorMessage(event, "Du har ikke tilladelse til at tildele tickets!");
+            sendErrorMessage(event, translate("ticket.assign.error.no_permission", userId));
             return;
         }
 
         // Find ticket
         Optional<Ticket> ticketOpt = ticketManager.getTicketService().getTicketByThreadId(thread.getId());
         if (ticketOpt.isEmpty()) {
-            sendErrorMessage(event, "Kunne ikke finde ticket for denne thread!");
+            sendErrorMessage(event, translate("ticket.assign.error.not_found", userId));
             return;
         }
 
@@ -229,14 +249,14 @@ public class TicketCommandHandler {
         // Tildel ticket
         if (ticketManager.assignTicket(ticket.getTicketId(), staff)) {
             EmbedBuilder embed = new EmbedBuilder()
-                .setTitle(SUCCESS_EMOJI + " Ticket Tildelt")
-                .setDescription(String.format("Ticket er blevet tildelt til %s", staff.getAsMention()))
+                .setTitle(SUCCESS_EMOJI + " " + translate("ticket.assign.title", userId))
+                .setDescription(translate("ticket.assign.description", userId, staff.getAsMention()))
                 .setColor(SUCCESS_COLOR)
                 .setTimestamp(Instant.now());
             
             event.replyEmbeds(embed.build()).queue();
         } else {
-            sendErrorMessage(event, "Kunne ikke tildele ticket. Prøv igen senere.");
+            sendErrorMessage(event, translate("ticket.assign.error.failed", userId));
         }
     }
 
@@ -244,9 +264,12 @@ public class TicketCommandHandler {
      * Håndterer ændring af prioritet
      */
     private void handleSetPriority(SlashCommandInteractionEvent event) {
+        User user = event.getUser();
+        String userId = user.getId();
+        
         OptionMapping priorityOption = event.getOption("priority");
         if (priorityOption == null) {
-            sendErrorMessage(event, "Du skal angive en prioritet!");
+            sendErrorMessage(event, translate("ticket.priority.error.no_priority", userId));
             return;
         }
         
@@ -255,37 +278,37 @@ public class TicketCommandHandler {
         
         // Tjek om kommandoen køres i en ticket thread
         if (!(event.getChannel() instanceof ThreadChannel thread)) {
-            sendErrorMessage(event, "Denne kommando kan kun bruges i en ticket thread!");
+            sendErrorMessage(event, translate("ticket.priority.error.not_in_ticket", userId));
             return;
         }
 
         // Tjek staff rettigheder
         Member member = event.getMember();
         if (member == null || !ticketManager.hasStaffPermissions(member, event.getGuild().getId())) {
-            sendErrorMessage(event, "Du har ikke tilladelse til at ændre prioritet!");
+            sendErrorMessage(event, translate("ticket.priority.error.no_permission", userId));
             return;
         }
 
         // Find ticket
         Optional<Ticket> ticketOpt = ticketManager.getTicketService().getTicketByThreadId(thread.getId());
         if (ticketOpt.isEmpty()) {
-            sendErrorMessage(event, "Kunne ikke finde ticket for denne thread!");
+            sendErrorMessage(event, translate("ticket.priority.error.not_found", userId));
             return;
         }
 
         Ticket ticket = ticketOpt.get();
         
         // Ændre prioritet
-        if (ticketManager.setTicketPriority(ticket.getTicketId(), priority, event.getUser())) {
+        if (ticketManager.setTicketPriority(ticket.getTicketId(), priority, user)) {
             EmbedBuilder embed = new EmbedBuilder()
-                .setTitle(SUCCESS_EMOJI + " Prioritet Ændret")
-                .setDescription(String.format("Ticket prioritet ændret til %s", priority))
+                .setTitle(SUCCESS_EMOJI + " " + translate("ticket.priority.title", userId))
+                .setDescription(translate("ticket.priority.description", userId, priority))
                 .setColor(SUCCESS_COLOR)
                 .setTimestamp(Instant.now());
             
             event.replyEmbeds(embed.build()).queue();
         } else {
-            sendErrorMessage(event, "Kunne ikke ændre prioritet. Prøv igen senere.");
+            sendErrorMessage(event, translate("ticket.priority.error.failed", userId));
         }
     }
 
@@ -295,17 +318,19 @@ public class TicketCommandHandler {
     private void handleListTickets(SlashCommandInteractionEvent event) {
         OptionMapping userOption = event.getOption("user");
         OptionMapping statusOption = event.getOption("status");
+        User user = event.getUser();
+        String userId = user.getId();
         
         Guild guild = event.getGuild();
         if (guild == null) {
-            sendErrorMessage(event, "Denne kommando kan kun bruges på en server!");
+            sendErrorMessage(event, translate("error.guild_only", userId));
             return;
         }
 
         // Tjek rettigheder
         Member member = event.getMember();
         if (member == null || !ticketManager.hasStaffPermissions(member, guild.getId())) {
-            sendErrorMessage(event, "Du har ikke tilladelse til at se alle tickets!");
+            sendErrorMessage(event, translate("ticket.list.error.no_permission", userId));
             return;
         }
 
@@ -313,35 +338,35 @@ public class TicketCommandHandler {
         List<Ticket> tickets;
         
         if (userOption != null) {
-            User user = userOption.getAsUser();
+            User targetUser = userOption.getAsUser();
             tickets = includeClosed ? 
                 ticketManager.getTicketService().getGuildTickets(guild.getId(), true).stream()
-                    .filter(t -> t.getUserId().equals(user.getId()))
+                    .filter(t -> t.getUserId().equals(targetUser.getId()))
                     .toList() :
-                ticketManager.getTicketService().getUserOpenTickets(user.getId(), guild.getId());
+                ticketManager.getTicketService().getUserOpenTickets(targetUser.getId(), guild.getId());
         } else {
             tickets = ticketManager.getTicketService().getGuildTickets(guild.getId(), includeClosed);
         }
 
         EmbedBuilder embed = new EmbedBuilder()
-            .setTitle(TICKET_EMOJI + " Ticket Oversigt")
+            .setTitle(TICKET_EMOJI + " " + translate("ticket.list.title", userId))
             .setColor(INFO_COLOR)
             .setTimestamp(Instant.now());
 
         if (tickets.isEmpty()) {
-            embed.setDescription("Ingen tickets fundet.");
+            embed.setDescription(translate("ticket.list.no_tickets", userId));
         } else {
             StringBuilder description = new StringBuilder();
             int count = 0;
             
             for (Ticket ticket : tickets) {
                 if (count >= 10) {
-                    description.append("\n... og ").append(tickets.size() - count).append(" flere");
+                    description.append("\n").append(translate("ticket.list.more_tickets", userId, tickets.size() - count));
                     break;
                 }
                 
                 User ticketUser = event.getJDA().getUserById(ticket.getUserId());
-                String userName = ticketUser != null ? ticketUser.getName() : "Ukendt bruger";
+                String userName = ticketUser != null ? ticketUser.getName() : translate("ticket.list.unknown_user", userId);
                 
                 description.append(String.format(
                     "%s **%s** - %s\n" +
@@ -358,7 +383,7 @@ public class TicketCommandHandler {
             }
             
             embed.setDescription(description.toString());
-            embed.setFooter(String.format("Total: %d tickets", tickets.size()));
+            embed.setFooter(translate("ticket.list.total", userId, tickets.size()));
         }
 
         event.replyEmbeds(embed.build()).setEphemeral(true).queue();
@@ -368,16 +393,19 @@ public class TicketCommandHandler {
      * Håndterer ticket info
      */
     private void handleTicketInfo(SlashCommandInteractionEvent event) {
+        User user = event.getUser();
+        String userId = user.getId();
+        
         // Tjek om kommandoen køres i en ticket thread
         if (!(event.getChannel() instanceof ThreadChannel thread)) {
-            sendErrorMessage(event, "Denne kommando kan kun bruges i en ticket thread!");
+            sendErrorMessage(event, translate("ticket.info.error.not_in_ticket", userId));
             return;
         }
 
         // Find ticket
         Optional<Ticket> ticketOpt = ticketManager.getTicketService().getTicketByThreadId(thread.getId());
         if (ticketOpt.isEmpty()) {
-            sendErrorMessage(event, "Kunne ikke finde ticket for denne thread!");
+            sendErrorMessage(event, translate("ticket.info.error.not_found", userId));
             return;
         }
 
@@ -387,20 +415,20 @@ public class TicketCommandHandler {
             event.getJDA().getUserById(ticket.getAssignedStaffId()) : null;
         
         EmbedBuilder embed = new EmbedBuilder()
-            .setTitle(TICKET_EMOJI + " Ticket Information")
-            .addField("Ticket ID", "`" + ticket.getTicketId() + "`", true)
-            .addField("Status", ticket.getStatus().toString(), true)
-            .addField("Prioritet", ticket.getPriority().toString(), true)
-            .addField("Kategori", ticket.getCategory(), true)
-            .addField("Oprettet af", ticketUser != null ? ticketUser.getAsMention() : "Ukendt", true)
-            .addField("Tildelt til", assignedStaff != null ? assignedStaff.getAsMention() : "Ingen", true)
-            .addField("Emne", ticket.getSubject(), false)
+            .setTitle(TICKET_EMOJI + " " + translate("ticket.info.title", userId))
+            .addField(translate("ticket.info.id", userId), "`" + ticket.getTicketId() + "`", true)
+            .addField(translate("ticket.info.status", userId), ticket.getStatus().toString(), true)
+            .addField(translate("ticket.info.priority", userId), ticket.getPriority().toString(), true)
+            .addField(translate("ticket.info.category", userId), ticket.getCategory(), true)
+            .addField(translate("ticket.info.created_by", userId), ticketUser != null ? ticketUser.getAsMention() : translate("ticket.info.unknown", userId), true)
+            .addField(translate("ticket.info.assigned_to", userId), assignedStaff != null ? assignedStaff.getAsMention() : translate("ticket.info.none", userId), true)
+            .addField(translate("ticket.info.subject", userId), ticket.getSubject(), false)
             .setColor(INFO_COLOR)
             .setTimestamp(Instant.now())
-            .setFooter("Oprettet " + ticket.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            .setFooter(translate("ticket.info.created_at", userId, ticket.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
 
         if (ticket.getDescription() != null && !ticket.getDescription().trim().isEmpty()) {
-            embed.addField("Beskrivelse", ticket.getDescription(), false);
+            embed.addField(translate("ticket.info.description", userId), ticket.getDescription(), false);
         }
 
         event.replyEmbeds(embed.build()).setEphemeral(true).queue();
@@ -410,16 +438,19 @@ public class TicketCommandHandler {
      * Håndterer ticket konfiguration kommandoer
      */
     private void handleTicketConfigCommand(SlashCommandInteractionEvent event, String subcommand) {
+        User user = event.getUser();
+        String userId = user.getId();
+        
         // Tjek administrator rettigheder
         Member member = event.getMember();
         if (member == null || !member.hasPermission(Permission.ADMINISTRATOR)) {
-            sendErrorMessage(event, "Du skal være administrator for at ændre ticket konfiguration!");
+            sendErrorMessage(event, translate("config.error.admin_required", userId));
             return;
         }
 
         Guild guild = event.getGuild();
         if (guild == null) {
-            sendErrorMessage(event, "Denne kommando kan kun bruges på en server!");
+            sendErrorMessage(event, translate("error.guild_only", userId));
             return;
         }
 
@@ -437,7 +468,7 @@ public class TicketCommandHandler {
                 handleToggleConfig(event, guild, false);
                 break;
             default:
-                sendErrorMessage(event, "Ukendt konfiguration kommando: " + subcommand);
+                sendErrorMessage(event, translate("config.error.unknown_command", userId, subcommand));
         }
     }
 
@@ -448,6 +479,8 @@ public class TicketCommandHandler {
         OptionMapping categoryOption = event.getOption("category");
         OptionMapping staffRoleOption = event.getOption("staff_role");
         OptionMapping maxTicketsOption = event.getOption("max_tickets");
+        User user = event.getUser();
+        String userId = user.getId();
         
         Optional<TicketConfig> configOpt = ticketManager.getTicketService().getTicketConfig(guild.getId());
         TicketConfig config = configOpt.orElse(TicketConfig.createDefault(guild.getId()));
@@ -475,17 +508,17 @@ public class TicketCommandHandler {
         if (updated) {
             if (ticketManager.getTicketService().saveTicketConfig(config)) {
                 EmbedBuilder embed = new EmbedBuilder()
-                    .setTitle(SUCCESS_EMOJI + " Konfiguration Opdateret")
-                    .setDescription("Ticket konfiguration er blevet opdateret.")
+                    .setTitle(SUCCESS_EMOJI + " " + translate("config.setup.title", userId))
+                    .setDescription(translate("config.setup.description", userId))
                     .setColor(SUCCESS_COLOR)
                     .setTimestamp(Instant.now());
                 
                 event.replyEmbeds(embed.build()).setEphemeral(true).queue();
             } else {
-                sendErrorMessage(event, "Kunne ikke gemme konfiguration. Prøv igen senere.");
+                sendErrorMessage(event, translate("config.setup.error.save_failed", userId));
             }
         } else {
-            sendErrorMessage(event, "Ingen ændringer blev foretaget.");
+            sendErrorMessage(event, translate("config.setup.error.no_changes", userId));
         }
     }
 
@@ -493,6 +526,9 @@ public class TicketCommandHandler {
      * Håndterer visning af konfiguration
      */
     private void handleViewConfig(SlashCommandInteractionEvent event, Guild guild) {
+        User user = event.getUser();
+        String userId = user.getId();
+        
         Optional<TicketConfig> configOpt = ticketManager.getTicketService().getTicketConfig(guild.getId());
         TicketConfig config = configOpt.orElse(TicketConfig.createDefault(guild.getId()));
         
@@ -502,12 +538,12 @@ public class TicketCommandHandler {
             guild.getRoleById(config.getStaffRoleId()) : null;
         
         EmbedBuilder embed = new EmbedBuilder()
-            .setTitle(SETTINGS_EMOJI + " Ticket Konfiguration")
-            .addField("Status", config.isEnabled() ? "✅ Aktiveret" : "❌ Deaktiveret", true)
-            .addField("Support Kategori", category != null ? category.getName() : "Ikke sat", true)
-            .addField("Staff Rolle", staffRole != null ? staffRole.getAsMention() : "Ikke sat", true)
-            .addField("Max Tickets per Bruger", String.valueOf(config.getMaxTicketsPerUser()), true)
-            .addField("Auto-luk efter (timer)", String.valueOf(config.getAutoCloseInactiveHours()), true)
+            .setTitle(SETTINGS_EMOJI + " " + translate("config.view.title", userId))
+            .addField(translate("config.view.status", userId), config.isEnabled() ? translate("config.view.enabled", userId) : translate("config.view.disabled", userId), true)
+            .addField(translate("config.view.category", userId), category != null ? category.getName() : translate("config.view.not_set", userId), true)
+            .addField(translate("config.view.staff_role", userId), staffRole != null ? staffRole.getAsMention() : translate("config.view.not_set", userId), true)
+            .addField(translate("config.view.max_tickets", userId), String.valueOf(config.getMaxTicketsPerUser()), true)
+            .addField(translate("config.view.auto_close", userId), String.valueOf(config.getAutoCloseInactiveHours()), true)
             .setColor(INFO_COLOR)
             .setTimestamp(Instant.now());
         
@@ -518,22 +554,27 @@ public class TicketCommandHandler {
      * Håndterer aktivering/deaktivering af ticket system
      */
     private void handleToggleConfig(SlashCommandInteractionEvent event, Guild guild, boolean enable) {
+        User user = event.getUser();
+        String userId = user.getId();
+        
         Optional<TicketConfig> configOpt = ticketManager.getTicketService().getTicketConfig(guild.getId());
         TicketConfig config = configOpt.orElse(TicketConfig.createDefault(guild.getId()));
         
         config.setEnabled(enable);
         
         if (ticketManager.getTicketService().saveTicketConfig(config)) {
-            String status = enable ? "aktiveret" : "deaktiveret";
+            String titleKey = enable ? "config.toggle.enabled_title" : "config.toggle.disabled_title";
+            String descKey = enable ? "config.toggle.enabled_desc" : "config.toggle.disabled_desc";
+            
             EmbedBuilder embed = new EmbedBuilder()
-                .setTitle(SUCCESS_EMOJI + " Ticket System " + status.substring(0, 1).toUpperCase() + status.substring(1))
-                .setDescription("Ticket systemet er blevet " + status + ".")
+                .setTitle(SUCCESS_EMOJI + " " + translate(titleKey, userId))
+                .setDescription(translate(descKey, userId))
                 .setColor(enable ? SUCCESS_COLOR : WARNING_COLOR)
                 .setTimestamp(Instant.now());
             
             event.replyEmbeds(embed.build()).setEphemeral(true).queue();
         } else {
-            sendErrorMessage(event, "Kunne ikke ændre ticket system status. Prøv igen senere.");
+            sendErrorMessage(event, translate("config.toggle.error.save_failed", userId));
         }
     }
 
@@ -572,27 +613,29 @@ public class TicketCommandHandler {
      * Håndterer luk ticket knap
      */
     private void handleCloseTicketButton(ButtonInteractionEvent event, String ticketId) {
+        User user = event.getUser();
+        String userId = user.getId();
+        
         Optional<Ticket> ticketOpt = ticketManager.getTicketService().getTicket(ticketId);
         if (ticketOpt.isEmpty()) {
-            event.reply("Ticket ikke fundet!").setEphemeral(true).queue();
+            event.reply(translate("ticket.close.error.not_found", userId)).setEphemeral(true).queue();
             return;
         }
 
         Ticket ticket = ticketOpt.get();
-        User user = event.getUser();
         Member member = event.getMember();
         
         // Tjek rettigheder
         if (!ticket.getUserId().equals(user.getId()) && 
             (member == null || !ticketManager.hasStaffPermissions(member, event.getGuild().getId()))) {
-            event.reply("Du har ikke tilladelse til at lukke denne ticket!").setEphemeral(true).queue();
+            event.reply(translate("ticket.close.error.no_permission", userId)).setEphemeral(true).queue();
             return;
         }
 
-        if (ticketManager.closeTicket(ticketId, user, "Lukket via knap")) {
-            event.reply("Ticket lukket!").setEphemeral(true).queue();
+        if (ticketManager.closeTicket(ticketId, user, translate("ticket.close.button_reason", userId))) {
+            event.reply(translate("ticket.close.success", userId)).setEphemeral(true).queue();
         } else {
-            event.reply("Kunne ikke lukke ticket!").setEphemeral(true).queue();
+            event.reply(translate("ticket.close.error.failed", userId)).setEphemeral(true).queue();
         }
     }
 
@@ -600,16 +643,19 @@ public class TicketCommandHandler {
      * Håndterer tildel ticket knap
      */
     private void handleAssignTicketButton(ButtonInteractionEvent event, String ticketId) {
+        User user = event.getUser();
+        String userId = user.getId();
         Member member = event.getMember();
+        
         if (member == null || !ticketManager.hasStaffPermissions(member, event.getGuild().getId())) {
-            event.reply("Du har ikke tilladelse til at tildele tickets!").setEphemeral(true).queue();
+            event.reply(translate("ticket.assign.error.no_permission", userId)).setEphemeral(true).queue();
             return;
         }
 
-        if (ticketManager.assignTicket(ticketId, event.getUser())) {
-            event.reply("Du er nu tildelt denne ticket!").setEphemeral(true).queue();
+        if (ticketManager.assignTicket(ticketId, user)) {
+            event.reply(translate("ticket.assign.button_success", userId)).setEphemeral(true).queue();
         } else {
-            event.reply("Kunne ikke tildele ticket!").setEphemeral(true).queue();
+            event.reply(translate("ticket.assign.error.failed", userId)).setEphemeral(true).queue();
         }
     }
 
@@ -617,22 +663,25 @@ public class TicketCommandHandler {
      * Håndterer prioritet ticket knap
      */
     private void handlePriorityTicketButton(ButtonInteractionEvent event, String ticketId) {
+        User user = event.getUser();
+        String userId = user.getId();
         Member member = event.getMember();
+        
         if (member == null || !ticketManager.hasStaffPermissions(member, event.getGuild().getId())) {
-            event.reply("Du har ikke tilladelse til at ændre prioritet!").setEphemeral(true).queue();
+            event.reply(translate("ticket.priority.error.no_permission", userId)).setEphemeral(true).queue();
             return;
         }
 
         // Opret dropdown menu til prioritet valg
         StringSelectMenu priorityMenu = StringSelectMenu.create("priority_select_" + ticketId)
-            .setPlaceholder("Vælg ny prioritet")
-            .addOption("Lav", "low", "🟢 Lav prioritet")
-            .addOption("Medium", "medium", "🟡 Medium prioritet")
-            .addOption("Høj", "high", "🟠 Høj prioritet")
-            .addOption("Akut", "urgent", "🔴 Akut prioritet")
+            .setPlaceholder(translate("ticket.priority.select_placeholder", userId))
+            .addOption(translate("ticket.priority.low", userId), "low", "🟢 " + translate("ticket.priority.low_desc", userId))
+            .addOption(translate("ticket.priority.medium", userId), "medium", "🟡 " + translate("ticket.priority.medium_desc", userId))
+            .addOption(translate("ticket.priority.high", userId), "high", "🟠 " + translate("ticket.priority.high_desc", userId))
+            .addOption(translate("ticket.priority.urgent", userId), "urgent", "🔴 " + translate("ticket.priority.urgent_desc", userId))
             .build();
 
-        event.reply("Vælg ny prioritet:")
+        event.reply(translate("ticket.priority.select_prompt", userId))
             .addComponents(ActionRow.of(priorityMenu))
             .setEphemeral(true)
             .queue();
@@ -643,16 +692,18 @@ public class TicketCommandHandler {
      */
     public void handleStringSelectInteraction(StringSelectInteractionEvent event) {
         String componentId = event.getComponentId();
+        User user = event.getUser();
+        String userId = user.getId();
         
         if (componentId.startsWith("priority_select_")) {
             String ticketId = componentId.substring("priority_select_".length());
             String priorityValue = event.getValues().get(0);
             TicketPriority priority = TicketPriority.fromString(priorityValue);
             
-            if (ticketManager.setTicketPriority(ticketId, priority, event.getUser())) {
-                event.reply("Prioritet ændret til " + priority + "!").setEphemeral(true).queue();
+            if (ticketManager.setTicketPriority(ticketId, priority, user)) {
+                event.reply(translate("ticket.priority.changed_success", userId, priority)).setEphemeral(true).queue();
             } else {
-                event.reply("Kunne ikke ændre prioritet!").setEphemeral(true).queue();
+                event.reply(translate("ticket.priority.error.failed", userId)).setEphemeral(true).queue();
             }
         }
     }

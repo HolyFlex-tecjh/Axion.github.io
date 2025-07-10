@@ -434,7 +434,7 @@ public class DatabaseService {
         Connection connection = databaseManager.getConnection();
         if (connection == null) {
             logger.error("Database forbindelse er null. Returnerer standard sprog.");
-            return "da"; // Default til dansk
+            return "en"; // Default to English
         }
         
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -449,7 +449,7 @@ public class DatabaseService {
             logger.error("Fejl ved hentning af bruger sprog for bruger: " + userId, e);
         }
         
-        return "da"; // Default til dansk hvis ikke fundet eller fejl
+        return "en"; // Default to English if not found or error
     }
 
     /**
