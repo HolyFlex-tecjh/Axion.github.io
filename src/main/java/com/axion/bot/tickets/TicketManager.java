@@ -110,10 +110,16 @@ public class TicketManager {
             // Slet den automatiske thread oprettelsesbesked
             thread.getHistory().retrievePast(1).queue(messages -> {
                 if (!messages.isEmpty()) {
-                    messages.get(0).delete().queue(
-                        success -> logger.debug("Thread oprettelsesbesked slettet for ticket: {}", ticketId),
-                        error -> logger.debug("Kunne ikke slette thread oprettelsesbesked: {}", error.getMessage())
-                    );
+                    Message message = messages.get(0);
+                    // Tjek om beskeden kan slettes (undgå RECIPIENT_ADD og andre system beskeder)
+                    if (message.getType().canDelete()) {
+                        message.delete().queue(
+                            success -> logger.debug("Thread oprettelsesbesked slettet for ticket: {}", ticketId),
+                            error -> logger.debug("Kunne ikke slette thread oprettelsesbesked: {}", error.getMessage())
+                        );
+                    } else {
+                        logger.debug("Springer over sletning af system besked type: {} for ticket: {}", message.getType(), ticketId);
+                    }
                 }
             });
 
@@ -181,8 +187,8 @@ public class TicketManager {
                         // Send lukkebesked
                         sendCloseMessage(thread, ticket, closedBy, reason);
                         
-                        // Slet thread efter 5 sekunder
-                        thread.delete().queueAfter(5, TimeUnit.SECONDS,
+                        // Slet thread øjeblikkeligt
+                        thread.delete().queue(
                             success -> {
                                 logger.info("Thread slettet for ticket: {}", ticketId);
                                 // Slet ticket fra database efter thread er slettet
