@@ -139,6 +139,15 @@ public class DatabaseManager {
      * Får database forbindelse
      */
     public Connection getConnection() {
+        try {
+            if (connection == null || connection.isClosed()) {
+                logger.warning("Database forbindelse er null eller lukket. Forsøger at genoprette forbindelse.");
+                connect();
+            }
+        } catch (SQLException e) {
+            logger.severe("Fejl ved tjek af database forbindelse: " + e.getMessage());
+            connect();
+        }
         return connection;
     }
 

@@ -95,7 +95,13 @@ public class DatabaseService {
                      "guild_id, channel_id, message_id, severity, automated) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
-        try (PreparedStatement stmt = databaseManager.getConnection().prepareStatement(sql)) {
+        Connection connection = databaseManager.getConnection();
+        if (connection == null) {
+            logger.error("Database forbindelse er null. Kan ikke logge moderation handling.");
+            return;
+        }
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, userId);
             stmt.setString(2, username);
             stmt.setString(3, moderatorId);
@@ -394,7 +400,13 @@ public class DatabaseService {
                      "ON CONFLICT(user_id) DO UPDATE SET " +
                      "language_code = ?, updated_at = CURRENT_TIMESTAMP";
         
-        try (PreparedStatement stmt = databaseManager.getConnection().prepareStatement(sql)) {
+        Connection connection = databaseManager.getConnection();
+        if (connection == null) {
+            logger.error("Database forbindelse er null. Kan ikke sætte bruger sprog.");
+            return;
+        }
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, userId);
             stmt.setString(2, languageCode);
             stmt.setString(3, languageCode);
@@ -412,7 +424,13 @@ public class DatabaseService {
     public String getUserLanguage(String userId) {
         String sql = "SELECT language_code FROM user_languages WHERE user_id = ?";
         
-        try (PreparedStatement stmt = databaseManager.getConnection().prepareStatement(sql)) {
+        Connection connection = databaseManager.getConnection();
+        if (connection == null) {
+            logger.error("Database forbindelse er null. Returnerer standard sprog.");
+            return "en"; // Default til engelsk
+        }
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, userId);
             
             try (ResultSet rs = stmt.executeQuery()) {
