@@ -92,7 +92,7 @@ public class TicketManager {
             } else {
                 // Find første tilgængelige text kanal
                 parentChannel = guild.getTextChannels().stream()
-                    .filter(channel -> guild.getSelfMember().hasPermission(channel, Permission.CREATE_PUBLIC_THREADS))
+                    .filter(channel -> guild.getSelfMember().hasPermission(channel, Permission.CREATE_PRIVATE_THREADS))
                     .findFirst()
                     .orElse(null);
             }
@@ -102,15 +102,15 @@ public class TicketManager {
                 return Optional.empty();
             }
 
-            // Opret thread
-            ThreadChannel thread = parentChannel.createThreadChannel(threadName)
+            // Opret privat thread
+            ThreadChannel thread = parentChannel.createThreadChannel(threadName, true) // true = private thread
                 .setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_1_WEEK)
                 .complete();
 
             // Tilføj bruger til thread
             thread.addThreadMember(user).queue();
             
-            // Tilføj staff hvis konfigureret
+            // Tilføj staff hvis konfigureret - automatisk for private threads
             if (config.getStaffRoleId() != null) {
                 Role staffRole = guild.getRoleById(config.getStaffRoleId());
                 if (staffRole != null) {
@@ -119,6 +119,9 @@ public class TicketManager {
                     });
                 }
             }
+            
+            // Tilføj bot selv til private thread
+            thread.addThreadMember(guild.getSelfMember().getUser()).queue();
 
             // Opret ticket objekt
             Ticket ticket = new Ticket(ticketId, user.getId(), guild.getId(), thread.getId(), category, subject, description);

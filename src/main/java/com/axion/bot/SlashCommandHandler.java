@@ -2797,7 +2797,10 @@ public class SlashCommandHandler extends ListenerAdapter {
      */
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        if (event.getComponentId().startsWith("ticket_")) {
+        String componentId = event.getComponentId();
+        if (componentId.startsWith("close_ticket_") || 
+            componentId.startsWith("assign_ticket_") || 
+            componentId.startsWith("priority_ticket_")) {
             ticketCommandHandler.handleButtonInteraction(event);
         }
     }
