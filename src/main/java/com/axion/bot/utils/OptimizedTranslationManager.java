@@ -27,7 +27,6 @@ public class OptimizedTranslationManager {
     // Cache configuration
     private static final int MAX_CACHE_SIZE = 10000;
     private static final Duration CACHE_TTL = Duration.ofHours(1);
-    private static final Duration STATS_REFRESH = Duration.ofMinutes(5);
     
     // Language resources
     private final Map<String, Properties> languageProperties = new ConcurrentHashMap<>();
@@ -333,7 +332,6 @@ public class OptimizedTranslationManager {
      */
     public TranslationMetrics getMetrics() {
         CacheStats translationStats = translationCache.stats();
-        CacheStats propertiesStats = propertiesCache.stats();
         
         return new TranslationMetrics(
             translationRequests.get(),

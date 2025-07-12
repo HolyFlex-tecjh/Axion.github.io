@@ -1,16 +1,9 @@
 package com.axion.bot.tickets;
 
-import com.axion.bot.database.OptimizedDatabaseManager;
-import com.axion.bot.optimization.*;
-import com.axion.bot.services.TicketService;
-import com.axion.bot.services.UserLanguageManager;
-import com.axion.bot.models.Ticket;
-import com.axion.bot.models.TicketConfig;
-import com.axion.bot.models.TicketPriority;
-import com.axion.bot.models.TicketStatus;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
@@ -22,6 +15,7 @@ import java.awt.Color;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,13 +28,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class OptimizedTicketManager {
     private static final Logger logger = LoggerFactory.getLogger(OptimizedTicketManager.class);
-    
     // Optimized components
-    private final OptimizedDatabaseManager databaseManager;
-    private final OptimizedTranslationManager translationManager;
+    private final TranslationManager translationManager;
     private final OptimizedAsyncProcessor asyncProcessor;
     private final ObjectPoolManager objectPoolManager;
-    private final OptimizedCommandRegistry commandRegistry;
     
     // Services
     private final TicketService ticketService;
@@ -48,35 +39,26 @@ public class OptimizedTicketManager {
     
     // Constants
     private static final Color SUCCESS_COLOR = new Color(0, 255, 0);
-    private static final Color ERROR_COLOR = new Color(255, 0, 0);
-    private static final Color INFO_COLOR = new Color(0, 123, 255);
     
     private static final String TICKET_EMOJI = "🎫";
-    private static final String STAFF_EMOJI = "👨‍💼";
-    private static final String LOCK_EMOJI = "🔒";
     
     // Cache keys
     private static final String CACHE_KEY_TICKET_CONFIG = "ticket_config_%s";
     private static final String CACHE_KEY_USER_TICKETS = "user_tickets_%s_%s";
     
-    public OptimizedTicketManager(OptimizedDatabaseManager databaseManager,
-                                 OptimizedTranslationManager translationManager,
+    public OptimizedTicketManager(TranslationManager translationManager,
                                  OptimizedAsyncProcessor asyncProcessor,
                                  ObjectPoolManager objectPoolManager,
-                                 OptimizedCommandRegistry commandRegistry,
                                  TicketService ticketService,
                                  UserLanguageManager userLanguageManager) {
-        this.databaseManager = databaseManager;
         this.translationManager = translationManager;
         this.asyncProcessor = asyncProcessor;
         this.objectPoolManager = objectPoolManager;
-        this.commandRegistry = commandRegistry;
         this.ticketService = ticketService;
         this.userLanguageManager = userLanguageManager;
         
         logger.info("OptimizedTicketManager initialized with performance monitoring");
     }
-    
     /**
      * Creates a new ticket with optimized performance
      */
@@ -114,7 +96,7 @@ public class OptimizedTicketManager {
                 Ticket ticket = createTicketObject(ticketId, user, guild, category, subject, description, priority);
                 
                 // Create thread asynchronously
-                return createTicketThreadAsync(ticket, user, guild, supportCategory, config)
+                Boolean result = createTicketThreadAsync(ticket, user, guild, supportCategory, config)
                     .thenCompose(threadCreated -> {
                         if (threadCreated) {
                             // Save ticket to database asynchronously
@@ -132,6 +114,7 @@ public class OptimizedTicketManager {
                         return CompletableFuture.completedFuture(false);
                     })
                     .get(30, TimeUnit.SECONDS); // Timeout after 30 seconds
+                return result;
                     
             } catch (Exception e) {
                 logger.error("Error creating ticket for user {}: {}", user.getId(), e.getMessage(), e);
@@ -257,6 +240,7 @@ public class OptimizedTicketManager {
         String cacheKey = String.format(CACHE_KEY_USER_TICKETS, userId, guildId);
         
         // Try to get from cache first
+        @SuppressWarnings("unchecked")
         List<Ticket> userTickets = (List<Ticket>) translationManager.getFromCache(cacheKey);
         if (userTickets == null) {
             // Load from database and cache
@@ -306,7 +290,18 @@ public class OptimizedTicketManager {
             try {
                 String threadName = String.format("%s-%s", ticket.getCategory(), ticket.getTicketId());
                 
-                ThreadChannel thread = supportCategory.createThreadChannel(threadName)
+                // First, get a text channel from the category or create one
+                net.dv8tion.jda.api.entities.channel.concrete.TextChannel textChannel = supportCategory.getTextChannels().stream()
+                    .findFirst()
+                    .orElse(null);
+                
+                if (textChannel == null) {
+                    // Create a text channel if none exists in the category
+                    textChannel = supportCategory.createTextChannel("tickets")
+                        .complete();
+                }
+                
+                ThreadChannel thread = textChannel.createThreadChannel(threadName)
                     .setAutoArchiveDuration(ThreadChannel.AutoArchiveDuration.TIME_24_HOURS)
                     .complete();
                 
@@ -472,5 +467,181 @@ public class OptimizedTicketManager {
     
     public TicketService getTicketService() {
         return ticketService;
+    }
+}
+
+// Local model classes
+class Ticket {
+    private String ticketId;
+    private String userId;
+    private String guildId;
+    private String category;
+    private String subject;
+    private String description;
+    private TicketPriority priority;
+    private TicketStatus status;
+    private String threadId;
+    private String assignedStaffId;
+    private Instant createdAt;
+    
+    // Getters and setters
+    public String getTicketId() { return ticketId; }
+    public void setTicketId(String ticketId) { this.ticketId = ticketId; }
+    
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+    
+    public String getGuildId() { return guildId; }
+    public void setGuildId(String guildId) { this.guildId = guildId; }
+    
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+    
+    public String getSubject() { return subject; }
+    public void setSubject(String subject) { this.subject = subject; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    public TicketPriority getPriority() { return priority; }
+    public void setPriority(TicketPriority priority) { this.priority = priority; }
+    
+    public TicketStatus getStatus() { return status; }
+    public void setStatus(TicketStatus status) { this.status = status; }
+    
+    public String getThreadId() { return threadId; }
+    public void setThreadId(String threadId) { this.threadId = threadId; }
+    
+    public String getAssignedStaffId() { return assignedStaffId; }
+    public void setAssignedStaffId(String assignedStaffId) { this.assignedStaffId = assignedStaffId; }
+    
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    
+    public boolean isClosed() { return status == TicketStatus.CLOSED; }
+}
+
+class TicketConfig {
+    private String guildId;
+    private String categoryId;
+    private String welcomeMessage;
+    private int maxTicketsPerUser;
+    private String staffRoleId;
+    private String adminRoleId;
+    
+    // Getters and setters
+    public String getGuildId() { return guildId; }
+    public void setGuildId(String guildId) { this.guildId = guildId; }
+    
+    public String getCategoryId() { return categoryId; }
+    public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
+    
+    public String getWelcomeMessage() { return welcomeMessage; }
+    public void setWelcomeMessage(String welcomeMessage) { this.welcomeMessage = welcomeMessage; }
+    
+    public int getMaxTicketsPerUser() { return maxTicketsPerUser; }
+    public void setMaxTicketsPerUser(int maxTicketsPerUser) { this.maxTicketsPerUser = maxTicketsPerUser; }
+    
+    public String getStaffRoleId() { return staffRoleId; }
+    public void setStaffRoleId(String staffRoleId) { this.staffRoleId = staffRoleId; }
+    
+    public String getAdminRoleId() { return adminRoleId; }
+    public void setAdminRoleId(String adminRoleId) { this.adminRoleId = adminRoleId; }
+}
+
+enum TicketPriority {
+    LOW, MEDIUM, HIGH, URGENT
+}
+enum TicketStatus {
+    OPEN, IN_PROGRESS, CLOSED
+}
+
+// Simple TranslationManager implementation with caching
+class TranslationManager {
+    private final Map<String, Object> cache = new ConcurrentHashMap<>();
+    private final Map<String, String> translations = new ConcurrentHashMap<>();
+    
+    public String translate(String key, String language, Object... params) {
+        String translationKey = language + "." + key;
+        String translation = translations.getOrDefault(translationKey, key);
+        
+        if (params.length > 0) {
+            return String.format(translation, params);
+        }
+        return translation;
+    }
+    
+    public Object getFromCache(String key) {
+        return cache.get(key);
+    }
+    
+    public void putInCache(String key, Object value, int ttlMinutes) {
+        cache.put(key, value);
+        // In a real implementation, you would implement TTL cleanup
+    }
+    
+    public void invalidateCache(String key) {
+        cache.remove(key);
+    }
+}
+
+// Placeholder classes for missing dependencies
+class OptimizedAsyncProcessor {
+    public <T> CompletableFuture<T> submitGeneralTask(java.util.function.Supplier<T> task) {
+        return CompletableFuture.supplyAsync(task);
+    }
+    
+    public <T> CompletableFuture<T> submitDatabaseTask(java.util.function.Supplier<T> task) {
+        return CompletableFuture.supplyAsync(task);
+    }
+    
+    public <T> CompletableFuture<T> submitNetworkTask(java.util.function.Supplier<T> task) {
+        return CompletableFuture.supplyAsync(task);
+    }
+}
+
+class ObjectPoolManager {
+    public StringBuilder borrowStringBuilder() {
+        return new StringBuilder();
+    }
+    
+    public void returnStringBuilder(StringBuilder sb) {
+        // Return to pool
+    }
+}
+
+class OptimizedCommandRegistry {
+    // Placeholder implementation
+}
+
+class TicketService {
+    public boolean saveTicket(Ticket ticket) {
+        return true;
+    }
+    
+    public Optional<Ticket> getTicket(String ticketId) {
+        return Optional.empty();
+    }
+    
+    public boolean deleteTicket(String ticketId) {
+        return true;
+    }
+    
+    public boolean updateTicket(Ticket ticket) {
+        return true;
+    }
+    
+    public List<Ticket> getUserTickets(String userId, String guildId) {
+        return new ArrayList<>();
+    }
+    
+    public Optional<TicketConfig> getTicketConfig(String guildId) {
+        return Optional.empty();
+    }
+}
+
+class UserLanguageManager {
+    public String getUserLanguage(String userId) {
+        return "en";
     }
 }

@@ -55,9 +55,9 @@ public class OptimizedDatabaseManager {
                 .register(meterRegistry);
         
         // Register active connections gauge
-        Gauge.builder("database.connections.active")
+        Gauge.builder("database.connections.active", activeConnections, AtomicInteger::get)
                 .description("Number of active database connections")
-                .register(meterRegistry, this, manager -> manager.activeConnections.get());
+                .register(meterRegistry);
     }
     
     /**
@@ -126,30 +126,36 @@ public class OptimizedDatabaseManager {
      * Get connection from pool with performance monitoring
      */
     public Connection getConnection() {
-        return connectionTimer.recordCallable(() -> {
-            try {
-                if (dataSource == null || dataSource.isClosed()) {
-                    logger.warn("⚠️ DataSource is null or closed, attempting to reconnect");
-                    connect();
-                }
-                
-                Connection connection = dataSource.getConnection();
-                if (connection != null) {
-                    connectionCounter.increment();
-                    activeConnections.incrementAndGet();
+        try {
+            return connectionTimer.recordCallable(() -> {
+                try {
+                    if (dataSource == null || dataSource.isClosed()) {
+                        logger.warn("⚠️ DataSource is null or closed, attempting to reconnect");
+                        connect();
+                    }
                     
-                    // Wrap connection to track when it's closed
-                    return new ConnectionWrapper(connection, () -> activeConnections.decrementAndGet());
+                    Connection connection = dataSource.getConnection();
+                    if (connection != null) {
+                        connectionCounter.increment();
+                        activeConnections.incrementAndGet();
+                        
+                        // Wrap connection to track when it's closed
+                        return new ConnectionWrapper(connection, () -> activeConnections.decrementAndGet());
+                    }
+                    
+                    throw new SQLException("Failed to get connection from pool");
+                    
+                } catch (SQLException e) {
+                    logger.error("❌ Failed to get database connection", e);
+                    errorCounter.increment();
+                    throw new RuntimeException("Database connection failed", e);
                 }
-                
-                throw new SQLException("Failed to get connection from pool");
-                
-            } catch (SQLException e) {
-                logger.error("❌ Failed to get database connection", e);
-                errorCounter.increment();
-                throw new RuntimeException("Database connection failed", e);
-            }
-        });
+            });
+        } catch (Exception e) {
+            logger.error("❌ Failed to record connection timing", e);
+            errorCounter.increment();
+            throw new RuntimeException("Database connection failed", e);
+        }
     }
     
     /**

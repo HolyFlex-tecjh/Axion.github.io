@@ -185,8 +185,9 @@ public class OptimizedAsyncProcessor {
      * Execute multiple tasks in parallel and wait for all to complete
      */
     @SafeVarargs
+    @SuppressWarnings("unchecked")
     public final CompletableFuture<Void> executeAllAsync(Supplier<CompletableFuture<Void>>... tasks) {
-        CompletableFuture<Void>[] futures = new CompletableFuture[tasks.length];
+        CompletableFuture<Void>[] futures = (CompletableFuture<Void>[]) new CompletableFuture[tasks.length];
         for (int i = 0; i < tasks.length; i++) {
             futures[i] = tasks[i].get();
         }
@@ -197,8 +198,9 @@ public class OptimizedAsyncProcessor {
      * Execute multiple tasks and return the first completed result
      */
     @SafeVarargs
+    @SuppressWarnings("unchecked")
     public final <T> CompletableFuture<T> executeAnyAsync(Supplier<CompletableFuture<T>>... tasks) {
-        CompletableFuture<T>[] futures = new CompletableFuture[tasks.length];
+        CompletableFuture<T>[] futures = (CompletableFuture<T>[]) new CompletableFuture[tasks.length];
         for (int i = 0; i < tasks.length; i++) {
             futures[i] = tasks[i].get();
         }
@@ -236,7 +238,7 @@ public class OptimizedAsyncProcessor {
     private <T> CompletableFuture<T> executeWithRetry(Supplier<T> supplier, int maxRetries, 
                                                      long retryDelay, TimeUnit unit, int attempt) {
         return supplyAsync(supplier)
-            .handle((result, throwable) -> {
+            .<CompletableFuture<T>>handle((result, throwable) -> {
                 if (throwable == null) {
                     return CompletableFuture.completedFuture(result);
                 }
@@ -250,7 +252,15 @@ public class OptimizedAsyncProcessor {
                 logger.debug("🔄 Retrying task (attempt {}/{}) after error: {}", 
                         attempt + 1, maxRetries, throwable.getMessage());
                 
-                return scheduleAsync(() -> {}, retryDelay, unit)
+                return CompletableFuture
+                    .runAsync(() -> {
+                        try {
+                            Thread.sleep(unit.toMillis(retryDelay));
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException(e);
+                        }
+                    }, scheduledExecutor)
                     .thenCompose(v -> executeWithRetry(supplier, maxRetries, retryDelay, unit, attempt + 1));
             })
             .thenCompose(future -> future);
