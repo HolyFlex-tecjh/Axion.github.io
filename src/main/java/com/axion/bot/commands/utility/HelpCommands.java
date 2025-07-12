@@ -254,17 +254,45 @@ public class HelpCommands {
                 .setColor(0xFF4757)
                 .addField("🔨 **" + translationManager.translate("help.moderation.user_management", userLang) + "**", 
                     "```yaml\n🔨 /ban - " + translationManager.translate("help.moderation.ban_desc", userLang) +
+                    "\n⏰ /tempban - " + translationManager.translate("help.moderation.tempban_desc", userLang) +
+                    "\n🔓 /unban - " + translationManager.translate("help.moderation.unban_desc", userLang) +
                     "\n👢 /kick - " + translationManager.translate("help.moderation.kick_desc", userLang) +
-                    "\n🔇 /mute - " + translationManager.translate("help.moderation.mute_desc", userLang) +
+                    "\n� /massban - " + translationManager.translate("help.moderation.massban_desc", userLang) +
+                    "\n🏷️ /nick - " + translationManager.translate("help.moderation.nick_desc", userLang) +
+                    "\n🎭 /role - " + translationManager.translate("help.moderation.role_desc", userLang) + "\n```", false)
+                .addField("�🔇 **" + translationManager.translate("help.moderation.mute_system", userLang) + "**", 
+                    "```yaml\n🔇 /mute - " + translationManager.translate("help.moderation.mute_desc", userLang) +
                     "\n🔊 /unmute - " + translationManager.translate("help.moderation.unmute_desc", userLang) +
-                    "\n⚠️ /warn - " + translationManager.translate("help.moderation.warn_desc", userLang) +
-                    "\n🗑️ /unwarn - " + translationManager.translate("help.moderation.unwarn_desc", userLang) + "\n```", false)
+                    "\n⏰ /tempmute - " + translationManager.translate("help.moderation.tempmute_desc", userLang) +
+                    "\n⏱️ /timeout - " + translationManager.translate("help.moderation.timeout_desc", userLang) + "\n```", false)
+                .addField("⚠️ **" + translationManager.translate("help.moderation.warning_system", userLang) + "**", 
+                    "```yaml\n⚠️ /warn - " + translationManager.translate("help.moderation.warn_desc", userLang) +
+                    "\n🗑️ /unwarn - " + translationManager.translate("help.moderation.unwarn_desc", userLang) +
+                    "\n📋 /warnings - " + translationManager.translate("help.moderation.warnings_desc", userLang) +
+                    "\n🧹 /clearwarnings - " + translationManager.translate("help.moderation.clearwarnings_desc", userLang) + "\n```", false)
                 .addField("📝 **" + translationManager.translate("help.moderation.message_management", userLang) + "**", 
-                    "```yaml\n🧹 /clear - " + translationManager.translate("help.moderation.clear_desc", userLang) +
-                    "\n📋 /modlog - " + translationManager.translate("help.moderation.modlog_desc", userLang) +
-                    "\n📊 /warnings - " + translationManager.translate("help.moderation.warnings_desc", userLang) +
+                    "```yaml\n🧹 /purge - " + translationManager.translate("help.moderation.purge_desc", userLang) +
+                    "\n🐌 /slowmode - " + translationManager.translate("help.moderation.slowmode_desc", userLang) +
                     "\n🔒 /lock - " + translationManager.translate("help.moderation.lock_desc", userLang) +
-                    "\n🔓 /unlock - " + translationManager.translate("help.moderation.unlock_desc", userLang) + "\n```", false)
+                    "\n🔓 /unlock - " + translationManager.translate("help.moderation.unlock_desc", userLang) +
+                    "\n� /lockdown - " + translationManager.translate("help.moderation.lockdown_desc", userLang) +
+                    "\n🔓 /unlockdown - " + translationManager.translate("help.moderation.unlockdown_desc", userLang) + "\n```", false)
+                .addField("🎙️ **" + translationManager.translate("help.moderation.voice_management", userLang) + "**", 
+                    "```yaml\n🎙️ /voicekick - " + translationManager.translate("help.moderation.voicekick_desc", userLang) +
+                    "\n🔇 /voiceban - " + translationManager.translate("help.moderation.voiceban_desc", userLang) +
+                    "\n🔊 /voiceunban - " + translationManager.translate("help.moderation.voiceunban_desc", userLang) + "\n```", false)
+                .addField("📊 **" + translationManager.translate("help.moderation.logs_stats", userLang) + "**", 
+                    "```yaml\n📊 /logs - " + translationManager.translate("help.moderation.logs_desc", userLang) +
+                    "\n📈 /modstats - " + translationManager.translate("help.moderation.modstats_desc", userLang) +
+                    "\n📋 /logstats - " + translationManager.translate("help.moderation.logstats_desc", userLang) +
+                    "\n� /exportlogs - " + translationManager.translate("help.moderation.exportlogs_desc", userLang) +
+                    "\n🧹 /clearlogs - " + translationManager.translate("help.moderation.clearlogs_desc", userLang) + "\n```", false)
+                .addField("⚙️ **" + translationManager.translate("help.moderation.configuration", userLang) + "**", 
+                    "```yaml\n⚙️ /modconfig - " + translationManager.translate("help.moderation.modconfig_desc", userLang) +
+                    "\n🤖 /automod - " + translationManager.translate("help.moderation.automod_desc", userLang) +
+                    "\n�️ /addfilter - " + translationManager.translate("help.moderation.addfilter_desc", userLang) +
+                    "\n📝 /setlogchannel - " + translationManager.translate("help.moderation.setlogchannel_desc", userLang) +
+                    "\n🔍 /setauditchannel - " + translationManager.translate("help.moderation.setauditchannel_desc", userLang) + "\n```", false)
                 .addField("⚖️ **" + translationManager.translate("help.moderation.requirements", userLang) + "**", 
                     "```diff\n- " + translationManager.translate("help.moderation.req_permissions", userLang) +
                     "\n- " + translationManager.translate("help.moderation.req_admin", userLang) +
@@ -351,8 +379,8 @@ public class HelpCommands {
                 .setColor(0x6F42C1)
                 .addField("📚 **" + translationManager.translate("help.overview.basic", userLang) + " (7)**", 
                     "```yaml\nhelp, ping, info, about, invite, support, uptime\n```", true)
-                .addField("🛡️ **" + translationManager.translate("help.overview.moderation", userLang) + " (11)**", 
-                    "```yaml\nban, kick, mute, unmute, warn, unwarn, clear, modlog, warnings, lock, unlock\n```", true)
+                .addField("🛡️ **" + translationManager.translate("help.overview.moderation", userLang) + " (34)**", 
+                    "```yaml\nban, tempban, unban, kick, massban, nick, role, mute, unmute, tempmute, timeout, warn, unwarn, warnings, clearwarnings, purge, slowmode, lock, unlock, lockdown, unlockdown, voicekick, voiceban, voiceunban, logs, modstats, logstats, exportlogs, clearlogs, modconfig, automod, addfilter, setlogchannel, setauditchannel\n```", true)
                 .addField("⚙️ **" + translationManager.translate("help.overview.utility", userLang) + " (12)**", 
                     "```yaml\nuserinfo, serverinfo, roleinfo, stats, avatar, created, shorturl, embed, color, poll, remind, search\n```", true)
                 .addField("🎮 **" + translationManager.translate("help.overview.fun", userLang) + " (12)**", 
@@ -360,7 +388,7 @@ public class HelpCommands {
                 .addField("🔧 **" + translationManager.translate("help.overview.config", userLang) + " (10)**", 
                     "```yaml\nconfig, setlang, logging, settings, prefix, automod, levels, permissions, roles, automation\n```", true)
                 .addField("📈 **" + translationManager.translate("help.overview.total", userLang) + "**", 
-                    "```yaml\n" + translationManager.translate("help.overview.total_desc", userLang, "52", "5") + "\n```", true)
+                    "```yaml\n" + translationManager.translate("help.overview.total_desc", userLang, "75", "5") + "\n```", true)
                 .setFooter(translationManager.translate("help.overview.footer", userLang))
                 .setTimestamp(java.time.Instant.now());
     }
