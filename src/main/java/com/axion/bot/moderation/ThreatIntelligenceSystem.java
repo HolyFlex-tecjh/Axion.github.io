@@ -46,8 +46,6 @@ public class ThreatIntelligenceSystem {
      * Analyzes content for potential threats
      */
     public ThreatAssessment analyzeContent(String content, UserContext userContext, GuildContext guildContext) {
-        long startTime = System.currentTimeMillis();
-        
         try {
             List<String> detectedThreats = new ArrayList<>();
             List<String> indicators = new ArrayList<>();
@@ -99,8 +97,6 @@ public class ThreatIntelligenceSystem {
                 maxConfidence = Math.max(maxConfidence, contentAnalysis.getConfidence());
                 evidence.putAll(contentAnalysis.getEvidence());
             }
-            
-            long analysisTime = System.currentTimeMillis() - startTime;
             
             if (detectedThreats.isEmpty()) {
                 return ThreatAssessment.noThreat(userId, guildContext.getGuildId());
@@ -288,6 +284,10 @@ public class ThreatIntelligenceSystem {
                 recommendations.add("Immediate action required");
                 recommendations.add("Consider temporary user suspension");
                 break;
+            case VERY_HIGH:
+                recommendations.add("Immediate review required");
+                recommendations.add("Escalate to security team");
+                break;
             case HIGH:
                 recommendations.add("Review content manually");
                 recommendations.add("Monitor user activity closely");
@@ -298,6 +298,10 @@ public class ThreatIntelligenceSystem {
                 break;
             case LOW:
                 recommendations.add("Log for analysis");
+                break;
+            case NONE:
+            default:
+                // No action needed for NONE or unknown levels
                 break;
         }
         

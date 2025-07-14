@@ -10,7 +10,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -426,6 +425,11 @@ public class RealTimeThreatIntelligence {
                 recommendations.add("Report to Discord Trust & Safety");
                 recommendations.add("Scan all recent messages from user");
                 break;
+            case VERY_HIGH:
+                recommendations.add("Ban user and escalate to moderators");
+                recommendations.add("Delete all related content");
+                recommendations.add("Initiate incident response procedures");
+                break;
             case HIGH:
                 recommendations.add("Timeout user and delete content");
                 recommendations.add("Review user's recent activity");
@@ -438,6 +442,9 @@ public class RealTimeThreatIntelligence {
             case LOW:
                 recommendations.add("Flag content for manual review");
                 recommendations.add("Add to watch list");
+                break;
+            case NONE:
+                // No action needed for NONE threat level
                 break;
         }
         
@@ -536,6 +543,7 @@ public class RealTimeThreatIntelligence {
                        stats.getPhishingDetections(),
                        stats.getSpamDetections(),
                        stats.getCoordinatedAttacks());
+            logger.info("Recent Threat Indicators (last 24h): {}", recentThreats);
             
         } catch (Exception e) {
             logger.error("Error generating threat intelligence report", e);

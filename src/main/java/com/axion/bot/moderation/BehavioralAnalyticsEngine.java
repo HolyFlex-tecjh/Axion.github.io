@@ -181,9 +181,8 @@ public class BehavioralAnalyticsEngine {
             return UserBehaviorInsights.notFound(userId, guildId);
         }
         
-        RiskAssessment riskAssessment = riskAssessments.getIfPresent(userId + ":" + guildId);
-        List<BehaviorPattern> patterns = detectedPatterns.getOrDefault(userId + ":" + guildId, 
-                                                                     new ArrayList<>());
+        // List<BehaviorPattern> patterns = detectedPatterns.getOrDefault(userId + ":" + guildId, 
+        //                                                              new ArrayList<>());
         
         return UserBehaviorInsights.fromProfile(profile);
     }
@@ -524,12 +523,6 @@ public class BehavioralAnalyticsEngine {
         updateUserProfile(profile, activity);
     }
     
-    private double calculateAverageRiskScore() {
-        return riskAssessments.asMap().values().stream()
-            .mapToDouble(RiskAssessment::getRiskScore)
-            .average()
-            .orElse(0.0);
-    }
     
     /**
      * Clean up old data and optimize performance

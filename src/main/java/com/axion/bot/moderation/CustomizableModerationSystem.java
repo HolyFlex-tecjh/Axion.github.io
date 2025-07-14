@@ -7,15 +7,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 // Import enum classes
-import com.axion.bot.moderation.ActionType;
-import com.axion.bot.moderation.ConditionType;
-import com.axion.bot.moderation.UITheme;
-import com.axion.bot.moderation.DashboardLayout;
-import com.axion.bot.moderation.ComparisonOperator;
-import com.axion.bot.moderation.ModerationAction;
-import com.axion.bot.moderation.ModerationResult;
-import java.util.stream.Collectors;
-import java.util.regex.Pattern;
 
 /**
  * Fully Customizable Moderation System
@@ -33,8 +24,6 @@ public class CustomizableModerationSystem {
     
     // Customization managers
     private final FilterCustomizationManager filterManager;
-    private final ActionCustomizationManager actionManager;
-    private final UICustomizationManager uiManager;
     
     public CustomizableModerationSystem() {
         this.configCache = new ConcurrentHashMap<>();
@@ -44,8 +33,6 @@ public class CustomizableModerationSystem {
         this.thresholdEngine = new ThresholdEngine();
         
         this.filterManager = new FilterCustomizationManager();
-        this.actionManager = new ActionCustomizationManager();
-        this.uiManager = new UICustomizationManager();
     }
     
     /**
@@ -70,7 +57,7 @@ public class CustomizableModerationSystem {
         CustomGuildModerationConfig config = getGuildConfig(guildId);
         
         // Apply custom filters
-        List<FilterResult> filterResults = filterManager.applyFilters(content, config.getFilterConfig(), context);
+        filterManager.applyFilters(content, config.getFilterConfig(), context);
         
         // Evaluate custom rules
         List<RuleViolation> violations = ruleEngine.evaluateRules(content, userId, config.getCustomRules(), context);
@@ -79,7 +66,7 @@ public class CustomizableModerationSystem {
         ThresholdResult thresholdResult = thresholdEngine.evaluateThresholds(userId, violations, config.getThresholdConfig());
         
         // Determine actions
-        List<ModerationAction> actions = actionEngine.determineActions(violations, thresholdResult, config.getActionConfig());
+        actionEngine.determineActions(violations, thresholdResult, config.getActionConfig());
         
         // Determine overall result based on violations and actions
         boolean allowed = violations.isEmpty();

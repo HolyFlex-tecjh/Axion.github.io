@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 // Import for EscalationResult and ConditionType
 import com.axion.bot.moderation.EscalationEngine.EscalationResult;
-import static com.axion.bot.moderation.ConditionType.*;
 
 /**
  * Smart Auto-Moderation Rules Engine with dynamic rule evaluation and adaptive enforcement
@@ -305,7 +304,6 @@ public class SmartAutoModerationEngine {
         ModerationRule primaryRule = primaryMatch.getRule();
         
         // Check for escalation based on user history
-        List<ActionRecord> userHistory = getUserActionHistory(context.getUserId(), context.getGuildId());
         EscalationResult escalation = escalationEngine.evaluateEscalation(context, primaryMatch.getResult().getConfidence());
         
         // Determine action type based on severity
@@ -593,11 +591,12 @@ public class SmartAutoModerationEngine {
         try {
             String expectedStr = condition.getValue().toString();
             ComparisonOperator operator = condition.getOperator();
-            
+
+            // Number comparison
             if (actualValue instanceof Number) {
                 double actual = ((Number) actualValue).doubleValue();
                 double expected = Double.parseDouble(expectedStr);
-                
+
                 boolean matches = false;
                 switch (operator) {
                     case EQUALS:
@@ -618,17 +617,25 @@ public class SmartAutoModerationEngine {
                     case LESS_THAN_OR_EQUAL:
                         matches = actual <= expected;
                         break;
+                    default:
+                        // Operators like CONTAINS, REGEX_MATCH, etc. are not applicable for numbers
+                        matches = false;
+                        break;
                 }
-                
+
                 if (matches) {
                     return ConditionResult.match(
                         String.format("%s %s %s", actual, operator, expected),
-                        0.8
+                        1.0
                     );
+                } else {
+                    return ConditionResult.noMatch("Condition not met for number comparison");
                 }
-            } else if (actualValue instanceof String) {
+            }
+
+            // String comparison
+            if (actualValue instanceof String) {
                 String actual = (String) actualValue;
-                
                 boolean matches = false;
                 switch (operator) {
                     case EQUALS:
@@ -646,18 +653,30 @@ public class SmartAutoModerationEngine {
                     case REGEX_MATCH:
                         matches = Pattern.matches(expectedStr, actual);
                         break;
+                    case STARTS_WITH:
+                        matches = actual.startsWith(expectedStr);
+                        break;
+                    case ENDS_WITH:
+                        matches = actual.endsWith(expectedStr);
+                        break;
+                    default:
+                        // Operators like GREATER_THAN, etc. are not applicable for strings
+                        matches = false;
+                        break;
                 }
-                
+
                 if (matches) {
                     return ConditionResult.match(
                         String.format("String condition matched: %s %s %s", actual, operator, expectedStr),
                         0.8
                     );
+                } else {
+                    return ConditionResult.noMatch("Condition not met for string comparison");
                 }
             }
-            
-            return ConditionResult.noMatch("Condition not met");
-            
+
+            return ConditionResult.noMatch("Unsupported value type for comparison");
+
         } catch (Exception e) {
             return ConditionResult.error("Error comparing values: " + e.getMessage());
         }
@@ -754,19 +773,6 @@ public class SmartAutoModerationEngine {
         }
     }
     
-    /**
-     * Get appropriate duration for moderation action
-     */
-    private long getDurationFromAction(ModerationActionType actionType) {
-        switch (actionType) {
-            case TIMEOUT:
-                return 300000; // 5 minutes in milliseconds
-            case BAN:
-                return 86400000; // 24 hours in milliseconds
-            default:
-                return 0; // No duration for other actions
-        }
-    }
     
     private String generateCacheKey(ModerationContext context) {
         return String.format("%s:%s:%s:%d", 

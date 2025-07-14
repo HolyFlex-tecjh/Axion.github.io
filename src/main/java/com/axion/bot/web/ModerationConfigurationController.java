@@ -1,6 +1,5 @@
 package com.axion.bot.web;
 
-import com.axion.bot.moderation.*;
 import com.axion.bot.database.DatabaseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
@@ -200,7 +199,7 @@ public class ModerationConfigurationController {
                     
                     if (rs.next()) {
                         String configData = rs.getString("config_data");
-                        Map<String, Object> config = objectMapper.readValue(configData, Map.class);
+                        Map<String, Object> config = objectMapper.readValue(configData, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
                         sendResponse(exchange, 200, config);
                     } else {
                         // Return default configuration
@@ -223,7 +222,7 @@ public class ModerationConfigurationController {
             
             // Read request body
             String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-            Map<String, Object> config = objectMapper.readValue(requestBody, Map.class);
+            Map<String, Object> config = objectMapper.readValue(requestBody, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
             
             try (Connection conn = databaseService.getConnection()) {
                 String sql = """
@@ -261,7 +260,7 @@ public class ModerationConfigurationController {
             
             // Read test request
             String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-            Map<String, Object> testRequest = objectMapper.readValue(requestBody, Map.class);
+            Map<String, Object> testRequest = objectMapper.readValue(requestBody, new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {});
             
             // Simulate moderation test
             Map<String, Object> testResult = simulateModerationTest(testRequest);
@@ -510,7 +509,6 @@ public class ModerationConfigurationController {
     
     private Map<String, Object> simulateModerationTest(Map<String, Object> testRequest) {
         String content = (String) testRequest.get("content");
-        Map<String, Object> config = (Map<String, Object>) testRequest.get("configuration");
         
         List<Map<String, Object>> violations = new ArrayList<>();
         List<Map<String, Object>> actions = new ArrayList<>();
@@ -551,15 +549,15 @@ public class ModerationConfigurationController {
     
     private String createStrictTemplate() {
         Map<String, Object> template = createDefaultConfig("template");
-        Map<String, Object> filters = (Map<String, Object>) template.get("filters");
+        Map<String, Object> filters = castToMap(template.get("filters"));
         
         // Enable all filters with strict settings
-        ((Map<String, Object>) filters.get("spam")).put("enabled", true);
-        ((Map<String, Object>) filters.get("spam")).put("threshold", 0.5);
-        ((Map<String, Object>) filters.get("toxicity")).put("enabled", true);
-        ((Map<String, Object>) filters.get("toxicity")).put("threshold", 0.4);
-        ((Map<String, Object>) filters.get("link")).put("enabled", true);
-        ((Map<String, Object>) filters.get("word")).put("enabled", true);
+        castToMap(filters.get("spam")).put("enabled", true);
+        castToMap(filters.get("spam")).put("threshold", 0.5);
+        castToMap(filters.get("toxicity")).put("enabled", true);
+        castToMap(filters.get("toxicity")).put("threshold", 0.4);
+        castToMap(filters.get("link")).put("enabled", true);
+        castToMap(filters.get("word")).put("enabled", true);
         
         try {
             return objectMapper.writeValueAsString(template);
@@ -570,11 +568,11 @@ public class ModerationConfigurationController {
     
     private String createCommunityTemplate() {
         Map<String, Object> template = createDefaultConfig("template");
-        Map<String, Object> filters = (Map<String, Object>) template.get("filters");
+        Map<String, Object> filters = castToMap(template.get("filters"));
         
         // Balanced settings
-        ((Map<String, Object>) filters.get("spam")).put("enabled", true);
-        ((Map<String, Object>) filters.get("toxicity")).put("enabled", true);
+        castToMap(filters.get("spam")).put("enabled", true);
+        castToMap(filters.get("toxicity")).put("enabled", true);
         
         try {
             return objectMapper.writeValueAsString(template);
@@ -585,18 +583,23 @@ public class ModerationConfigurationController {
     
     private String createGamingTemplate() {
         Map<String, Object> template = createDefaultConfig("template");
-        Map<String, Object> filters = (Map<String, Object>) template.get("filters");
+        Map<String, Object> filters = castToMap(template.get("filters"));
         
         // Gaming-optimized settings
-        ((Map<String, Object>) filters.get("spam")).put("enabled", true);
-        ((Map<String, Object>) filters.get("spam")).put("maxMessages", 8); // Allow more messages for gaming
-        ((Map<String, Object>) filters.get("link")).put("enabled", true);
-        ((Map<String, Object>) filters.get("link")).put("maxLinks", 3); // Allow more links for gaming content
+        castToMap(filters.get("spam")).put("enabled", true);
+        castToMap(filters.get("spam")).put("maxMessages", 8); // Allow more messages for gaming
+        castToMap(filters.get("link")).put("enabled", true);
+        castToMap(filters.get("link")).put("maxLinks", 3); // Allow more links for gaming content
         
         try {
             return objectMapper.writeValueAsString(template);
         } catch (Exception e) {
             return "{}";
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> castToMap(Object obj) {
+        return (Map<String, Object>) obj;
     }
 }

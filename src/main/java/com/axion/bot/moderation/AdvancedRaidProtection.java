@@ -1,7 +1,6 @@
 package com.axion.bot.moderation;
 
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import org.slf4j.Logger;
@@ -30,7 +29,6 @@ public class AdvancedRaidProtection {
     private final Map<String, List<SuspiciousActivity>> suspiciousActivities = new ConcurrentHashMap<>();
     
     // Pattern analysis
-    private final Map<String, Set<String>> suspiciousPatterns = new ConcurrentHashMap<>();
     private final Map<String, AtomicInteger> raidCounters = new ConcurrentHashMap<>();
     
     // Background processing
@@ -49,7 +47,6 @@ public class AdvancedRaidProtection {
      */
     public RaidAnalysisResult analyzeMemberJoin(GuildMemberJoinEvent event) {
         Guild guild = event.getGuild();
-        Member member = event.getMember();
         User user = event.getUser();
         String guildId = guild.getId();
         String userId = user.getId();
@@ -398,6 +395,16 @@ public class AdvancedRaidProtection {
             case COORDINATED:
                 recommendations.add("Review user patterns");
                 recommendations.add("Check for external coordination");
+                break;
+            case RAPID_JOIN:
+                recommendations.add("Investigate rapid join activity");
+                recommendations.add("Consider enabling join rate limits");
+                break;
+            case NONE:
+                // No additional recommendations for NONE
+                break;
+            case UNKNOWN:
+                recommendations.add("Manual review required for unknown raid type");
                 break;
         }
         
