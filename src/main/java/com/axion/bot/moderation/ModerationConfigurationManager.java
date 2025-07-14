@@ -1,13 +1,11 @@
 package com.axion.bot.moderation;
 
 // Removed Caffeine cache dependency
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.io.*;
 import java.nio.file.*;
 
 /**
@@ -1093,6 +1091,18 @@ class ThresholdConfig {
         this.enabled = enabled;
         this.autoScale = autoScale;
     }
+
+    public Map<String, Object> getThresholds() {
+        return thresholds;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isAutoScale() {
+        return autoScale;
+    }
 }
 
 class ActionConfig {
@@ -1106,6 +1116,22 @@ class ActionConfig {
         this.enabled = enabled;
         this.autoExecute = autoExecute;
         this.customActions = customActions;
+    }
+
+    public Map<String, Object> getActions() {
+        return actions;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isAutoExecute() {
+        return autoExecute;
+    }
+
+    public List<String> getCustomActions() {
+        return customActions;
     }
 }
 
@@ -1150,6 +1176,11 @@ class ConfigurationTemplate {
     public String getName() { return name; }
     public String getDescription() { return description; }
     public TemplateCategory getCategory() { return category; }
+    public FilterConfig getFilterConfig() { return filterConfig; }
+    public List<CustomRule> getRules() { return rules; }
+    public ThresholdConfig getThresholdConfig() { return thresholdConfig; }
+    public ActionConfig getActionConfig() { return actionConfig; }
+    public UIConfig getUiConfig() { return uiConfig; }
 }
 
 enum TemplateCategory {

@@ -172,26 +172,25 @@ public class EscalationEngine {
     }
     
     /**
-     * Represents a violation event for escalation tracking
-     */
-    private static class ViolationEvent {
-        private final Instant timestamp;
-        private final String guildId;
-        private final String channelId;
-        private final double confidence;
-        
-        public ViolationEvent(Instant timestamp, String guildId, String channelId, double confidence) {
-            this.timestamp = timestamp;
-            this.guildId = guildId;
-            this.channelId = channelId;
-            this.confidence = confidence;
+         * Represents a violation event for escalation tracking
+         */
+        private static class ViolationEvent {
+            private final Instant timestamp;
+            private final String guildId;
+            private final String channelId;
+            private final double confidence;
+            
+            public ViolationEvent(Instant timestamp, String guildId, String channelId, double confidence) {
+                this.timestamp = timestamp;
+                this.guildId = guildId;
+                this.channelId = channelId;
+                this.confidence = confidence;
+            }
+            
+            public Instant getTimestamp() { return timestamp; }
+            public String getGuildId() { return guildId; }
+            public double getConfidence() { return confidence; }
         }
-        
-        public Instant getTimestamp() { return timestamp; }
-        public String getGuildId() { return guildId; }
-        public String getChannelId() { return channelId; }
-        public double getConfidence() { return confidence; }
-    }
     
     /**
      * Result of escalation evaluation

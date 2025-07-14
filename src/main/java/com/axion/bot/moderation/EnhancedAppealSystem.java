@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -64,7 +62,6 @@ public class EnhancedAppealSystem {
      * Submit a new appeal
      */
     public AppealSubmissionResult submitAppeal(AppealRequest request) {
-        long startTime = System.currentTimeMillis();
         totalAppeals.incrementAndGet();
         
         try {

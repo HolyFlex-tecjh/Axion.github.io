@@ -44,8 +44,6 @@ public class SmartRulesEngine {
         Map<String, Double> ruleScores = new HashMap<>();
         double overallScore = 0.0;
         ModerationSeverity maxSeverity = ModerationSeverity.LOW;
-        String primaryViolation = null;
-        List<String> recommendations = new ArrayList<>();
         
         long startTime = System.currentTimeMillis();
         
@@ -71,12 +69,10 @@ public class SmartRulesEngine {
                         
                         if (rule.getSeverity().ordinal() > maxSeverity.ordinal()) {
                             maxSeverity = rule.getSeverity();
-                            primaryViolation = rule.getName();
                         }
                         
                         // Add rule-specific recommendations if needed
                         updateRuleEffectiveness(rule.getId(), true);
-                    } else {
                         updateRuleEffectiveness(rule.getId(), false);
                     }
                 } catch (Exception e) {
@@ -143,20 +139,16 @@ public class SmartRulesEngine {
                     return RuleEvaluationResult.error("Unknown rule type: " + ruleType);
             }
             
-            long evaluationTime = System.currentTimeMillis() - startTime;
-            
             if (result.isMatch()) {
-                return RuleEvaluationResult.match(result.getConfidence(), evaluationTime);
+                return RuleEvaluationResult.match(result.getConfidence(), System.currentTimeMillis() - startTime);
             } else {
                 return RuleEvaluationResult.noMatch();
             }
             
         } catch (Exception e) {
-            long evaluationTime = System.currentTimeMillis() - startTime;
             return RuleEvaluationResult.error("Error evaluating rule: " + e.getMessage());
         }
     }
-    
     private String determineRuleType(ModerationRule rule) {
         // Determine rule type based on the first condition's type
         if (!rule.getConditions().isEmpty()) {

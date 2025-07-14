@@ -29,14 +29,12 @@ public class EnhancedModerationAnalytics {
     private final ReportingEngine reportingEngine;
     
     // Configuration
-    private final AnalyticsConfig config;
+    // private final AnalyticsConfig config;
     
     // Background tasks
     private final ScheduledExecutorService scheduler;
     
     public EnhancedModerationAnalytics(AnalyticsConfig config) {
-        this.config = config;
-        
         // Initialize caches
         this.guildMetricsCache = Caffeine.newBuilder()
             .maximumSize(1000)
@@ -411,6 +409,11 @@ public class EnhancedModerationAnalytics {
         List<String> recommendations = new ArrayList<>();
         
         switch (riskLevel) {
+            case CRITICAL:
+                recommendations.add("Immediate action required: suspend or ban user");
+                recommendations.add("Escalate to senior moderators for review");
+                recommendations.add("Audit all recent user activity for further violations");
+                break;
             case HIGH:
                 recommendations.add("Consider temporary restrictions or closer monitoring");
                 recommendations.add("Review user's recent activity and apply appropriate sanctions");
@@ -807,10 +810,9 @@ class UserBehaviorAnalysis {
 // Placeholder classes for analytics engines
 
 class TrendAnalysisEngine {
-    private final TrendAnalysisConfig config;
     
     public TrendAnalysisEngine(TrendAnalysisConfig config) {
-        this.config = config;
+        // No-op: config parameter is currently unused
     }
     
     public TrendAnalysis analyzeTrends(List<ModerationEvent> events, Duration timeRange) {
@@ -828,10 +830,8 @@ class TrendAnalysisEngine {
 }
 
 class AnomalyDetectionEngine {
-    private final AnomalyDetectionConfig config;
-    
     public AnomalyDetectionEngine(AnomalyDetectionConfig config) {
-        this.config = config;
+        // No-op: config parameter is currently unused
     }
     
     public List<Anomaly> detectAnomalies(List<ModerationEvent> events) {
@@ -850,10 +850,8 @@ class AnomalyDetectionEngine {
 }
 
 class PredictiveAnalyticsEngine {
-    private final PredictiveAnalyticsConfig config;
-    
     public PredictiveAnalyticsEngine(PredictiveAnalyticsConfig config) {
-        this.config = config;
+        // No-op: config parameter is currently unused
     }
     
     public PredictionResult generatePredictions(List<ModerationEvent> events) {
@@ -871,10 +869,8 @@ class PredictiveAnalyticsEngine {
 }
 
 class ReportingEngine {
-    private final ReportingConfig config;
-    
     public ReportingEngine(ReportingConfig config) {
-        this.config = config;
+        // No-op: config parameter is currently unused
     }
     
     public ModerationReport generateReport(String guildId, ReportType reportType, Duration timeRange) {

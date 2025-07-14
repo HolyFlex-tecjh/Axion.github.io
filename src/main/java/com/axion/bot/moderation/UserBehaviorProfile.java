@@ -74,6 +74,18 @@ public class UserBehaviorProfile {
             case JOIN:
                 metrics.incrementActivityCount("joins");
                 break;
+            case EDIT:
+                // No specific metric for EDIT
+                break;
+            case DELETE:
+                // No specific metric for DELETE
+                break;
+            case VOICE_LEAVE:
+                // No specific metric for VOICE_LEAVE
+                break;
+            case LEAVE:
+                // No specific metric for LEAVE
+                break;
         }
         
         // Clean old activity history (keep last 30 days)

@@ -2,7 +2,6 @@ package com.axion.bot.moderation;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Comprehensive insights about user behavior patterns and trends

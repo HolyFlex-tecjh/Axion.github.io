@@ -1,9 +1,7 @@
 package com.axion.bot.moderation;
 
-import com.axion.bot.database.OptimizedDatabaseManager;
 import com.axion.bot.utils.OptimizedAsyncProcessor;
 import com.axion.bot.utils.OptimizedTranslationManager;
-import com.axion.bot.utils.ObjectPoolManager;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -13,37 +11,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-// Missing imports for moderation classes
-import com.axion.bot.moderation.ThreatLevel;
-import com.axion.bot.moderation.ModerationAction;
-import com.axion.bot.moderation.ModerationSeverity;
-import com.axion.bot.moderation.ModerationResult;
-import com.axion.bot.moderation.ModerationConfig;
-import com.axion.bot.moderation.UserModerationProfile;
-import com.axion.bot.moderation.AIContentAnalyzer;
-import com.axion.bot.moderation.BehavioralAnalytics;
-import com.axion.bot.moderation.SmartRulesEngine;
-import com.axion.bot.moderation.ThreatIntelligenceSystem;
-import com.axion.bot.moderation.AdvancedRaidProtection;
-import com.axion.bot.moderation.EnhancedPattern;
-import com.axion.bot.moderation.ThreatIntelligenceData;
-import com.axion.bot.moderation.ContentAnalysisResult;
-import com.axion.bot.moderation.BehaviorAnalysisResult;
-import com.axion.bot.moderation.RuleEvaluationResult;
-import com.axion.bot.moderation.ConversationContext;
-import com.axion.bot.moderation.UserBehaviorProfile;
-import com.axion.bot.moderation.UserContext;
-import com.axion.bot.moderation.GuildContext;
-import com.axion.bot.moderation.ContentRuleEngine;
-import com.axion.bot.moderation.BehaviorRuleEngine;
-import com.axion.bot.moderation.ContextRuleEngine;
 
 /**
  * Optimized Moderation Manager with enhanced performance and AI-powered features
@@ -53,10 +24,8 @@ public class OptimizedModerationManager {
     private static final Logger logger = LoggerFactory.getLogger(OptimizedModerationManager.class);
     
     // Core dependencies
-    private final OptimizedDatabaseManager databaseManager;
     private final OptimizedAsyncProcessor asyncProcessor;
-    private final OptimizedTranslationManager translationManager;
-    private final ObjectPoolManager objectPoolManager;
+    // private final OptimizedTranslationManager translationManager; // Removed unused field
     
     // Enhanced caching system
     private final Cache<String, UserModerationProfile> userProfileCache;
@@ -69,7 +38,6 @@ public class OptimizedModerationManager {
     private final BehavioralAnalytics behavioralAnalytics;
     private final SmartRulesEngine smartRulesEngine;
     private final ThreatIntelligenceSystem threatIntelSystem;
-    private final AdvancedRaidProtection raidProtection;
     
     // Performance tracking
     private final Map<String, Long> processingTimes = new ConcurrentHashMap<>();
@@ -80,22 +48,16 @@ public class OptimizedModerationManager {
     private final List<EnhancedPattern> spamPatterns = new ArrayList<>();
     private final List<EnhancedPattern> threatPatterns = new ArrayList<>();
     
-    public OptimizedModerationManager(OptimizedDatabaseManager databaseManager,
-                                    OptimizedAsyncProcessor asyncProcessor,
-                                    OptimizedTranslationManager translationManager,
-                                    ObjectPoolManager objectPoolManager) {
-        this.databaseManager = databaseManager;
+    public OptimizedModerationManager(OptimizedAsyncProcessor asyncProcessor,
+                                    OptimizedTranslationManager translationManager) {
         this.asyncProcessor = asyncProcessor;
-        this.translationManager = translationManager;
-        this.objectPoolManager = objectPoolManager;
-        
+        // this.translationManager = translationManager; // Removed unused assignment
         // Initialize caching system
         this.userProfileCache = Caffeine.newBuilder()
             .maximumSize(10000)
             .expireAfterWrite(Duration.ofMinutes(30))
             .recordStats()
             .build();
-            
         this.guildConfigCache = Caffeine.newBuilder()
             .maximumSize(1000)
             .expireAfterWrite(Duration.ofHours(1))
@@ -132,8 +94,9 @@ public class OptimizedModerationManager {
         this.threatIntelSystem = new ThreatIntelligenceSystem(threatConfig);
         
         // Initialize raid protection with config
-        AdvancedRaidProtection.RaidProtectionConfig raidConfig = new AdvancedRaidProtection.RaidProtectionConfig();
-        this.raidProtection = new AdvancedRaidProtection(raidConfig);
+        // Initialize raid protection with config
+        // AdvancedRaidProtection.RaidProtectionConfig raidConfig = new AdvancedRaidProtection.RaidProtectionConfig();
+        // this.raidProtection = new AdvancedRaidProtection(raidConfig);
         
         initializeEnhancedPatterns();
     }
@@ -517,22 +480,6 @@ public class OptimizedModerationManager {
         return new ArrayList<>();
     }
     
-    private UserActivity convertToUserActivity(RecentActivity recentActivity) {
-        // Convert activity type string to ActivityType enum
-        ActivityType activityType;
-        try {
-            activityType = ActivityType.valueOf(recentActivity.getActivityType().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            activityType = ActivityType.MESSAGE; // Default fallback
-        }
-        
-        return new UserActivity(
-            recentActivity.getUserId(),
-            recentActivity.getContent(),
-            recentActivity.getTimestamp(),
-            activityType
-        );
-    }
     
     private UserBehaviorProfile convertToUserBehaviorProfile(UserModerationProfile moderationProfile) {
         // Create a UserBehaviorProfile from UserModerationProfile

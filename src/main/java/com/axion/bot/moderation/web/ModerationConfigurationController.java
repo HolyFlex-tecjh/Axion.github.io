@@ -2,7 +2,6 @@ package com.axion.bot.moderation.web;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.time.Duration;
 import java.time.Instant;
 
 // Missing classes and enums
@@ -545,8 +544,6 @@ public class ModerationConfigurationController {
             ModerationTestRequest request) {
         
         try {
-            // Apply test configuration temporarily
-            Object originalConfig = moderationSystem.getGuildConfig(guildId);
             // For now, skip updating test configuration since types don't match
             // moderationSystem.updateGuildConfig(guildId, request.getTestConfiguration());
             

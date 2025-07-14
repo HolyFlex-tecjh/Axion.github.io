@@ -11,13 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-// Missing imports for threat detection classes
-import com.axion.bot.moderation.ThreatDetection;
-import com.axion.bot.moderation.ThreatLevel;
-import com.axion.bot.moderation.ThreatType;
-import com.axion.bot.moderation.ContentType;
-import com.axion.bot.moderation.UserModerationProfile;
-
 /**
  * Advanced Spam Detection Engine
  * Provides sophisticated spam detection using multiple algorithms
@@ -78,8 +71,7 @@ public class SpamDetectionEngine {
             totalScore += domainFlag.getScore();
         }
         
-        // Determine if spam is detected
-        boolean isDetected = totalScore > 30; // Threshold for detection
+        // Determine threat level based on score
         ThreatLevel level = determineThreatLevel(totalScore);
         
         Map<String, Object> details = new HashMap<>();

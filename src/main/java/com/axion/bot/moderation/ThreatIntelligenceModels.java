@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import com.axion.bot.moderation.ActivityType;
 
 /**
  * Supporting models and classes for the Real-time Threat Intelligence System
@@ -380,12 +379,10 @@ class ThreatIntelligenceStats {
 
 // Detection Engines
 class MalwareDetectionEngine {
-    private final MalwareDetectionConfig config;
     private final Set<String> knownMalwareHashes;
     private final List<Pattern> malwarePatterns;
     
     public MalwareDetectionEngine(MalwareDetectionConfig config) {
-        this.config = config;
         this.knownMalwareHashes = new HashSet<>();
         this.malwarePatterns = initializeMalwarePatterns();
         
@@ -471,13 +468,11 @@ class MalwareDetectionEngine {
 }
 
 class PhishingDetectionEngine {
-    private final PhishingDetectionConfig config;
     private final Set<String> knownPhishingDomains;
     private final List<Pattern> phishingPatterns;
     private final Set<String> legitimateDomains;
     
     public PhishingDetectionEngine(PhishingDetectionConfig config) {
-        this.config = config;
         this.knownPhishingDomains = new HashSet<>();
         this.phishingPatterns = initializePhishingPatterns();
         this.legitimateDomains = initializeLegitimateDomainsSet();
@@ -759,14 +754,12 @@ class CoordinatedAttackDetector {
 // UserActivity class removed - using separate UserActivity.java file
 
 class ThreatFeedManager {
-    private final ThreatFeedConfig config;
     private final Map<String, Set<String>> maliciousDomains;
     private final Map<String, Set<String>> maliciousIPs;
     private final Map<String, Set<String>> suspiciousIPs;
     private final List<ThreatIndicator> threatIndicators;
     
     public ThreatFeedManager(ThreatFeedConfig config) {
-        this.config = config;
         this.maliciousDomains = new ConcurrentHashMap<>();
         this.maliciousIPs = new ConcurrentHashMap<>();
         this.suspiciousIPs = new ConcurrentHashMap<>();
