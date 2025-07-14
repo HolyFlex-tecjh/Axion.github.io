@@ -1,4 +1,457 @@
 /* Dashboard Styles */
+
+/* Emergency visibility fix for dashboard */
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: #0f0f23 !important;
+    color: #ffffff !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+}
+
+/* Custom scrollbar styling to match theme */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(15, 15, 35, 0.8);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #5865F2, #8B5CF6);
+    border-radius: 6px;
+    border: 2px solid rgba(15, 15, 35, 0.8);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #6875F3, #9C6CF7);
+    box-shadow: 0 0 10px rgba(88, 101, 242, 0.3);
+}
+
+::-webkit-scrollbar-corner {
+    background: rgba(15, 15, 35, 0.8);
+}
+
+/* Firefox scrollbar styling */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #5865F2 rgba(15, 15, 35, 0.8);
+}
+
+/* Form Controls */
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #5865F2;
+    box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Setting Groups */
+.setting-group {
+    margin-bottom: 24px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.setting-group h3 {
+    margin: 0 0 12px 0;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #5865F2, #8B5CF6);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+/* Analytics Grid */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.analytics-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.analytics-card h3 {
+    margin: 0 0 16px 0;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Commands List */
+.commands-list {
+    margin-top: 24px;
+}
+
+.command-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 12px;
+}
+
+.command-name {
+    font-family: 'Courier New', monospace;
+    color: #5865F2;
+    font-weight: 600;
+}
+
+.command-response {
+    color: rgba(255, 255, 255, 0.8);
+    flex: 1;
+    margin: 0 16px;
+}
+
+.command-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.command-uses {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    margin-right: 16px;
+}
+
+/* Roles List */
+.roles-list {
+    margin-top: 24px;
+}
+
+.role-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 12px;
+}
+
+.role-name {
+    color: #8B5CF6;
+    font-weight: 600;
+}
+
+.role-permissions {
+    color: rgba(255, 255, 255, 0.6);
+    flex: 1;
+    margin: 0 16px;
+    font-size: 14px;
+}
+
+.role-members {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    margin-right: 16px;
+}
+
+.role-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+/* Force dashboard container to be visible */
+.dashboard-container {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%) !important;
+    height: 100vh !important;
+    overflow: visible !important;
+}
+
+/* Force sidebar to be visible */
+.sidebar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(15, 15, 35, 0.95) !important;
+    color: #ffffff !important;
+}
+
+/* Force main content to be visible */
+.main-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex: 1;
+    background: transparent !important;
+    color: #ffffff !important;
+    overflow-y: auto !important;
+    height: 100vh !important;
+}
+
+/* Force top bar to be visible */
+.top-bar {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(15, 15, 35, 0.95) !important;
+    color: #ffffff !important;
+    padding: 20px !important;
+    border-bottom: 1px solid rgba(88, 101, 242, 0.2) !important;
+}
+
+/* Force dashboard content to be visible */
+.dashboard-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 24px !important;
+    color: #ffffff !important;
+    background: transparent !important;
+}
+
+/* Force stats cards to be visible */
+.stats-grid {
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    gap: 24px !important;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+    margin-bottom: 32px !important;
+}
+
+.stat-card {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(26, 26, 46, 0.8) !important;
+    color: #ffffff !important;
+    padding: 24px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(88, 101, 242, 0.2) !important;
+}
+
+/* Force sidebar menu items to be visible */
+.menu-item {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #B9BBBE !important;
+}
+
+.menu-item.active {
+    color: #5865F2 !important;
+}
+
+/* Force sidebar header to be visible */
+.sidebar-header {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #ffffff !important;
+}
+
+/* Force all dashboard sections to be visible */
+section, .section {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #ffffff !important;
+}
+
+/* Force charts and graphs to be visible */
+.chart-container, .chart, .graph {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(26, 26, 46, 0.8) !important;
+    color: #ffffff !important;
+}
+
+/* Force activity feed to be visible */
+.activity-feed {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(26, 26, 46, 0.8) !important;
+    color: #ffffff !important;
+    padding: 24px !important;
+    border-radius: 16px !important;
+}
+
+/* Force quick actions to be visible */
+.quick-actions {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    gap: 16px !important;
+    flex-wrap: wrap !important;
+}
+
+.action-button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(88, 101, 242, 0.2) !important;
+    color: #ffffff !important;
+    padding: 12px 24px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(88, 101, 242, 0.3) !important;
+    text-decoration: none !important;
+}
+
+/* Ripple effect for buttons */
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: ripple-animation 0.6s linear;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Enhanced hover effects */
+.stat-card:hover,
+.analytics-card:hover,
+.command-item:hover,
+.role-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(88, 101, 242, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* Setting feedback animation */
+.setting-feedback {
+    animation: fadeInUp 0.3s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Improved form controls */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2);
+    outline: none;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--primary-color);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+/* Force all text elements to be visible */
+h1, h2, h3, h4, h5, h6, p, span, div {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Force icons to be visible */
+i, .icon {
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: inherit !important;
+}
+
 :root {
     --primary-color: #5865F2;
     --secondary-color: #5865F2;
@@ -18,7 +471,7 @@
     height: 100vh;
     background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
     position: relative;
-    overflow: hidden;
+    overflow: visible !important;
 }
 
 .dashboard-container::before {

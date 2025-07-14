@@ -1,16 +1,211 @@
 /* Commands Page Specific Styles */
 
-/* Global layout improvements */
-body {
+/* Emergency visibility fix */
+html, body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
+    background: #0f0f23 !important;
+    color: #ffffff !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    overflow-x: hidden;
+}
+
+/* Force all sections to be visible */
+section {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.commands-hero,
+.popular-commands,
+.commands {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: #0f0f23 !important;
+    color: #ffffff !important;
+}
+
+.container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.hero-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    text-align: center;
+    padding: 2rem;
+}
+
+.hero-title {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff !important;
+    margin-bottom: 1rem;
+}
+
+.hero-description {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-size: 1.1rem;
+    color: #a0a9c0 !important;
+    margin-bottom: 2rem;
+}
+
+/* Emergency styles for popular commands */
+.popular-commands {
+    padding: 4rem 0 !important;
+    background: #1a1a2e !important;
+}
+
+.section-header {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff !important;
+    margin-bottom: 1rem;
+}
+
+.popular-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.popular-card {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(88, 101, 242, 0.2);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    color: #ffffff !important;
+}
+
+.popular-card h3 {
+    color: #5865f2 !important;
+    font-size: 1.5rem;
+    margin: 1rem 0;
+}
+
+.popular-card p {
+    color: #a0a9c0 !important;
+    margin-bottom: 1rem;
+}
+
+/* Emergency styles for commands section */
+.commands {
+    padding: 4rem 0 !important;
+    background: #0f0f23 !important;
+}
+
+.commands-search-container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin-bottom: 3rem;
+}
+
+.search-box {
+    display: flex !important;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(88, 101, 242, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.search-input {
+    background: transparent !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 1rem;
+    flex: 1;
+    outline: none;
+}
+
+.search-input::placeholder {
+    color: #a0a9c0 !important;
+}
+
+/* Global layout improvements */
+body {
     display: flex;
     flex-direction: column;
 }
 
 main {
     flex: 1;
+}
+
+/* Emergency navbar visibility */
+.navbar {
+    background: rgba(15, 15, 35, 0.95) !important;
+    color: #ffffff !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+}
+
+.nav-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.nav-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem;
+    color: #ffffff !important;
+}
+
+.nav-menu {
+    display: flex !important;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: #a0a9c0 !important;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: #5865f2 !important;
 }
 
 /* Container base styles */
@@ -50,13 +245,16 @@ section {
 /* Commands Hero Section */
 .commands-hero {
     min-height: 60vh;
-    background: var(--gradient-dark);
-    display: flex;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%) !important;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
     padding: 6rem 0;
+    color: #ffffff !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .commands-hero::before {

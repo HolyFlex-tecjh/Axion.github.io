@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Axion Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.png" alt="Axion Bot" class="logo">
+                <span class="logo-text">Axion</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Hjem</a>
+                <a href="index.html#features" class="nav-link">Funktioner</a>
+                <a href="commands.html" class="nav-link">Kommandoer</a>
+                <a href="pricing.html" class="nav-link">Priser</a>
+                <a href="index.html#support" class="nav-link">Support</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary" id="loginBtn">Login</a>
+                <a href="index.html#invite" class="btn btn-primary">Tilføj til Server</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="hero-section blog-hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1><i class="fas fa-blog"></i> Axion Blog</h1>
+                    <p>Seneste nyheder, opdateringer og tips til at få mest muligt ud af din Discord server</p>
+                    <div class="blog-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="150">0</span><span class="stat-symbol">+</span>
+                            <span class="stat-label">Blog Indlæg</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="25000">0</span><span class="stat-symbol">+</span>
+                            <span class="stat-label">Månedlige Læsere</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="12">0</span>
+                            <span class="stat-label">Kategorier</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="blog-categories">
+            <div class="container">
+                <h2>Kategorier</h2>
+                <div class="categories-filter">
+                    <button class="category-btn active" data-category="all">Alle</button>
+                    <button class="category-btn" data-category="updates">Opdateringer</button>
+                    <button class="category-btn" data-category="tutorials">Tutorials</button>
+                    <button class="category-btn" data-category="tips">Tips & Tricks</button>
+                    <button class="category-btn" data-category="community">Community</button>
+                    <button class="category-btn" data-category="technical">Teknisk</button>
+                    <button class="category-btn" data-category="announcements">Meddelelser</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="featured-posts">
+            <div class="container">
+                <h2>Fremhævede Indlæg</h2>
+                <div class="featured-grid">
+                    <article class="featured-post main-feature">
+                        <div class="post-image">
+                            <div class="image-placeholder">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div class="post-category">Opdateringer</div>
+                        </div>
+                        <div class="post-content">
+                            <h3>Axion Bot 2.1.0 - Revolutionerende Nye Funktioner</h3>
+                            <p>Vi er stolte af at præsentere den største opdatering til Axion Bot nogensinde. Med avanceret AI-moderation, forbedret musik streaming og helt nye analytics funktioner...</p>
+                            <div class="post-meta">
+                                <span class="post-author"><i class="fas fa-user"></i> Axion Team</span>
+                                <span class="post-date"><i class="fas fa-calendar"></i> 15. December 2024</span>
+                                <span class="post-read-time"><i class="fas fa-clock"></i> 5 min læsning</span>
+                            </div>
+                            <a href="#" class="read-more-btn">Læs mere <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </article>
+
+                    <div class="featured-sidebar">
+                        <article class="featured-post sidebar-feature">
+                            <div class="post-image">
+                                <div class="image-placeholder small">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                <div class="post-category">Tips & Tricks</div>
+                                <h4>10 Måder at Forbedre Server Sikkerhed</h4>
+                                <div class="post-meta">
+                                    <span class="post-date">12. December 2024</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="featured-post sidebar-feature">
+                            <div class="post-image">
+                                <div class="image-placeholder small">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                <div class="post-category">Tutorials</div>
+                                <h4>Sådan Opsætter du Musik Bot Perfekt</h4>
+                                <div class="post-meta">
+                                    <span class="post-date">10. December 2024</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="featured-post sidebar-feature">
+                            <div class="post-image">
+                                <div class="image-placeholder small">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                <div class="post-category">Community</div>
+                                <h4>Community Spotlight: Gaming Servers</h4>
+                                <div class="post-meta">
+                                    <span class="post-date">8. December 2024</span>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="blog-posts">
+            <div class="container">
+                <h2>Seneste Indlæg</h2>
+                <div class="posts-grid">
+                    <article class="blog-post" data-category="updates">
+                        <div class="post-image">
+                            <div class="image-placeholder">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="post-category">Opdateringer</div>
+                        </div>
+                        <div class="post-content">
+                            <h3>Performance Forbedringer i Version 2.0.8</h3>
+                            <p>Vi har optimeret Axion Bot's performance med op til 40% hurtigere responstider og reduceret memory forbrug...</p>
+                            <div class="post-meta">
+                                <span class="post-author"><i class="fas fa-user"></i> Tech Team</span>
+                                <span class="post-date"><i class="fas fa-calendar"></i> 5. December 2024</span>
+                                <span class="post-read-time"><i class="fas fa-clock"></i> 3 min</span>
+                            </div>
+                            <a href="#" class="read-more-btn">Læs mere</a>
+                        </div>
+                    </article>
+
+                    <article class="blog-post" data-category="tutorials">
+                        <div class="post-image">
+                            <div class="image-placeholder">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="post-category">Tutorials</div>
+                        </div>
+                        <div class="post-content">
+                            <h3>Komplet Guide til Custom Commands</h3>
+                            <p>Lær hvordan du opretter kraftfulde custom commands der kan automatisere næsten alt på din Discord server...</p>
+                            <div class="post-meta">
+                                <span class="post-author"><i class="fas fa-user"></i> Sarah Jensen</span>
+                                <span class="post-date"><i class="fas fa-calendar"></i> 2. December 2024</span>
+                                <span class="post-read-time"><i class="fas fa-clock"></i> 8 min</span>
+                            </div>
+                            <a href="#" class="read-more-btn">Læs mere</a>
+                        </div>
+                    </article>
+
+                    <article class="blog-post" data-category="tips">
+                        <div class="post-image">
+                            <div class="image-placeholder">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="post-category">Tips & Tricks</div>
+                        </div>
+                        <div class="post-content">
+                            <h3>5 Skjulte Funktioner du Ikke Kendte</h3>
+                            <p>Opdag kraftfulde funktioner i Axion Bot som de fleste brugere ikke ved eksisterer...</p>
+                            <div class="post-meta">
+                                <span class="post-author"><i class="fas fa-user"></i> Mike Hansen</span>
+                                <span class="post-date"><i class="fas fa-calendar"></i> 28. November 2024</span>
+                                <span class="post-read-time"><i class="fas fa-clock"></i> 4 min</span>
+                            </div>
+                            <a href="#" class="read-more-btn">Læs mere</a>
+                        </div>
+                    </article>
+
+                    <article class="blog-post" data-category="community">
+                        <div class="post-image">
+                            <div class="image-placeholder">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="post-category">Community</div>
+                        </div>
+                        <div class="post-content">
+                            <h3>Server af Måneden: Nordic Esports</h3>
+                            <p>Vi fremhæver Nordic Esports, en fantastisk gaming community der bruger Axion Bot til at skabe en engagerende oplevelse...</p>
+                            <div class="post-meta">
+                                <span class="post-author"><i class="fas fa-user"></i> Community Team</span>
+                                <span class="post-date"><i class="fas fa-calendar"></i> 25. November 2024</span>
+                                <span class="post-read-time"><i class="fas fa-clock"></i> 6 min</span>
+                            </div>
+                            <a href="#" class="read-more-btn">Læs mere</a>
+                        </div>
+                    </article>
+
+                    <article class="blog-post" data-category="technical">
+                        <div class="post-image">
+                            <div class="image-placeholder">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <div class="post-category">Teknisk</div>
+                        </div>
+                        <div class="post-content">
+                            <h3>API Dokumentation Opdatering</h3>
+                            <p>Vi har udvidet vores API med nye endpoints og forbedret dokumentation for udviklere...</p>
+                            <div class="post-meta">
+                                <span class="post-author"><i class="fas fa-user"></i> Dev Team</span>
+                                <span class="post-date"><i class="fas fa-calendar"></i> 22. November 2024</span>
+                                <span class="post-read-time"><i class="fas fa-clock"></i> 5 min</span>
+                            </div>
+                            <a href="#" class="read-more-btn">Læs mere</a>
+                        </div>
+                    </article>
+
+                    <article class="blog-post" data-category="announcements">
+                        <div class="post-image">
+                            <div class="image-placeholder">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <div class="post-category">Meddelelser</div>
+                        </div>
+                        <div class="post-content">
+                            <h3>Black Friday Tilbud - 50% Rabat</h3>
+                            <p>Fejr Black Friday med os! Få 50% rabat på alle premium planer i en begrænset periode...</p>
+                            <div class="post-meta">
+                                <span class="post-author"><i class="fas fa-user"></i> Marketing Team</span>
+                                <span class="post-date"><i class="fas fa-calendar"></i> 20. November 2024</span>
+                                <span class="post-read-time"><i class="fas fa-clock"></i> 2 min</span>
+                            </div>
+                            <a href="#" class="read-more-btn">Læs mere</a>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="load-more-section">
+                    <button class="btn btn-secondary load-more-btn">
+                        <i class="fas fa-plus"></i>
+                        Indlæs flere indlæg
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="newsletter-signup">
+            <div class="container">
+                <div class="newsletter-content">
+                    <div class="newsletter-text">
+                        <h2><i class="fas fa-envelope"></i> Hold dig Opdateret</h2>
+                        <p>Få de seneste nyheder, tips og opdateringer direkte i din indbakke</p>
+                    </div>
+                    <form class="newsletter-form">
+                        <div class="form-group">
+                            <input type="email" placeholder="Din email adresse" required>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Tilmeld
+                            </button>
+                        </div>
+                        <div class="newsletter-benefits">
+                            <span><i class="fas fa-check"></i> Ugentlige tips</span>
+                            <span><i class="fas fa-check"></i> Tidlige opdateringer</span>
+                            <span><i class="fas fa-check"></i> Eksklusive indhold</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="popular-tags">
+            <div class="container">
+                <h2>Populære Tags</h2>
+                <div class="tags-cloud">
+                    <a href="#" class="tag">#discord-bot</a>
+                    <a href="#" class="tag">#moderation</a>
+                    <a href="#" class="tag">#musik</a>
+                    <a href="#" class="tag">#custom-commands</a>
+                    <a href="#" class="tag">#server-management</a>
+                    <a href="#" class="tag">#automation</a>
+                    <a href="#" class="tag">#analytics</a>
+                    <a href="#" class="tag">#community</a>
+                    <a href="#" class="tag">#tutorials</a>
+                    <a href="#" class="tag">#tips</a>
+                    <a href="#" class="tag">#updates</a>
+                    <a href="#" class="tag">#api</a>
+                    <a href="#" class="tag">#security</a>
+                    <a href="#" class="tag">#performance</a>
+                    <a href="#" class="tag">#features</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Axion Bot</h3>
+                <p>Den ultimative Discord bot til din server</p>
+            </div>
+            <div class="footer-section">
+                <h4>Links</h4>
+                <ul>
+                    <li><a href="index.html#features">Funktioner</a></li>
+                    <li><a href="commands.html">Kommandoer</a></li>
+                    <li><a href="pricing.html">Priser</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Indhold</h4>
+                <ul>
+                    <li><a href="blog.html">Blog</a></li>
+                    <li><a href="docs.html">Dokumentation</a></li>
+                    <li><a href="api-docs.html">API Docs</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="docs.html">Dokumentation</a></li>
+                    <li><a href="contact.html">Kontakt</a></li>
+                    <li><a href="#">Discord Server</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Axion Bot. Alle rettigheder forbeholdes.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Animate blog stats
+        function animateStats() {
+            const stats = document.querySelectorAll('.stat-number');
+            
+            stats.forEach(stat => {
+                const target = parseInt(stat.getAttribute('data-target'));
+                const increment = target / 50;
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    stat.textContent = Math.floor(current);
+                }, 30);
+            });
+        }
+
+        // Category filtering
+        function initCategoryFilter() {
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const blogPosts = document.querySelectorAll('.blog-post');
+
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    btn.classList.add('active');
+
+                    const category = btn.getAttribute('data-category');
+
+                    blogPosts.forEach(post => {
+                        if (category === 'all' || post.getAttribute('data-category') === category) {
+                            post.style.display = 'block';
+                            post.style.animation = 'fadeIn 0.5s ease-in';
+                        } else {
+                            post.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        }
+
+        // Load more functionality
+        function initLoadMore() {
+            const loadMoreBtn = document.querySelector('.load-more-btn');
+            let postsLoaded = 6;
+            const postsPerLoad = 3;
+
+            loadMoreBtn.addEventListener('click', () => {
+                // Simulate loading more posts
+                loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Indlæser...';
+                
+                setTimeout(() => {
+                    postsLoaded += postsPerLoad;
+                    loadMoreBtn.innerHTML = '<i class="fas fa-plus"></i> Indlæs flere indlæg';
+                    
+                    // Hide button if all posts are loaded (simulate max 15 posts)
+                    if (postsLoaded >= 15) {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                }, 1000);
+            });
+        }
+
+        // Newsletter form
+        function initNewsletterForm() {
+            const form = document.querySelector('.newsletter-form');
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = form.querySelector('input[type="email"]').value;
+                
+                if (email) {
+                    const button = form.querySelector('button');
+                    const originalText = button.innerHTML;
+                    
+                    button.innerHTML = '<i class="fas fa-check"></i> Tilmeldt!';
+                    button.style.backgroundColor = '#10b981';
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.style.backgroundColor = '';
+                        form.reset();
+                    }, 3000);
+                }
+            });
+        }
+
+        // Trigger animation when stats come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateStats();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        const statsSection = document.querySelector('.blog-stats');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
+
+        // Add hover effects to blog posts
+        document.querySelectorAll('.blog-post, .featured-post').forEach(post => {
+            post.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            post.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Initialize all functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            initCategoryFilter();
+            initLoadMore();
+            initNewsletterForm();
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

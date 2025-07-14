@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontakt - Axion Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.png" alt="Axion Bot" class="logo">
+                <span class="logo-text">Axion</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Hjem</a>
+                <a href="index.html#features" class="nav-link">Funktioner</a>
+                <a href="commands.html" class="nav-link">Kommandoer</a>
+                <a href="pricing.html" class="nav-link">Priser</a>
+                <a href="index.html#support" class="nav-link">Support</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary" id="loginBtn">Login</a>
+                <a href="index.html#invite" class="btn btn-primary">Tilføj til Server</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-envelope"></i> Kontakt Os</h1>
+                <p>Har du spørgsmål eller brug for hjælp? Vi er her for at hjælpe!</p>
+            </div>
+
+            <div class="contact-container">
+                <div class="contact-methods">
+                    <div class="contact-method">
+                        <div class="contact-icon">
+                            <i class="fab fa-discord"></i>
+                        </div>
+                        <h3>Discord Server</h3>
+                        <p>Join vores officielle Discord server for hurtig support og community hjælp.</p>
+                        <a href="#" class="btn btn-primary">Join Discord</a>
+                    </div>
+
+                    <div class="contact-method">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h3>Email Support</h3>
+                        <p>Send os en email og vi vender tilbage inden for 24 timer.</p>
+                        <a href="mailto:support@axionbot.dk" class="btn btn-secondary">support@axionbot.dk</a>
+                    </div>
+
+                    <div class="contact-method">
+                        <div class="contact-icon">
+                            <i class="fas fa-bug"></i>
+                        </div>
+                        <h3>Bug Reports</h3>
+                        <p>Fandt du en fejl? Rapporter den på vores GitHub repository.</p>
+                        <a href="#" class="btn btn-secondary">GitHub Issues</a>
+                    </div>
+                </div>
+
+                <div class="contact-form-section">
+                    <h2>Send os en besked</h2>
+                    <form class="contact-form" id="contactForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">Fornavn *</label>
+                                <input type="text" id="firstName" name="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Efternavn *</label>
+                                <input type="text" id="lastName" name="lastName" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="subject">Emne *</label>
+                            <select id="subject" name="subject" required>
+                                <option value="">Vælg emne...</option>
+                                <option value="support">Teknisk Support</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="billing">Billing/Betalinger</option>
+                                <option value="partnership">Partnerskab</option>
+                                <option value="other">Andet</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="serverid">Server ID (valgfri)</label>
+                            <input type="text" id="serverid" name="serverid" placeholder="Hvis dit spørgsmål vedrører en specifik server">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message">Besked *</label>
+                            <textarea id="message" name="message" rows="6" placeholder="Beskriv dit spørgsmål eller problem i detaljer..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="newsletter" name="newsletter">
+                                <span class="checkmark"></span>
+                                Jeg vil gerne modtage nyheder og opdateringer om Axion Bot
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Besked
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="faq-section">
+                <h2>Ofte Stillede Spørgsmål</h2>
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <h3>Hvordan inviterer jeg Axion Bot til min server?</h3>
+                        <p>Klik på "Tilføj til Server" knappen på forsiden og følg instruktionerne. Du skal have "Administrer Server" tilladelser.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Er Axion Bot gratis at bruge?</h3>
+                        <p>Ja! Axion Bot har en gratis plan med grundlæggende funktioner. Vi tilbyder også premium planer med avancerede funktioner.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Hvordan ændrer jeg bot prefixet?</h3>
+                        <p>Du kan ændre prefixet i dashboard'et under "Generelle Indstillinger" eller bruge kommandoen <code>!prefix [nyt prefix]</code>.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Kan jeg tilpasse bot kommandoerne?</h3>
+                        <p>Ja! Du kan oprette custom commands, deaktivere specifikke kommandoer og indstille tilladelser i dashboard'et.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Hvordan får jeg support?</h3>
+                        <p>Du kan få support gennem vores Discord server, email eller ved at udfylde kontaktformularen på denne side.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3>Understøtter Axion Bot andre sprog end dansk?</h3>
+                        <p>Ja! Axion Bot understøtter både dansk og engelsk. Du kan skifte sprog i dashboard'et.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="support-hours">
+                <h2>Support Timer</h2>
+                <div class="hours-grid">
+                    <div class="hours-item">
+                        <h3>Discord Support</h3>
+                        <p>24/7 Community Support</p>
+                        <span class="status online">Online Nu</span>
+                    </div>
+                    <div class="hours-item">
+                        <h3>Email Support</h3>
+                        <p>Mandag - Fredag: 9:00 - 17:00 CET</p>
+                        <span class="status">Svar inden for 24 timer</span>
+                    </div>
+                    <div class="hours-item">
+                        <h3>Premium Support</h3>
+                        <p>24/7 Prioriteret Support</p>
+                        <span class="status premium">Premium Kun</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Axion Bot</h3>
+                <p>Den ultimative Discord bot til din server</p>
+            </div>
+            <div class="footer-section">
+                <h4>Links</h4>
+                <ul>
+                    <li><a href="index.html#features">Funktioner</a></li>
+                    <li><a href="commands.html">Kommandoer</a></li>
+                    <li><a href="pricing.html">Priser</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="docs.html">Dokumentation</a></li>
+                    <li><a href="contact.html">Kontakt</a></li>
+                    <li><a href="#">Discord Server</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Axion Bot. Alle rettigheder forbeholdes.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show success message
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            // Simulate form submission
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sender...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Sendt!';
+                submitBtn.style.backgroundColor = '#28a745';
+                
+                setTimeout(() => {
+                    form.reset();
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.style.backgroundColor = '';
+                }, 2000);
+            }, 1500);
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

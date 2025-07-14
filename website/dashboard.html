@@ -301,6 +301,217 @@
                     </div>
                 </div>
 
+                <!-- Analytics Section -->
+                <div class="section" id="analytics-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-chart-line"></i>
+                            Analytics
+                        </h2>
+                    </div>
+                    <div class="analytics-content">
+                        <div class="analytics-grid">
+                            <div class="analytics-card">
+                                <h3>Server Growth</h3>
+                                <canvas id="growthChart"></canvas>
+                            </div>
+                            <div class="analytics-card">
+                                <h3>Message Activity</h3>
+                                <canvas id="messageChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- General Settings Section -->
+                <div class="section" id="general-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-cog"></i>
+                            Generelle Indstillinger
+                        </h2>
+                    </div>
+                    <div class="settings-content">
+                        <div class="setting-group">
+                            <h3>Bot Prefix</h3>
+                            <input type="text" class="form-control" value="!" placeholder="Enter bot prefix">
+                        </div>
+                        <div class="setting-group">
+                            <h3>Language</h3>
+                            <select class="form-control">
+                                <option value="da">Dansk</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Moderation Section -->
+                <div class="section" id="moderation-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Moderation
+                        </h2>
+                    </div>
+                    <div class="moderation-content">
+                        <div class="setting-group">
+                            <h3>Auto-Delete Spam</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-group">
+                            <h3>Warn Threshold</h3>
+                            <input type="number" class="form-control" value="3" min="1" max="10">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto-Moderation Section -->
+                <div class="section" id="automod-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-robot"></i>
+                            Auto-Moderation
+                        </h2>
+                    </div>
+                    <div class="automod-content">
+                        <div class="setting-group">
+                            <h3>Spam Detection</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-group">
+                            <h3>Toxic Language Filter</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Music Section -->
+                <div class="section" id="music-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-music"></i>
+                            Musik
+                        </h2>
+                    </div>
+                    <div class="music-content">
+                        <div class="setting-group">
+                            <h3>Default Volume</h3>
+                            <input type="range" class="form-control" min="0" max="100" value="50">
+                        </div>
+                        <div class="setting-group">
+                            <h3>Auto-Leave Empty Channel</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commands Section -->
+                <div class="section" id="commands-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-terminal"></i>
+                            Custom Commands
+                        </h2>
+                        <div class="section-actions">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Add Command
+                            </button>
+                        </div>
+                    </div>
+                    <div class="commands-content">
+                        <div class="commands-list">
+                            <div class="command-item">
+                                <span class="command-name">!hello</span>
+                                <span class="command-response">Hello there!</span>
+                                <div class="command-actions">
+                                    <button class="btn btn-sm btn-secondary">Edit</button>
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roles Section -->
+                <div class="section" id="roles-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-users-cog"></i>
+                            Roller & Permissions
+                        </h2>
+                    </div>
+                    <div class="roles-content">
+                        <div class="roles-list">
+                            <div class="role-item">
+                                <span class="role-name">@Admin</span>
+                                <span class="role-permissions">All Permissions</span>
+                                <button class="btn btn-sm btn-secondary">Configure</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Welcome Section -->
+                <div class="section" id="welcome-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-door-open"></i>
+                            Velkomst Beskeder
+                        </h2>
+                    </div>
+                    <div class="welcome-content">
+                        <div class="setting-group">
+                            <h3>Welcome Message</h3>
+                            <textarea class="form-control" placeholder="Welcome {user} to {server}!"></textarea>
+                        </div>
+                        <div class="setting-group">
+                            <h3>Welcome Channel</h3>
+                            <select class="form-control">
+                                <option value="">Select channel...</option>
+                                <option value="general">#general</option>
+                                <option value="welcome">#welcome</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Levels Section -->
+                <div class="section" id="levels-section" style="display: none;">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="fas fa-trophy"></i>
+                            Leveling System
+                        </h2>
+                    </div>
+                    <div class="levels-content">
+                        <div class="setting-group">
+                            <h3>Enable Leveling</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-group">
+                            <h3>XP Per Message</h3>
+                            <input type="number" class="form-control" value="15" min="1" max="100">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Ban Appeals Management Section (Admin View) -->
                 <div class="section" id="appeals-section" style="display: none;">
                     <div class="section-header">

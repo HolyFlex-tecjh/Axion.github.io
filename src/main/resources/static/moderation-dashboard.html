@@ -3,923 +3,2280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Axion Bot Moderation Dashboard - Configure and manage Discord server moderation settings">
-    <meta name="author" content="Axion Bot">
     <title>Moderation Dashboard - Axion Bot</title>
-    
-    <!-- Preload critical resources -->
-    <link rel="preload" href="css/moderation-dashboard.css" as="style">
-    <link rel="preload" href="js/ModerationDashboardV2.js" as="script">
-    
-    <!-- External CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Custom CSS -->
-    <link href="css/moderation-dashboard.css" rel="stylesheet">
-    
-    <!-- Theme and accessibility -->
-    <meta name="theme-color" content="#0d6efd">
-    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Performance optimizations */
+        .sidebar, .main-content {
+            contain: layout style paint;
+        }
+        
+        .content-section {
+            contain: layout style;
+        }
+        
+        /* Reduce repaints for animations */
+        .nav-item, .btn, .filter-card, .stat-card {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .moderation-dashboard {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .moderation-dashboard::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .sidebar {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 25px 0;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+        
+        .sidebar-header {
+            padding: 0 25px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .sidebar-title {
+            color: white;
+            font-size: 26px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .sidebar-title i {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 28px;
+        }
+        
+        .guild-selector {
+            padding: 0 25px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 25px;
+        }
+        
+        .guild-selector label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .guild-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .guild-select:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 25px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            margin: 2px 15px;
+            border-radius: 12px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+            will-change: transform, background-color;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .nav-item:hover::before {
+            left: 100%;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-item i {
+            margin-right: 15px;
+            width: 22px;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 35px;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .content-section {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+            will-change: transform, opacity;
+            transform: translateZ(0);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 30px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+        
+        /* Optimize shimmer animation */
+        @keyframes shimmer {
+            0% {
+                transform: translate3d(-100%, 0, 0);
+            }
+            100% {
+                transform: translate3d(100%, 0, 0);
+            }
+        }
+        
+        .content-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .section-header {
+            margin-bottom: 35px;
+            position: relative;
+        }
+        
+        .section-title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2d3748, #4a5568);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .section-description {
+            color: #718096;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+        
+        .form-group {
+            margin-bottom: 28px;
+            position: relative;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            will-change: transform, box-shadow;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 70px;
+            height: 40px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 40px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 32px;
+            width: 32px;
+            left: 4px;
+            bottom: 4px;
+            background: linear-gradient(135deg, #ffffff, #f7fafc);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        input:checked + .slider {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        
+        .btn {
+            padding: 18px 36px;
+            border: none;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+            transform: translateY(-4px) scale(1.02);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+            border-color: #cbd5e0;
+            color: #2d3748;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            box-shadow: 0 12px 35px rgba(72, 187, 120, 0.6);
+            transform: translateY(-4px) scale(1.02);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(245, 101, 101, 0.4);
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            box-shadow: 0 12px 35px rgba(245, 101, 101, 0.6);
+            transform: translateY(-4px) scale(1.02);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px) scale(0.98);
+            transition: all 0.1s ease;
+        }
+        
+        .btn i {
+            font-size: 16px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 32px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            background-size: 200% 100%;
+            animation: shimmer 4s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0%, 100% { background-position: 200% 0; }
+            50% { background-position: -200% 0; }
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2d3748;
+            display: block;
+        }
+        
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .filter-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 28px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .filter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .filter-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .filter-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .filter-title {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2d3748, #4a5568);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .filter-title::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            position: relative;
+        }
+        
+        .form-group::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .form-group:hover::before {
+            opacity: 1;
+        }
+        
+        .alert {
+            padding: 20px 24px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            border: none;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .alert::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+        }
+        
+        .alert-success {
+            background: rgba(240, 255, 244, 0.9);
+            color: #2f855a;
+        }
+        
+        .alert-success::before {
+            background: linear-gradient(180deg, #48bb78, #38a169);
+        }
+        
+        .alert-error {
+            background: rgba(254, 215, 215, 0.9);
+            color: #c53030;
+        }
+        
+        .alert-error::before {
+            background: linear-gradient(180deg, #f56565, #e53e3e);
+        }
+        
+        .alert-info {
+            background: rgba(235, 248, 255, 0.9);
+            color: #2b6cb0;
+        }
+        
+        .alert-info::before {
+            background: linear-gradient(180deg, #4299e1, #3182ce);
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 6px solid rgba(102, 126, 234, 0.1);
+            border-top: 6px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .spinner::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            right: 3px;
+            bottom: 3px;
+            border: 3px solid transparent;
+            border-top: 3px solid #764ba2;
+            border-radius: 50%;
+            animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner p {
+            color: #4a5568;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(25px);
+            margin: 3% auto;
+            padding: 40px;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            border-radius: 24px;
+        }
+        
+        .close {
+            color: #a0aec0;
+            float: right;
+            font-size: 32px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .close:hover {
+            color: #e53e3e;
+            background: rgba(245, 101, 101, 0.1);
+            transform: rotate(90deg) scale(1.1);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 450px;
+            margin: 30px 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .chart-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            border-radius: 20px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Skip to main content for accessibility -->
-    <a href="#main-content" class="visually-hidden-focusable">Skip to main content</a>
-    
-    <div id="dashboard-container" class="dashboard-container">
-        <!-- Loading Spinner -->
-        <div id="loading-spinner" class="loading-spinner show" role="status" aria-live="polite">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading dashboard...</span>
-            </div>
-            <p>Loading dashboard...</p>
-        </div>
-        
-        <!-- Alert Container -->
-        <div id="alert-container" class="alert-container" role="alert" aria-live="assertive" aria-atomic="true"></div>
-        
+    <div class="moderation-dashboard">
         <!-- Sidebar Navigation -->
-        <nav class="sidebar" role="navigation" aria-label="Dashboard navigation">
-            <header class="sidebar-header">
-                <h1 class="h3 mb-1 text-gradient">Axion Dashboard</h1>
-                <p class="text-muted small mb-0">Moderation Control</p>
-            </header>
-            
-            <ul class="nav nav-pills flex-column" role="menubar">
-                <li class="nav-item" role="none">
-                    <a href="#overview" class="nav-link active" data-section="overview" role="menuitem" aria-current="page">
-                        <i class="fas fa-tachometer-alt me-2" aria-hidden="true"></i>
-                        <span>Overview</span>
-                    </a>
-                </li>
-                <li class="nav-item" role="none">
-                    <a href="#filters" class="nav-link" data-section="filters" role="menuitem">
-                        <i class="fas fa-filter me-2" aria-hidden="true"></i>
-                        <span>Content Filters</span>
-                    </a>
-                </li>
-                <li class="nav-item" role="none">
-                    <a href="#actions" class="nav-link" data-section="actions" role="menuitem">
-                        <i class="fas fa-gavel me-2" aria-hidden="true"></i>
-                        <span>Actions</span>
-                    </a>
-                </li>
-                <li class="nav-item" role="none">
-                    <a href="#rules" class="nav-link" data-section="rules" role="menuitem">
-                        <i class="fas fa-list-ul me-2" aria-hidden="true"></i>
-                        <span>Custom Rules</span>
-                    </a>
-                </li>
-                <li class="nav-item" role="none">
-                    <a href="#thresholds" class="nav-link" data-section="thresholds" role="menuitem">
-                        <i class="fas fa-chart-line me-2" aria-hidden="true"></i>
-                        <span>Thresholds</span>
-                    </a>
-                </li>
-                <li class="nav-item" role="none">
-                    <a href="#testing" class="nav-link" data-section="testing" role="menuitem">
-                        <i class="fas fa-vial me-2" aria-hidden="true"></i>
-                        <span>Testing</span>
-                    </a>
-                </li>
-                <li class="nav-item" role="none">
-                    <a href="#analytics" class="nav-link" data-section="analytics" role="menuitem">
-                        <i class="fas fa-chart-bar me-2" aria-hidden="true"></i>
-                        <span>Analytics</span>
-                    </a>
-                </li>
-                <li class="nav-item" role="none">
-                    <a href="#settings" class="nav-link" data-section="settings" role="menuitem">
-                        <i class="fas fa-cog me-2" aria-hidden="true"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    
-    <!-- Main Content -->
-    <main id="main-content" class="main-content" role="main">
-        <!-- Header -->
-        <header class="dashboard-header d-flex justify-content-between align-items-center mb-4" role="banner">
-            <div class="header-content">
-                <h1 class="text-gradient mb-0">Moderation Dashboard</h1>
-                <p class="text-muted">Configure and monitor your server's moderation settings</p>
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Moderation Dashboard
+                </div>
             </div>
-            <div class="header-actions d-flex gap-3">
-                <label for="guildSelect" class="visually-hidden">Select Guild</label>
-                <select id="guildSelect" class="form-select" style="width: 250px;" aria-label="Select a guild to manage">
-                    <option value="">Select a guild...</option>
+            
+            <div class="guild-selector">
+                <label for="guildSelect">Select Guild:</label>
+                <select id="guildSelect" class="guild-select">
+                    <option value="">Loading guilds...</option>
                 </select>
-                <button class="btn btn-primary" data-action="save-config" aria-describedby="save-help">
-                    <i class="fas fa-save me-2" aria-hidden="true"></i>Save Configuration
-                </button>
-                <div id="save-help" class="visually-hidden">Save current moderation configuration settings</div>
             </div>
-        </header>
+            
+            <div class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="overview">
+                    <i class="fas fa-chart-bar"></i>
+                    Overview
+                </a>
+                <a href="#" class="nav-item" data-section="content-filters">
+                    <i class="fas fa-filter"></i>
+                    Content Filters
+                </a>
+                <a href="#" class="nav-item" data-section="actions">
+                    <i class="fas fa-bolt"></i>
+                    Actions
+                </a>
+                <a href="#" class="nav-item" data-section="custom-rules">
+                    <i class="fas fa-list"></i>
+                    Custom Rules
+                </a>
+                <a href="#" class="nav-item" data-section="thresholds">
+                    <i class="fas fa-sliders-h"></i>
+                    Thresholds
+                </a>
+                <a href="#" class="nav-item" data-section="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    Analytics
+                </a>
+                <a href="#" class="nav-item" data-section="templates">
+                    <i class="fas fa-copy"></i>
+                    Templates
+                </a>
+                <a href="#" class="nav-item" data-section="testing">
+                    <i class="fas fa-vial"></i>
+                    Testing
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+            </div>
+        </nav>
         
-        <!-- Overview Section -->
-        <section id="overview" class="content-section active" aria-labelledby="overview-heading">
-            <header class="section-header">
-                <h2 id="overview-heading" class="section-title visually-hidden">Dashboard Overview</h2>
-                <p class="section-description visually-hidden">Monitor your server's moderation activity and statistics</p>
-            </header>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading configuration...</p>
+            </div>
             
-            <div class="stats-grid row mb-4" role="region" aria-labelledby="stats-heading">
-                <h3 id="stats-heading" class="visually-hidden">Moderation Statistics</h3>
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
+            
+            <!-- Overview Section -->
+            <section id="overview" class="content-section active">
+                <div class="section-header">
+                    <h2 class="section-title">Moderation Overview</h2>
+                    <p class="section-description">Monitor your server's moderation activity and statistics</p>
+                </div>
                 
-                <div class="col-md-3">
-                    <article class="stat-card" role="img" aria-labelledby="filters-label">
-                        <div id="filtersCount" class="stat-number">0</div>
-                        <div id="filters-label" class="stat-label">Active Filters</div>
-                    </article>
-                </div>
-                <div class="col-md-3">
-                    <article class="stat-card" role="img" aria-labelledby="actions-label">
-                        <div id="actionsCount" class="stat-number">0</div>
-                        <div id="actions-label" class="stat-label">Enabled Actions</div>
-                    </article>
-                </div>
-                <div class="col-md-3">
-                    <article class="stat-card" role="img" aria-labelledby="rules-label">
-                        <div id="rulesCount" class="stat-number">0</div>
-                        <div id="rules-label" class="stat-label">Custom Rules</div>
-                    </article>
-                </div>
-                <div class="col-md-3">
-                    <article class="stat-card" role="img" aria-labelledby="status-label">
-                        <div id="configStatus" class="stat-number">Inactive</div>
-                        <div id="status-label" class="stat-label">Status</div>
-                    </article>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="chart-container">
-                        <h5 class="mb-3">Activity Overview</h5>
-                        <canvas id="activityChart" width="400" height="200"></canvas>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-value" id="totalViolations">0</span>
+                        <span class="stat-label">Total Violations</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="activeFilters">0</span>
+                        <span class="stat-label">Active Filters</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="customRules">0</span>
+                        <span class="stat-label">Custom Rules</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="moderationActions">0</span>
+                        <span class="stat-label">Actions Today</span>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="chart-container">
-                        <h5 class="mb-3">Violation Types</h5>
-                        <canvas id="analyticsChart" width="400" height="200"></canvas>
-                    </div>
+                
+                <div class="chart-container">
+                    <canvas id="activityChart"></canvas>
                 </div>
-            </div>
+            </section>
             
-            <div class="card mt-4">
-                <div class="card-body">
-                    <h5 class="card-title">Quick Settings</h5>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="moderationEnabled">
-                        <label class="form-check-label" for="moderationEnabled">
-                            Enable Moderation System
+            <!-- Content Filters Section -->
+            <section id="content-filters" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Content Filters</h2>
+                    <p class="section-description">Configure automatic content filtering and detection</p>
+                </div>
+                
+                <!-- Spam Filter -->
+                <div class="filter-card">
+                    <div class="filter-header">
+                        <h3 class="filter-title">Spam Filter</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="spamEnabled">
+                            <span class="slider"></span>
                         </label>
                     </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Content Filters Section -->
-        <section id="filters" class="content-section" aria-labelledby="filters-heading">
-            <header class="section-header">
-                <h2 id="filters-heading" class="section-title mb-4">Content Filters</h2>
-                <p class="section-description text-muted">Configure automated content filtering and detection systems</p>
-            </header>
-            
-            <!-- Spam Filter -->
-            <article class="filter-card" role="region" aria-labelledby="spam-filter-heading">
-                <header class="filter-header">
-                    <h3 id="spam-filter-heading" class="filter-title">Spam Detection</h3>
-                    <p class="filter-description text-muted small">Automatically detect and handle spam messages</p>
-                </header>
-                
-                <form class="filter-form" role="form" aria-labelledby="spam-filter-heading">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <fieldset class="mb-4">
-                                <legend class="visually-hidden">Spam Filter Settings</legend>
-                                
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="spamFilterEnabled" aria-describedby="spam-enabled-help">
-                                    <label class="form-check-label" for="spamFilterEnabled">Enable Spam Filter</label>
-                                    <div id="spam-enabled-help" class="form-text">Turn on automatic spam detection</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="spamThreshold" class="form-label">Detection Threshold: <span id="spamThresholdDisplay">0.7</span></label>
-                                    <input type="range" class="form-range" id="spamThreshold" min="0.1" max="1" step="0.1" value="0.7" aria-describedby="threshold-help">
-                                    <div id="threshold-help" class="form-text">Higher values require stronger evidence of spam</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="spamMaxMessages" class="form-label">Max Messages per Window</label>
-                                    <input type="number" class="form-control" id="spamMaxMessages" value="5" min="1" max="20" aria-describedby="max-messages-help">
-                                    <div id="max-messages-help" class="form-text">Maximum messages allowed in the time window</div>
-                                </div>
-                            </fieldset>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Detection Threshold</label>
+                            <input type="range" id="spamThreshold" class="form-input" min="0" max="1" step="0.1" value="0.7">
+                            <span id="spamThresholdValue">0.7</span>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <fieldset>
-                                <legend class="form-label">Detection Options</legend>
-                                
-                                <div class="mb-3">
-                                    <label for="spamTimeWindow" class="form-label">Time Window</label>
-                                    <select class="form-select" id="spamTimeWindow" aria-describedby="time-window-help">
-                                        <option value="30s">30 seconds</option>
-                                        <option value="1m" selected>1 minute</option>
-                                        <option value="5m">5 minutes</option>
-                                        <option value="10m">10 minutes</option>
-                                    </select>
-                                    <div id="time-window-help" class="form-text">Time period to monitor for spam patterns</div>
-                                </div>
-                                
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="spamCheckDuplicates">
-                                    <label class="form-check-label" for="spamCheckDuplicates">Check for duplicate messages</label>
-                                </div>
-                                
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="spamCheckRapidTyping">
-                                    <label class="form-check-label" for="spamCheckRapidTyping">Check for rapid typing</label>
-                                </div>
-                            </fieldset>
+                        <div class="form-group">
+                            <label class="form-label">Max Messages</label>
+                            <input type="number" id="spamMaxMessages" class="form-input" value="5" min="1" max="20">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Time Window</label>
+                            <select id="spamTimeWindow" class="form-select">
+                                <option value="30s">30 seconds</option>
+                                <option value="1m" selected>1 minute</option>
+                                <option value="5m">5 minutes</option>
+                                <option value="10m">10 minutes</option>
+                            </select>
                         </div>
                     </div>
-                </form>
-            </article>
-            
-            <!-- Toxicity Filter -->
-            <article class="filter-card" role="region" aria-labelledby="toxicity-filter-heading">
-                <header class="filter-header">
-                    <h3 id="toxicity-filter-heading" class="filter-title">Toxicity Detection</h3>
-                    <p class="filter-description text-muted small">Detect and filter toxic or harmful language</p>
-                </header>
-                
-                <form class="filter-form" role="form" aria-labelledby="toxicity-filter-heading">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <fieldset class="mb-4">
-                                <legend class="visually-hidden">Toxicity Filter Settings</legend>
-                                
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="toxicityFilterEnabled" aria-describedby="toxicity-enabled-help">
-                                    <label class="form-check-label" for="toxicityFilterEnabled">Enable Toxicity Filter</label>
-                                    <div id="toxicity-enabled-help" class="form-text">Automatically detect toxic language and behavior</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="toxicityThreshold" class="form-label">Detection Threshold: <span id="toxicityThresholdDisplay">0.6</span></label>
-                                    <input type="range" class="form-range" id="toxicityThreshold" min="0.1" max="1" step="0.1" value="0.6" aria-describedby="toxicity-threshold-help">
-                                    <div id="toxicity-threshold-help" class="form-text">Higher values require stronger evidence of toxicity</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="toxicityLanguages" class="form-label">Detection Languages</label>
-                                    <select class="form-select" id="toxicityLanguages" multiple aria-describedby="languages-help">
-                                        <option value="en" selected>English</option>
-                                        <option value="es">Spanish</option>
-                                        <option value="fr">French</option>
-                                        <option value="de">German</option>
-                                    </select>
-                                    <div id="languages-help" class="form-text">Languages for toxicity detection models</div>
-                                </div>
-                            </fieldset>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="spamCheckDuplicates">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Check Duplicate Messages</label>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <fieldset>
-                                <legend class="form-label">Detection Methods</legend>
-                                
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="toxicityUseAI" checked>
-                                    <label class="form-check-label" for="toxicityUseAI">Use AI detection</label>
-                                </div>
-                                
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="toxicityCheckSentiment">
-                                    <label class="form-check-label" for="toxicityCheckSentiment">Check sentiment analysis</label>
-                                </div>
-                                
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="toxicityCheckContext">
-                                    <label class="form-check-label" for="toxicityCheckContext">Consider message context</label>
-                                </div>
-                            </fieldset>
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="spamCheckRapidTyping">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Check Rapid Typing</label>
                         </div>
                     </div>
-                </form>
-            </article>
-            
-            <!-- Link Filter -->
-            <article class="filter-card" role="region" aria-labelledby="link-filter-heading">
-                <header class="filter-header">
-                    <h3 id="link-filter-heading" class="filter-title">Link Filtering</h3>
-                    <p class="filter-description text-muted small">Control and monitor links shared in messages</p>
-                </header>
+                </div>
                 
-                <form class="filter-form" role="form" aria-labelledby="link-filter-heading">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <fieldset class="mb-4">
-                                <legend class="visually-hidden">Link Filter Settings</legend>
-                                
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="linkFilterEnabled" aria-describedby="link-enabled-help">
-                                    <label class="form-check-label" for="linkFilterEnabled">Enable Link Filter</label>
-                                    <div id="link-enabled-help" class="form-text">Monitor and filter links in messages</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="linkMaxLinks" class="form-label">Max Links per Message</label>
-                                    <input type="number" class="form-control" id="linkMaxLinks" value="2" min="0" max="10" aria-describedby="max-links-help">
-                                    <div id="max-links-help" class="form-text">Maximum number of links allowed in a single message</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="linkBlockedDomains" class="form-label">Blocked Domains</label>
-                                    <textarea class="form-control" id="linkBlockedDomains" rows="4" placeholder="example.com&#10;bad-site.net" aria-describedby="blocked-domains-help"></textarea>
-                                    <div id="blocked-domains-help" class="form-text">Enter one domain per line to block</div>
-                                </div>
-                            </fieldset>
+                <!-- Toxicity Filter -->
+                <div class="filter-card">
+                    <div class="filter-header">
+                        <h3 class="filter-title">Toxicity Filter</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toxicityEnabled">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Detection Threshold</label>
+                            <input type="range" id="toxicityThreshold" class="form-input" min="0" max="1" step="0.1" value="0.6">
+                            <span id="toxicityThresholdValue">0.6</span>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <fieldset>
-                                <legend class="form-label">Security Checks</legend>
-                                
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="linkCheckShorteners">
-                                    <label class="form-check-label" for="linkCheckShorteners">Check URL shorteners</label>
-                                </div>
-                                
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="linkCheckReputation">
-                                    <label class="form-check-label" for="linkCheckReputation">Check domain reputation</label>
-                                </div>
-                            </fieldset>
+                        <div class="form-group">
+                            <label class="form-label">Languages</label>
+                            <select id="toxicityLanguages" class="form-select" multiple>
+                                <option value="en" selected>English</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                            </select>
                         </div>
                     </div>
-                </form>
-            </article>
-            
-            <!-- Word Filter -->
-            <article class="filter-card" role="region" aria-labelledby="word-filter-heading">
-                <header class="filter-header">
-                    <h3 id="word-filter-heading" class="filter-title">Word Filtering</h3>
-                    <p class="filter-description text-muted small">Filter specific words and phrases from messages</p>
-                </header>
-                
-                <form class="filter-form" role="form" aria-labelledby="word-filter-heading">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <fieldset class="mb-4">
-                                <legend class="visually-hidden">Word Filter Settings</legend>
-                                
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="wordFilterEnabled" aria-describedby="word-enabled-help">
-                                    <label class="form-check-label" for="wordFilterEnabled">Enable Word Filter</label>
-                                    <div id="word-enabled-help" class="form-text">Filter messages containing banned words</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="wordBannedWords" class="form-label">Banned Words</label>
-                                    <textarea class="form-control" id="wordBannedWords" rows="6" placeholder="badword1&#10;badword2" aria-describedby="banned-words-help"></textarea>
-                                    <div id="banned-words-help" class="form-text">Enter one word or phrase per line</div>
-                                </div>
-                            </fieldset>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="toxicityUseAI">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Use AI Detection</label>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <fieldset>
-                                <legend class="form-label">Matching Options</legend>
-                                
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="wordUseRegex">
-                                    <label class="form-check-label" for="wordUseRegex">Use regular expressions</label>
-                                </div>
-                                
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="wordCaseSensitive">
-                                    <label class="form-check-label" for="wordCaseSensitive">Case sensitive</label>
-                                </div>
-                                
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="wordWholeWordsOnly" checked>
-                                    <label class="form-check-label" for="wordWholeWordsOnly">Whole words only</label>
-                                </div>
-                            </fieldset>
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="toxicityCheckSentiment">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Check Sentiment</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="toxicityCheckContext">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Check Context</label>
                         </div>
                     </div>
-                </form>
-            </article>
-        </section>
-        
-        <!-- Actions Section -->
-        <section id="actions" class="content-section" aria-labelledby="actions-heading">
-            <header class="section-header">
-                <h2 id="actions-heading" class="section-title mb-4">Moderation Actions</h2>
-                <p class="section-description text-muted">Configure automated responses to rule violations</p>
-            </header>
-            
-            <div class="actions-grid row">
-                <div class="col-md-6">
-                    <article class="action-card filter-card" role="region" aria-labelledby="warning-action-heading">
-                        <header class="action-header">
-                            <h3 id="warning-action-heading" class="filter-title">Warning</h3>
-                            <p class="filter-description text-muted small">Send warning messages to users</p>
-                        </header>
-                        
-                        <form class="action-form" role="form" aria-labelledby="warning-action-heading">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="actionwarn" aria-describedby="warn-enabled-help">
-                                <label class="form-check-label" for="actionwarn">Enable Warnings</label>
-                                <div id="warn-enabled-help" class="form-text">Send warning messages for violations</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="warnMessage" class="form-label">Warning Message Template</label>
-                                <textarea class="form-control" id="warnMessage" rows="3" placeholder="Please follow server rules" aria-describedby="warn-message-help"></textarea>
-                                <div id="warn-message-help" class="form-text">Custom message sent to users when warned</div>
-                            </div>
-                        </form>
-                    </article>
                 </div>
                 
-                <div class="col-md-6">
-                    <article class="action-card filter-card" role="region" aria-labelledby="mute-action-heading">
-                        <header class="action-header">
-                            <h3 id="mute-action-heading" class="filter-title">Mute</h3>
-                            <p class="filter-description text-muted small">Temporarily restrict user messaging</p>
-                        </header>
-                        
-                        <form class="action-form" role="form" aria-labelledby="mute-action-heading">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="actionmute" aria-describedby="mute-enabled-help">
-                                <label class="form-check-label" for="actionmute">Enable Muting</label>
-                                <div id="mute-enabled-help" class="form-text">Temporarily mute users for violations</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="muteDuration" class="form-label">Default Mute Duration</label>
-                                <select class="form-select" id="muteDuration" aria-describedby="mute-duration-help">
-                                    <option value="5m">5 minutes</option>
-                                    <option value="10m" selected>10 minutes</option>
-                                    <option value="30m">30 minutes</option>
-                                    <option value="1h">1 hour</option>
-                                    <option value="6h">6 hours</option>
-                                    <option value="24h">24 hours</option>
-                                </select>
-                                <div id="mute-duration-help" class="form-text">How long users are muted by default</div>
-                            </div>
-                        </form>
-                    </article>
-                </div>
-                
-                <div class="col-md-6">
-                    <article class="action-card filter-card" role="region" aria-labelledby="kick-action-heading">
-                        <header class="action-header">
-                            <h3 id="kick-action-heading" class="filter-title">Kick</h3>
-                            <p class="filter-description text-muted small">Remove users from the server temporarily</p>
-                        </header>
-                        
-                        <form class="action-form" role="form" aria-labelledby="kick-action-heading">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="actionkick" aria-describedby="kick-enabled-help">
-                                <label class="form-check-label" for="actionkick">Enable Kicking</label>
-                                <div id="kick-enabled-help" class="form-text">Remove users from server for violations</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="kickReason" class="form-label">Default Kick Reason</label>
-                                <input type="text" class="form-control" id="kickReason" placeholder="Violation of server rules" aria-describedby="kick-reason-help">
-                                <div id="kick-reason-help" class="form-text">Reason shown when users are kicked</div>
-                            </div>
-                        </form>
-                    </article>
-                </div>
-                
-                <div class="col-md-6">
-                    <article class="action-card filter-card" role="region" aria-labelledby="ban-action-heading">
-                        <header class="action-header">
-                            <h3 id="ban-action-heading" class="filter-title">Ban</h3>
-                            <p class="filter-description text-muted small">Permanently remove users from the server</p>
-                        </header>
-                        
-                        <form class="action-form" role="form" aria-labelledby="ban-action-heading">
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" id="actionban" aria-describedby="ban-enabled-help">
-                                <label class="form-check-label" for="actionban">Enable Banning</label>
-                                <div id="ban-enabled-help" class="form-text">Permanently ban users for severe violations</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="banReason" class="form-label">Default Ban Reason</label>
-                                <input type="text" class="form-control" id="banReason" placeholder="Severe violation of server rules" aria-describedby="ban-reason-help">
-                                <div id="ban-reason-help" class="form-text">Reason shown when users are banned</div>
-                            </div>
-                            
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="banDeleteMessages">
-                                <label class="form-check-label" for="banDeleteMessages">Delete recent messages</label>
-                            </div>
-                        </form>
-                    </article>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Custom Rules Section -->
-        <section id="rules" class="content-section" aria-labelledby="custom-rules-heading">
-            <header class="section-header">
-                <h2 id="custom-rules-heading" class="section-title mb-4">Custom Rules</h2>
-                <p class="section-description text-muted">Create and manage custom moderation rules</p>
-            </header>
-            
-            <article class="rules-management filter-card" role="region" aria-labelledby="rule-management-heading">
-                <header class="rule-management-header d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h3 id="rule-management-heading" class="filter-title mb-0">Rule Management</h3>
-                        <p class="text-muted small mb-0">Add, edit, and organize custom rules</p>
+                <!-- Link Filter -->
+                <div class="filter-card">
+                    <div class="filter-header">
+                        <h3 class="filter-title">Link Filter</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="linkEnabled">
+                            <span class="slider"></span>
+                        </label>
                     </div>
-                    <button class="btn btn-primary" data-action="add-rule" aria-describedby="add-rule-help">
-                        <i class="fas fa-plus me-2" aria-hidden="true"></i>Add Rule
-                    </button>
-                    <div id="add-rule-help" class="visually-hidden">Opens dialog to create a new custom rule</div>
-                </header>
-                
-                <div id="customRulesList" class="rules-list" role="list" aria-label="Custom rules list">
-                    <!-- Custom rules will be populated here -->
-                    <div class="empty-state text-center text-muted py-4" id="rules-empty-state">
-                        <i class="fas fa-gavel fa-2x mb-2" aria-hidden="true"></i>
-                        <p>No custom rules configured yet. Click "Add Rule" to get started.</p>
-                    </div>
-                </div>
-            </article>
-        </section>
-        
-        <!-- Thresholds Section -->
-        <section id="thresholds" class="content-section" aria-labelledby="thresholds-heading">
-            <header class="section-header">
-                <h2 id="thresholds-heading" class="section-title mb-4">Violation Thresholds</h2>
-                <p class="section-description text-muted">Configure automatic escalation and ban thresholds</p>
-            </header>
-            
-            <article class="threshold-card filter-card" role="region" aria-labelledby="action-thresholds-heading">
-                <header class="threshold-header">
-                    <h3 id="action-thresholds-heading" class="filter-title">Action Thresholds</h3>
-                    <p class="filter-description text-muted mb-4">Set the number of violations required to trigger each action</p>
-                </header>
-                
-                <form class="threshold-form" role="form" aria-labelledby="action-thresholds-heading">
-                    <fieldset class="thresholds-grid">
-                        <legend class="visually-hidden">Violation count thresholds for each action type</legend>
-                        
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="thresholdWarn" class="form-label">Warnings</label>
-                                    <input type="number" class="form-control" id="thresholdWarn" value="1" min="1" aria-describedby="warn-threshold-help">
-                                    <div id="warn-threshold-help" class="form-text">Violations before warning</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="thresholdMute" class="form-label">Mute</label>
-                                    <input type="number" class="form-control" id="thresholdMute" value="3" min="1" aria-describedby="mute-threshold-help">
-                                    <div id="mute-threshold-help" class="form-text">Violations before mute</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="thresholdKick" class="form-label">Kick</label>
-                                    <input type="number" class="form-control" id="thresholdKick" value="5" min="1" aria-describedby="kick-threshold-help">
-                                    <div id="kick-threshold-help" class="form-text">Violations before kick</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="thresholdBan" class="form-label">Ban</label>
-                                    <input type="number" class="form-control" id="thresholdBan" value="10" min="1" aria-describedby="ban-threshold-help">
-                                    <div id="ban-threshold-help" class="form-text">Violations before ban</div>
-                                </div>
-                            </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Max Links per Message</label>
+                            <input type="number" id="linkMaxLinks" class="form-input" value="2" min="0" max="10">
                         </div>
-                    </fieldset>
+                        <div class="form-group">
+                            <label class="form-label">Blocked Domains</label>
+                            <textarea id="linkBlockedDomains" class="form-textarea" placeholder="Enter domains separated by commas"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="linkCheckShorteners">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Check URL Shorteners</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="linkCheckReputation">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Check Domain Reputation</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Word Filter -->
+                <div class="filter-card">
+                    <div class="filter-header">
+                        <h3 class="filter-title">Word Filter</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="wordEnabled">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Banned Words</label>
+                        <textarea id="wordBannedWords" class="form-textarea" placeholder="Enter words separated by commas"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="wordUseRegex">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Use Regular Expressions</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="wordCaseSensitive">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Case Sensitive</label>
+                        </div>
+                        <div class="form-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="wordWholeWordsOnly">
+                                <span class="slider"></span>
+                            </label>
+                            <label class="form-label">Whole Words Only</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Actions Section -->
+            <section id="actions" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Moderation Actions</h2>
+                    <p class="section-description">Configure automatic actions for violations</p>
+                </div>
+                
+                <div id="actionsContainer">
+                    <!-- Actions will be dynamically populated -->
+                </div>
+            </section>
+            
+            <!-- Custom Rules Section -->
+            <section id="custom-rules" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Custom Rules</h2>
+                    <p class="section-description">Create custom moderation rules for your server</p>
+                    <button class="btn btn-primary" onclick="openAddRuleModal()">Add New Rule</button>
+                </div>
+                
+                <div id="customRulesContainer">
+                    <!-- Custom rules will be dynamically populated -->
+                </div>
+            </section>
+            
+            <!-- Thresholds Section -->
+            <section id="thresholds" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Violation Thresholds</h2>
+                    <p class="section-description">Set thresholds for progressive moderation actions</p>
+                </div>
+                
+                <div class="filter-card">
+                    <h3 class="filter-title">Progressive Actions</h3>
+                    <div id="thresholdsContainer">
+                        <!-- Thresholds will be dynamically populated -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Analytics Section -->
+            <section id="analytics" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Moderation Analytics</h2>
+                    <p class="section-description">View detailed analytics and trends</p>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="analyticsChart"></canvas>
+                </div>
+            </section>
+            
+            <!-- Templates Section -->
+            <section id="templates" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Configuration Templates</h2>
+                    <p class="section-description">Apply pre-configured moderation templates</p>
+                </div>
+                
+                <div id="templatesContainer">
+                    <!-- Templates will be dynamically populated -->
+                </div>
+                
+                <div class="form-row" style="margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="exportConfiguration()">Export Configuration</button>
+                    <button class="btn btn-secondary" onclick="importConfiguration()">Import Configuration</button>
+                </div>
+            </section>
+            
+            <!-- Testing Section -->
+            <section id="testing" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Configuration Testing</h2>
+                    <p class="section-description">Test your moderation configuration</p>
+                </div>
+                
+                <div class="filter-card">
+                    <div class="form-group">
+                        <label class="form-label">Test User ID</label>
+                        <input type="text" id="testUserId" class="form-input" placeholder="Enter user ID to test">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Test Content</label>
+                        <textarea id="testContent" class="form-textarea" placeholder="Enter message content to test"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="runConfigurationTest()">Run Test</button>
                     
-                    <div class="mb-3">
-                        <label for="thresholdTimeWindow" class="form-label">Time Window</label>
-                        <select class="form-select" id="thresholdTimeWindow" aria-describedby="time-window-threshold-help">
-                            <option value="1h">1 hour</option>
-                            <option value="6h">6 hours</option>
-                            <option value="24h" selected>24 hours</option>
-                            <option value="7d">7 days</option>
-                            <option value="30d">30 days</option>
-                        </select>
-                        <div id="time-window-threshold-help" class="form-text">Time period to count violations within</div>
-                    </div>
-                </form>
-            </article>
-        </section>
-        
-        <!-- Testing Section -->
-        <section id="testing" class="content-section" aria-labelledby="testing-heading">
-            <header class="section-header">
-                <h2 id="testing-heading" class="section-title mb-4">Configuration Testing</h2>
-                <p class="section-description text-muted">Test how your moderation settings would handle specific messages</p>
-            </header>
-            
-            <article class="testing-tool filter-card" role="region" aria-labelledby="test-tool-heading">
-                <header class="test-tool-header">
-                    <h3 id="test-tool-heading" class="filter-title">Test Your Configuration</h3>
-                    <p class="filter-description text-muted mb-4">Simulate message processing with current settings</p>
-                </header>
-                
-                <div class="testing-interface row">
-                    <div class="col-md-6">
-                        <form class="test-form" role="form" aria-labelledby="test-tool-heading">
-                            <fieldset class="test-inputs">
-                                <legend class="visually-hidden">Test message input fields</legend>
-                                
-                                <div class="mb-3">
-                                    <label for="testUserId" class="form-label">User ID</label>
-                                    <input type="text" class="form-control" id="testUserId" placeholder="123456789012345678" aria-describedby="test-user-help">
-                                    <div id="test-user-help" class="form-text">Enter a Discord user ID to simulate</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="testContent" class="form-label">Test Message</label>
-                                    <textarea class="form-control" id="testContent" rows="4" placeholder="Enter a message to test..." aria-describedby="test-message-help" required></textarea>
-                                    <div id="test-message-help" class="form-text">Type the message content you want to test against your filters</div>
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary" data-action="test-config" aria-describedby="run-test-help">
-                                    <i class="fas fa-play me-2" aria-hidden="true"></i>Run Test
-                                </button>
-                                <div id="run-test-help" class="form-text">Process the message through all active filters</div>
-                            </fieldset>
-                        </form>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <section class="test-results-section" aria-labelledby="test-results-heading">
-                            <h4 id="test-results-heading" class="h6 mb-3">Test Results</h4>
-                            <div id="testResults" class="test-results bg-light p-3 rounded" role="log" aria-live="polite" aria-label="Test results output">
-                                <div class="empty-results text-center text-muted py-3">
-                                    <i class="fas fa-flask fa-2x mb-2" aria-hidden="true"></i>
-                                    <p class="mb-0">Run a test to see results here</p>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
+                    <div id="testResults" style="margin-top: 20px;"></div>
                 </div>
-            </article>
-        </section>
-        
-        <!-- Analytics Section -->
-        <section id="analytics" class="content-section" aria-labelledby="analytics-heading">
-            <header class="section-header">
-                <h2 id="analytics-heading" class="section-title mb-4">Analytics & Reports</h2>
-                <p class="section-description text-muted">View moderation statistics and trends</p>
-            </header>
+            </section>
             
-            <article class="analytics-dashboard" role="region" aria-labelledby="moderation-activity-heading">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="chart-container filter-card">
-                            <header class="chart-header">
-                                <h3 id="moderation-activity-heading" class="filter-title mb-3">Moderation Activity</h3>
-                                <p class="filter-description text-muted small">Visual overview of moderation actions over time</p>
-                            </header>
-                            
-                            <div class="chart-wrapper" role="img" aria-labelledby="chart-description">
-                                <canvas id="analyticsDetailChart" width="800" height="300" aria-label="Moderation activity chart"></canvas>
-                                <div id="chart-description" class="visually-hidden">
-                                    Chart displaying moderation activity including warnings, mutes, kicks, and bans over the selected time period
-                                </div>
-                            </div>
-                            
-                            <div class="chart-controls mt-3" role="group" aria-label="Chart time period controls">
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-period="24h">24 Hours</button>
-                                <button type="button" class="btn btn-sm btn-outline-primary active" data-period="7d">7 Days</button>
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-period="30d">30 Days</button>
-                            </div>
+            <!-- Settings Section -->
+            <section id="settings" class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">General Settings</h2>
+                    <p class="section-description">Configure general moderation settings</p>
+                </div>
+                
+                <div class="filter-card">
+                    <h3 class="filter-title">General Configuration</h3>
+                    <div class="form-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="moderationEnabled">
+                            <span class="slider"></span>
+                        </label>
+                        <label class="form-label">Enable Moderation</label>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Log Channel</label>
+                            <select id="logChannel" class="form-select">
+                                <option value="">Select channel...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Moderator Role</label>
+                            <select id="moderatorRole" class="form-select">
+                                <option value="">Select role...</option>
+                            </select>
                         </div>
                     </div>
                 </div>
-            </article>
-        </section>
-        
-        <!-- Settings Section -->
-        <section id="settings" class="content-section" aria-labelledby="settings-heading">
-            <header class="section-header">
-                <h2 id="settings-heading" class="section-title mb-4">General Settings</h2>
-                <p class="section-description text-muted">Configure dashboard preferences and system settings</p>
-            </header>
-            
-            <div class="settings-grid row">
-                <div class="col-md-6">
-                    <article class="logging-settings filter-card" role="region" aria-labelledby="logging-settings-heading">
-                        <header class="settings-header">
-                            <h3 id="logging-settings-heading" class="filter-title">Logging</h3>
-                            <p class="filter-description text-muted small">Configure moderation logging and roles</p>
-                        </header>
-                        
-                        <form class="logging-form" role="form" aria-labelledby="logging-settings-heading">
-                            <div class="mb-3">
-                                <label for="logChannel" class="form-label">Log Channel</label>
-                                <input type="text" class="form-control" id="logChannel" placeholder="Channel ID" aria-describedby="log-channel-help">
-                                <div id="log-channel-help" class="form-text">Discord channel ID where moderation logs will be sent</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="moderatorRole" class="form-label">Moderator Role</label>
-                                <input type="text" class="form-control" id="moderatorRole" placeholder="Role ID" aria-describedby="moderator-role-help">
-                                <div id="moderator-role-help" class="form-text">Discord role ID for users who can access moderation features</div>
-                            </div>
-                        </form>
-                    </article>
-                </div>
                 
-                <div class="col-md-6">
-                    <article class="ui-preferences filter-card" role="region" aria-labelledby="ui-preferences-heading">
-                        <header class="settings-header">
-                            <h3 id="ui-preferences-heading" class="filter-title">UI Preferences</h3>
-                            <p class="filter-description text-muted small">Customize dashboard appearance and behavior</p>
-                        </header>
-                        
-                        <form class="ui-form" role="form" aria-labelledby="ui-preferences-heading">
-                            <div class="mb-3">
-                                <label for="uiTheme" class="form-label">Theme</label>
-                                <select class="form-select" id="uiTheme" aria-describedby="theme-help">
-                                    <option value="light">Light</option>
-                                    <option value="dark">Dark</option>
-                                    <option value="auto">Auto</option>
-                                </select>
-                                <div id="theme-help" class="form-text">Choose your preferred color scheme</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="uiLanguage" class="form-label">Language</label>
-                                <select class="form-select" id="uiLanguage" aria-describedby="language-help">
-                                    <option value="en">English</option>
-                                    <option value="es">Spanish</option>
-                                    <option value="fr">French</option>
-                                    <option value="de">German</option>
-                                </select>
-                                <div id="language-help" class="form-text">Select your preferred interface language</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="dashboardLayout" class="form-label">Dashboard Layout</label>
-                                <select class="form-select" id="dashboardLayout" aria-describedby="layout-help">
-                                    <option value="default">Default</option>
-                                    <option value="compact">Compact</option>
-                                    <option value="expanded">Expanded</option>
-                                </select>
-                                <div id="layout-help" class="form-text">Choose how dashboard sections are displayed</div>
-                            </div>
-                        </form>
-                    </article>
+                <div class="filter-card">
+                    <h3 class="filter-title">UI Settings</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Theme</label>
+                            <select id="uiTheme" class="form-select">
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Language</label>
+                            <select id="uiLanguage" class="form-select">
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                                <option value="de">Deutsch</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dashboard Layout</label>
+                            <select id="uiLayout" class="form-select">
+                                <option value="default">Default</option>
+                                <option value="compact">Compact</option>
+                                <option value="expanded">Expanded</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
+            </section>
+            
+            <!-- Save Button -->
+            <div style="position: fixed; bottom: 30px; right: 30px;">
+                <button class="btn btn-primary" onclick="saveConfiguration()" style="padding: 16px 32px; font-size: 16px;">
+                    <i class="fas fa-save"></i> Save Configuration
+                </button>
             </div>
-            
-            <article class="import-export filter-card mt-4" role="region" aria-labelledby="import-export-heading">
-                <header class="settings-header">
-                    <h3 id="import-export-heading" class="filter-title">Import/Export</h3>
-                    <p class="filter-description text-muted">Backup and restore your configuration settings</p>
-                </header>
-                
-                <div class="import-export-interface row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="importFile" class="form-label">Import Configuration</label>
-                            <input type="file" class="form-control" id="importFile" accept=".json" aria-describedby="import-file-help">
-                            <div id="import-file-help" class="form-text">Upload a previously exported configuration JSON file</div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6 d-flex align-items-end">
-                        <div class="mb-3">
-                            <button class="btn btn-outline-primary" data-action="export-config" aria-describedby="export-button-help">
-                                <i class="fas fa-download me-2" aria-hidden="true"></i>Export Configuration
-                            </button>
-                            <div id="export-button-help" class="form-text">Download your current settings as a JSON file</div>
-                        </div>
-                    </div>
-                </div>
-            </article>
-        </section>
-    </main>
+        </main>
+    </div>
     
     <!-- Add Rule Modal -->
-    <div class="modal fade" id="addRuleModal" tabindex="-1" aria-labelledby="addRuleModalLabel" aria-describedby="addRuleModalDescription" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <header class="modal-header">
-                    <h5 class="modal-title" id="addRuleModalLabel">Add Custom Rule</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close modal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </header>
-                
-                <div class="modal-body">
-                    <p id="addRuleModalDescription" class="text-muted mb-4">
-                        Create a new custom moderation rule to enhance your server's content filtering.
-                    </p>
-                    
-                    <form id="addRuleForm" role="form" aria-labelledby="addRuleModalLabel">
-                        <fieldset class="rule-form-fields">
-                            <legend class="visually-hidden">Custom rule configuration</legend>
-                            
-                            <div class="mb-3">
-                                <label for="ruleName" class="form-label">Rule Name <span class="text-danger" aria-label="required">*</span></label>
-                                <input type="text" class="form-control" id="ruleName" required aria-describedby="rule-name-help">
-                                <div id="rule-name-help" class="form-text">Enter a descriptive name for this rule</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="ruleDescription" class="form-label">Description</label>
-                                <textarea class="form-control" id="ruleDescription" rows="3" aria-describedby="rule-description-help" placeholder="Describe what this rule does..."></textarea>
-                                <div id="rule-description-help" class="form-text">Optional description to help identify the rule's purpose</div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="ruleType" class="form-label">Rule Type <span class="text-danger" aria-label="required">*</span></label>
-                                <select class="form-select" id="ruleType" required aria-describedby="rule-type-help">
-                                    <option value="">Select type...</option>
-                                    <option value="content">Content Filter</option>
-                                    <option value="behavior">Behavior Monitor</option>
-                                    <option value="custom">Custom Logic</option>
-                                </select>
-                                <div id="rule-type-help" class="form-text">Choose the category that best describes this rule</div>
-                            </div>
-                        </fieldset>
-                    </form>
-                </div>
-                
-                <footer class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" form="addRuleForm" class="btn btn-primary">Add Rule</button>
-                </footer>
+    <div id="addRuleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddRuleModal()">&times;</span>
+            <h2>Add Custom Rule</h2>
+            <div class="form-group">
+                <label class="form-label">Rule Name</label>
+                <input type="text" id="ruleName" class="form-input" placeholder="Enter rule name">
             </div>
+            <div class="form-group">
+                <label class="form-label">Rule Type</label>
+                <select id="ruleType" class="form-select">
+                    <option value="content">Content Filter</option>
+                    <option value="user">User Behavior</option>
+                    <option value="channel">Channel Specific</option>
+                    <option value="time">Time Based</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Condition</label>
+                <textarea id="ruleCondition" class="form-textarea" placeholder="Enter rule condition"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Action</label>
+                <select id="ruleAction" class="form-select">
+                    <option value="warn">Warn</option>
+                    <option value="mute">Mute</option>
+                    <option value="kick">Kick</option>
+                    <option value="ban">Ban</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="ruleEnabled">
+                    <span class="slider"></span>
+                </label>
+                <label class="form-label">Enable Rule</label>
+            </div>
+            <button class="btn btn-primary" onclick="addCustomRule()">Add Rule</button>
         </div>
     </div>
-    </div> <!-- End Dashboard Container -->
-
-    <!-- External JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Custom JavaScript (ES6 Modules) -->
-    <script type="module">
-        import ModerationDashboardV2 from './js/ModerationDashboardV2.js?v='; + Date.now()
+    <script>
+        // Global variables
+        let currentGuildId = null;
+        let currentConfiguration = {};
+        let charts = {};
         
-        // Initialize dashboard when DOM is ready
-        document.addEventListener('DOMContentLoaded', async () => {
-            const loadingSpinner = document.getElementById('loading-spinner');
-            
-            try {
-                // Create dashboard instance
-                window.dashboard = new ModerationDashboardV2({
-                    containerId: 'dashboard-container',
-                    mockMode: true, // Enable for development
-                    autoSave: true,
-                    theme: 'light'
-                });
-                
-                // Initialize dashboard
-                await window.dashboard.init();
-                
-                console.log('Dashboard V2 initialized successfully');
-                
-                // Hide loading spinner after successful initialization
-                setTimeout(() => {
-                    loadingSpinner.classList.remove('show');
-                }, 500);
-                
-            } catch (error) {
-                console.error('Failed to initialize dashboard:', error);
-                
-                // Hide loading spinner even on error
-                setTimeout(() => {
-                    loadingSpinner.classList.remove('show');
-                }, 1000);
-            }
+        // API Base URL
+        const API_BASE = 'http://localhost:8080/api/moderation/config';
+        
+        // Initialize dashboard with performance optimizations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Use requestAnimationFrame for smooth initialization
+            requestAnimationFrame(() => {
+                initializeDashboard();
+                setupEventListeners();
+                // Defer heavy operations
+                setTimeout(() => loadInitialData(), 100);
+            });
         });
         
-        // Hide loading spinner immediately if no JavaScript modules load
-         window.addEventListener('load', () => {
-             const loadingSpinner = document.getElementById('loading-spinner');
-             if (loadingSpinner.classList.contains('show')) {
-                 setTimeout(() => {
-                     loadingSpinner.classList.remove('show');
-                 }, 2000);
-             }
-         });
-     </script>
+        function initializeDashboard() {
+            // Setup navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    showSection(section);
+                    
+                    // Update active nav item
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Setup guild selector
+            document.getElementById('guildSelect').addEventListener('change', function() {
+                currentGuildId = this.value;
+                if (currentGuildId) {
+                    loadGuildConfiguration(currentGuildId);
+                }
+            });
+        }
+        
+        function setupEventListeners() {
+            // Use event delegation for better performance
+            document.addEventListener('change', debounce(function(e) {
+                if (e.target.matches('input, select, textarea')) {
+                    autoSave();
+                }
+            }, 1000));
+            
+            // Optimized range slider updates with throttling
+            const updateThreshold = throttle(function(id, valueId) {
+                const element = document.getElementById(valueId);
+                if (element) element.textContent = document.getElementById(id).value;
+            }, 16); // ~60fps
+            
+            document.addEventListener('input', function(e) {
+                if (e.target.id === 'spamThreshold') {
+                    updateThreshold('spamThreshold', 'spamThresholdValue');
+                } else if (e.target.id === 'toxicityThreshold') {
+                    updateThreshold('toxicityThreshold', 'toxicityThresholdValue');
+                }
+            });
+        }
+        
+        async function loadInitialData() {
+            showLoading(true);
+            
+            try {
+                // Load critical data first
+                await loadGuildList();
+                
+                // Load non-critical data with lazy loading
+                const lazyTasks = [
+                    () => loadFilterOptions(),
+                    () => loadActionOptions(),
+                    () => loadRuleConditions(),
+                    () => loadUIOptions(),
+                    () => loadTemplates()
+                ];
+                
+                // Execute lazy tasks with delays to prevent blocking
+                for (let i = 0; i < lazyTasks.length; i++) {
+                    setTimeout(lazyTasks[i], i * 50);
+                }
+                
+                // Initialize charts only when visible
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            initializeCharts();
+                            observer.disconnect();
+                        }
+                    });
+                });
+                
+                const chartsContainer = document.querySelector('.chart-container');
+                if (chartsContainer) observer.observe(chartsContainer);
+                
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+                showAlert('Error loading dashboard data', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function loadGuildList() {
+            // Mock guild data - replace with actual API call
+            const guilds = [
+                { id: '123456789', name: 'Test Server 1' },
+                { id: '987654321', name: 'Test Server 2' }
+            ];
+            
+            const select = document.getElementById('guildSelect');
+            select.innerHTML = '<option value="">Select a guild...</option>';
+            
+            guilds.forEach(guild => {
+                const option = document.createElement('option');
+                option.value = guild.id;
+                option.textContent = guild.name;
+                select.appendChild(option);
+            });
+        }
+        
+        async function loadGuildConfiguration(guildId) {
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/guild/${guildId}`);
+                if (response.ok) {
+                    currentConfiguration = await response.json();
+                    populateConfigurationForm(currentConfiguration);
+                    updateMetrics(currentConfiguration);
+                } else {
+                    // Create default configuration
+                    currentConfiguration = createDefaultConfiguration(guildId);
+                    populateConfigurationForm(currentConfiguration);
+                }
+            } catch (error) {
+                console.error('Error loading configuration:', error);
+                showAlert('Error loading guild configuration', 'error');
+                currentConfiguration = createDefaultConfiguration(guildId);
+                populateConfigurationForm(currentConfiguration);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function createDefaultConfiguration(guildId) {
+            return {
+                guildId: guildId,
+                enabled: true,
+                filters: {
+                    spam: {
+                        enabled: false,
+                        threshold: 0.7,
+                        maxMessages: 5,
+                        timeWindow: '1m',
+                        checkDuplicates: true,
+                        checkRapidTyping: true
+                    },
+                    toxicity: {
+                        enabled: false,
+                        threshold: 0.6,
+                        languages: ['en'],
+                        useAI: true,
+                        checkSentiment: false,
+                        checkContext: false
+                    },
+                    link: {
+                        enabled: false,
+                        maxLinks: 2,
+                        blockedDomains: [],
+                        checkShorteners: false,
+                        checkReputation: false
+                    },
+                    word: {
+                        enabled: false,
+                        bannedWords: [],
+                        useRegex: false,
+                        caseSensitive: false,
+                        wholeWordsOnly: true
+                    }
+                },
+                actions: {
+                    warn: { enabled: true, message: 'Please follow server rules' },
+                    mute: { enabled: true, duration: '10m' },
+                    kick: { enabled: false, reason: 'Violation of server rules' },
+                    ban: { enabled: false, reason: 'Severe violation', deleteMessages: true }
+                },
+                customRules: [],
+                thresholds: {
+                    violations: {
+                        warn: 1,
+                        mute: 3,
+                        kick: 5,
+                        ban: 10
+                    },
+                    timeWindow: '24h'
+                },
+                ui: {
+                    theme: 'light',
+                    language: 'en',
+                    layout: 'default'
+                },
+                settings: {
+                    logChannel: null,
+                    moderatorRole: null
+                }
+            };
+        }
+        
+        function populateConfigurationForm(config) {
+            // Populate filters
+            populateSpamFilter(config.filters.spam);
+            populateToxicityFilter(config.filters.toxicity);
+            populateLinkFilter(config.filters.link);
+            populateWordFilter(config.filters.word);
+            
+            // Populate actions
+            populateActions(config.actions);
+            
+            // Populate custom rules
+            populateCustomRules(config.customRules);
+            
+            // Populate thresholds
+            populateThresholds(config.thresholds);
+            
+            // Populate settings
+            populateSettings(config.settings);
+            
+            // Populate UI settings
+            populateUISettings(config.ui);
+        }
+        
+        function populateSpamFilter(spam) {
+            document.getElementById('spamEnabled').checked = spam.enabled;
+            document.getElementById('spamThreshold').value = spam.threshold;
+            document.getElementById('spamThresholdValue').textContent = spam.threshold;
+            document.getElementById('spamMaxMessages').value = spam.maxMessages;
+            document.getElementById('spamTimeWindow').value = spam.timeWindow;
+            document.getElementById('spamCheckDuplicates').checked = spam.checkDuplicates;
+            document.getElementById('spamCheckRapidTyping').checked = spam.checkRapidTyping;
+        }
+        
+        function populateToxicityFilter(toxicity) {
+            document.getElementById('toxicityEnabled').checked = toxicity.enabled;
+            document.getElementById('toxicityThreshold').value = toxicity.threshold;
+            document.getElementById('toxicityThresholdValue').textContent = toxicity.threshold;
+            document.getElementById('toxicityUseAI').checked = toxicity.useAI;
+            document.getElementById('toxicityCheckSentiment').checked = toxicity.checkSentiment;
+            document.getElementById('toxicityCheckContext').checked = toxicity.checkContext;
+            
+            // Set selected languages
+            const languageSelect = document.getElementById('toxicityLanguages');
+            Array.from(languageSelect.options).forEach(option => {
+                option.selected = toxicity.languages.includes(option.value);
+            });
+        }
+        
+        function populateLinkFilter(link) {
+            document.getElementById('linkEnabled').checked = link.enabled;
+            document.getElementById('linkMaxLinks').value = link.maxLinks;
+            document.getElementById('linkBlockedDomains').value = link.blockedDomains.join(', ');
+            document.getElementById('linkCheckShorteners').checked = link.checkShorteners;
+            document.getElementById('linkCheckReputation').checked = link.checkReputation;
+        }
+        
+        function populateWordFilter(word) {
+            document.getElementById('wordEnabled').checked = word.enabled;
+            document.getElementById('wordBannedWords').value = word.bannedWords.join(', ');
+            document.getElementById('wordUseRegex').checked = word.useRegex;
+            document.getElementById('wordCaseSensitive').checked = word.caseSensitive;
+            document.getElementById('wordWholeWordsOnly').checked = word.wholeWordsOnly;
+        }
+        
+        function populateActions(actions) {
+            const container = document.getElementById('actionsContainer');
+            
+            // Use DocumentFragment for better performance
+            const fragment = document.createDocumentFragment();
+            
+            Object.entries(actions).forEach(([actionType, config]) => {
+                const actionCard = document.createElement('div');
+                actionCard.className = 'filter-card';
+                actionCard.innerHTML = `
+                    <div class="filter-header">
+                        <h3 class="filter-title">${actionType.charAt(0).toUpperCase() + actionType.slice(1)}</h3>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="${actionType}Enabled" ${config.enabled ? 'checked' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        ${actionType === 'warn' || actionType === 'kick' || actionType === 'ban' ? `
+                            <div class="form-group">
+                                <label class="form-label">${actionType === 'warn' ? 'Message' : 'Reason'}</label>
+                                <input type="text" id="${actionType}Message" class="form-input" value="${config.message || config.reason || ''}">
+                            </div>
+                        ` : ''}
+                        ${actionType === 'mute' ? `
+                            <div class="form-group">
+                                <label class="form-label">Duration</label>
+                                <select id="${actionType}Duration" class="form-select">
+                                    <option value="5m" ${config.duration === '5m' ? 'selected' : ''}>5 minutes</option>
+                                    <option value="10m" ${config.duration === '10m' ? 'selected' : ''}>10 minutes</option>
+                                    <option value="30m" ${config.duration === '30m' ? 'selected' : ''}>30 minutes</option>
+                                    <option value="1h" ${config.duration === '1h' ? 'selected' : ''}>1 hour</option>
+                                    <option value="24h" ${config.duration === '24h' ? 'selected' : ''}>24 hours</option>
+                                </select>
+                            </div>
+                        ` : ''}
+                        ${actionType === 'ban' ? `
+                            <div class="form-group">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="${actionType}DeleteMessages" ${config.deleteMessages ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                                <label class="form-label">Delete Messages</label>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                fragment.appendChild(actionCard);
+            });
+            
+            // Single DOM update
+            container.innerHTML = '';
+            container.appendChild(fragment);
+        }
+        
+        function populateCustomRules(rules) {
+            const container = document.getElementById('customRulesContainer');
+            
+            if (rules.length === 0) {
+                container.innerHTML = '<p>No custom rules configured. Click "Add New Rule" to create one.</p>';
+                return;
+            }
+            
+            // Use DocumentFragment for better performance
+            const fragment = document.createDocumentFragment();
+            
+            rules.forEach((rule, index) => {
+                const ruleCard = document.createElement('div');
+                ruleCard.className = 'filter-card';
+                ruleCard.innerHTML = `
+                    <div class="filter-header">
+                        <h3 class="filter-title">${rule.name}</h3>
+                        <div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" ${rule.enabled ? 'checked' : ''} onchange="toggleCustomRule(${index})">
+                                <span class="slider"></span>
+                            </label>
+                            <button class="btn btn-secondary" onclick="deleteCustomRule(${index})" style="margin-left: 10px;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Type</label>
+                            <span class="form-input" style="background: #f7fafc;">${rule.type}</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Action</label>
+                            <span class="form-input" style="background: #f7fafc;">${rule.action}</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Condition</label>
+                        <div class="form-input" style="background: #f7fafc; min-height: 60px; white-space: pre-wrap;">${rule.condition}</div>
+                    </div>
+                `;
+                fragment.appendChild(ruleCard);
+            });
+            
+            // Single DOM update
+            container.innerHTML = '';
+            container.appendChild(fragment);
+        }
+        
+        function populateThresholds(thresholds) {
+            const container = document.getElementById('thresholdsContainer');
+            container.innerHTML = `
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Warn Threshold</label>
+                        <input type="number" id="thresholdWarn" class="form-input" value="${thresholds.violations.warn}" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mute Threshold</label>
+                        <input type="number" id="thresholdMute" class="form-input" value="${thresholds.violations.mute}" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kick Threshold</label>
+                        <input type="number" id="thresholdKick" class="form-input" value="${thresholds.violations.kick}" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ban Threshold</label>
+                        <input type="number" id="thresholdBan" class="form-input" value="${thresholds.violations.ban}" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Time Window</label>
+                    <select id="thresholdTimeWindow" class="form-select">
+                        <option value="1h" ${thresholds.timeWindow === '1h' ? 'selected' : ''}>1 hour</option>
+                        <option value="6h" ${thresholds.timeWindow === '6h' ? 'selected' : ''}>6 hours</option>
+                        <option value="24h" ${thresholds.timeWindow === '24h' ? 'selected' : ''}>24 hours</option>
+                        <option value="7d" ${thresholds.timeWindow === '7d' ? 'selected' : ''}>7 days</option>
+                    </select>
+                </div>
+            `;
+        }
+        
+        function populateSettings(settings) {
+            document.getElementById('moderationEnabled').checked = currentConfiguration.enabled;
+            
+            // Mock channel and role data
+            const channels = [
+                { id: '123', name: '#general' },
+                { id: '456', name: '#moderation-log' }
+            ];
+            
+            const roles = [
+                { id: '789', name: 'Moderator' },
+                { id: '012', name: 'Admin' }
+            ];
+            
+            const channelSelect = document.getElementById('logChannel');
+            channelSelect.innerHTML = '<option value="">Select channel...</option>';
+            channels.forEach(channel => {
+                const option = document.createElement('option');
+                option.value = channel.id;
+                option.textContent = channel.name;
+                option.selected = settings.logChannel === channel.id;
+                channelSelect.appendChild(option);
+            });
+            
+            const roleSelect = document.getElementById('moderatorRole');
+            roleSelect.innerHTML = '<option value="">Select role...</option>';
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.id;
+                option.textContent = role.name;
+                option.selected = settings.moderatorRole === role.id;
+                roleSelect.appendChild(option);
+            });
+        }
+        
+        function populateUISettings(ui) {
+            document.getElementById('uiTheme').value = ui.theme;
+            document.getElementById('uiLanguage').value = ui.language;
+            document.getElementById('uiLayout').value = ui.layout;
+        }
+        
+        function updateMetrics(config) {
+            // Count active filters
+            const activeFilters = Object.values(config.filters).filter(filter => filter.enabled).length;
+            document.getElementById('activeFilters').textContent = activeFilters;
+            
+            // Count custom rules
+            document.getElementById('customRules').textContent = config.customRules.length;
+            
+            // Mock other metrics
+            document.getElementById('totalViolations').textContent = '127';
+            document.getElementById('moderationActions').textContent = '23';
+        }
+        
+        async function loadFilterOptions() {
+            try {
+                const response = await fetch(`${API_BASE}/filters/options`);
+                if (response.ok) {
+                    const options = await response.json();
+                    // Update filter options in UI
+                }
+            } catch (error) {
+                console.error('Error loading filter options:', error);
+            }
+        }
+        
+        async function loadActionOptions() {
+            try {
+                const response = await fetch(`${API_BASE}/actions/options`);
+                if (response.ok) {
+                    const options = await response.json();
+                    // Update action options in UI
+                }
+            } catch (error) {
+                console.error('Error loading action options:', error);
+            }
+        }
+        
+        async function loadRuleConditions() {
+            try {
+                const response = await fetch(`${API_BASE}/rules/conditions`);
+                if (response.ok) {
+                    const options = await response.json();
+                    // Update rule condition options in UI
+                }
+            } catch (error) {
+                console.error('Error loading rule conditions:', error);
+            }
+        }
+        
+        async function loadUIOptions() {
+            try {
+                const response = await fetch(`${API_BASE}/ui/options`);
+                if (response.ok) {
+                    const options = await response.json();
+                    // Update UI options
+                }
+            } catch (error) {
+                console.error('Error loading UI options:', error);
+            }
+        }
+        
+        async function loadTemplates() {
+            try {
+                const response = await fetch(`${API_BASE}/templates`);
+                if (response.ok) {
+                    const data = await response.json();
+                    initializeTemplatesList(data.templates);
+                }
+            } catch (error) {
+                console.error('Error loading templates:', error);
+                initializeTemplatesList([]);
+            }
+        }
+        
+        function initializeTemplatesList(templates) {
+            const container = document.getElementById('templatesContainer');
+            container.innerHTML = '';
+            
+            if (templates.length === 0) {
+                container.innerHTML = '<p>No templates available.</p>';
+                return;
+            }
+            
+            templates.forEach(template => {
+                const templateCard = document.createElement('div');
+                templateCard.className = 'filter-card';
+                templateCard.innerHTML = `
+                    <div class="filter-header">
+                        <div>
+                            <h3 class="filter-title">${template.name}</h3>
+                            <p style="color: #718096; margin: 5px 0;">${template.description}</p>
+                            <span style="background: #667eea; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${template.category}</span>
+                        </div>
+                        <button class="btn btn-primary" onclick="applyTemplate('${template.id}')">
+                            Apply Template
+                        </button>
+                    </div>
+                `;
+                container.appendChild(templateCard);
+            });
+        }
+        
+        async function applyTemplate(templateId) {
+            if (!currentGuildId) {
+                showAlert('Please select a guild first', 'error');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                // In a real implementation, this would apply the template via API
+                showAlert('Template applied successfully', 'success');
+                await loadGuildConfiguration(currentGuildId);
+            } catch (error) {
+                console.error('Error applying template:', error);
+                showAlert('Error applying template', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function initializeCharts() {
+            // Activity Chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            charts.activity = new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Violations',
+                        data: [12, 19, 3, 5, 2, 3, 7],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+            
+            // Analytics Chart
+            const analyticsCtx = document.getElementById('analyticsChart').getContext('2d');
+            charts.analytics = new Chart(analyticsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Spam', 'Toxicity', 'Links', 'Words'],
+                    datasets: [{
+                        data: [30, 25, 20, 25],
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#f5576c'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        async function saveConfiguration() {
+            if (!currentGuildId) {
+                showAlert('Please select a guild first', 'error');
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                
+                const config = collectConfigurationFromForm();
+                
+                const response = await fetch(`${API_BASE}/guild/${currentGuildId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showAlert('Configuration saved successfully', 'success');
+                    currentConfiguration = config;
+                } else {
+                    throw new Error('Failed to save configuration');
+                }
+            } catch (error) {
+                console.error('Error saving configuration:', error);
+                showAlert('Error saving configuration', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function collectConfigurationFromForm() {
+            const config = {
+                guildId: currentGuildId,
+                enabled: document.getElementById('moderationEnabled').checked,
+                filters: {
+                    spam: {
+                        enabled: document.getElementById('spamEnabled').checked,
+                        threshold: parseFloat(document.getElementById('spamThreshold').value),
+                        maxMessages: parseInt(document.getElementById('spamMaxMessages').value),
+                        timeWindow: document.getElementById('spamTimeWindow').value,
+                        checkDuplicates: document.getElementById('spamCheckDuplicates').checked,
+                        checkRapidTyping: document.getElementById('spamCheckRapidTyping').checked
+                    },
+                    toxicity: {
+                        enabled: document.getElementById('toxicityEnabled').checked,
+                        threshold: parseFloat(document.getElementById('toxicityThreshold').value),
+                        languages: Array.from(document.getElementById('toxicityLanguages').selectedOptions).map(o => o.value),
+                        useAI: document.getElementById('toxicityUseAI').checked,
+                        checkSentiment: document.getElementById('toxicityCheckSentiment').checked,
+                        checkContext: document.getElementById('toxicityCheckContext').checked
+                    },
+                    link: {
+                        enabled: document.getElementById('linkEnabled').checked,
+                        maxLinks: parseInt(document.getElementById('linkMaxLinks').value),
+                        blockedDomains: document.getElementById('linkBlockedDomains').value.split(',').map(d => d.trim()).filter(d => d),
+                        checkShorteners: document.getElementById('linkCheckShorteners').checked,
+                        checkReputation: document.getElementById('linkCheckReputation').checked
+                    },
+                    word: {
+                        enabled: document.getElementById('wordEnabled').checked,
+                        bannedWords: document.getElementById('wordBannedWords').value.split(',').map(w => w.trim()).filter(w => w),
+                        useRegex: document.getElementById('wordUseRegex').checked,
+                        caseSensitive: document.getElementById('wordCaseSensitive').checked,
+                        wholeWordsOnly: document.getElementById('wordWholeWordsOnly').checked
+                    }
+                },
+                actions: collectActionsFromForm(),
+                customRules: currentConfiguration.customRules || [],
+                thresholds: {
+                    violations: {
+                        warn: parseInt(document.getElementById('thresholdWarn').value),
+                        mute: parseInt(document.getElementById('thresholdMute').value),
+                        kick: parseInt(document.getElementById('thresholdKick').value),
+                        ban: parseInt(document.getElementById('thresholdBan').value)
+                    },
+                    timeWindow: document.getElementById('thresholdTimeWindow').value
+                },
+                ui: {
+                    theme: document.getElementById('uiTheme').value,
+                    language: document.getElementById('uiLanguage').value,
+                    layout: document.getElementById('uiLayout').value
+                },
+                settings: {
+                    logChannel: document.getElementById('logChannel').value,
+                    moderatorRole: document.getElementById('moderatorRole').value
+                }
+            };
+            
+            return config;
+        }
+        
+        function collectActionsFromForm() {
+            const actions = {};
+            const actionTypes = ['warn', 'mute', 'kick', 'ban'];
+            
+            actionTypes.forEach(type => {
+                const enabledEl = document.getElementById(`${type}Enabled`);
+                if (enabledEl) {
+                    actions[type] = {
+                        enabled: enabledEl.checked
+                    };
+                    
+                    if (type === 'warn' || type === 'kick' || type === 'ban') {
+                        const messageEl = document.getElementById(`${type}Message`);
+                        if (messageEl) {
+                            if (type === 'warn') {
+                                actions[type].message = messageEl.value;
+                            } else {
+                                actions[type].reason = messageEl.value;
+                            }
+                        }
+                    }
+                    
+                    if (type === 'mute') {
+                        const durationEl = document.getElementById(`${type}Duration`);
+                        if (durationEl) {
+                            actions[type].duration = durationEl.value;
+                        }
+                    }
+                    
+                    if (type === 'ban') {
+                        const deleteEl = document.getElementById(`${type}DeleteMessages`);
+                        if (deleteEl) {
+                            actions[type].deleteMessages = deleteEl.checked;
+                        }
+                    }
+                }
+            });
+            
+            return actions;
+        }
+        
+        function autoSave() {
+            if (currentGuildId && currentConfiguration) {
+                saveConfiguration();
+            }
+        }
+        
+        async function runConfigurationTest() {
+            const userId = document.getElementById('testUserId').value;
+            const content = document.getElementById('testContent').value;
+            
+            if (!userId || !content) {
+                showAlert('Please enter both user ID and test content', 'error');
+                return;
+            }
+            
+            if (!currentGuildId) {
+                showAlert('Please select a guild first', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/test`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        guildId: currentGuildId,
+                        userId: userId,
+                        content: content,
+                        configuration: collectConfigurationFromForm()
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    displayTestResults(result);
+                } else {
+                    throw new Error('Test failed');
+                }
+            } catch (error) {
+                console.error('Error running test:', error);
+                showAlert('Error running configuration test', 'error');
+            }
+        }
+        
+        function displayTestResults(result) {
+            const container = document.getElementById('testResults');
+            container.innerHTML = `
+                <div class="alert ${result.violation ? 'alert-error' : 'alert-success'}">
+                    <h4>Test Results</h4>
+                    <p><strong>Violation Detected:</strong> ${result.violation ? 'Yes' : 'No'}</p>
+                    ${result.violation ? `
+                        <p><strong>Filter Triggered:</strong> ${result.filter}</p>
+                        <p><strong>Confidence:</strong> ${(result.confidence * 100).toFixed(1)}%</p>
+                        <p><strong>Action:</strong> ${result.action}</p>
+                        <p><strong>Reason:</strong> ${result.reason}</p>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        function openAddRuleModal() {
+            document.getElementById('addRuleModal').style.display = 'block';
+        }
+        
+        function closeAddRuleModal() {
+            document.getElementById('addRuleModal').style.display = 'none';
+            // Clear form
+            document.getElementById('ruleName').value = '';
+            document.getElementById('ruleType').value = 'content';
+            document.getElementById('ruleCondition').value = '';
+            document.getElementById('ruleAction').value = 'warn';
+            document.getElementById('ruleEnabled').checked = true;
+        }
+        
+        function addCustomRule() {
+            const name = document.getElementById('ruleName').value;
+            const type = document.getElementById('ruleType').value;
+            const condition = document.getElementById('ruleCondition').value;
+            const action = document.getElementById('ruleAction').value;
+            const enabled = document.getElementById('ruleEnabled').checked;
+            
+            if (!name || !condition) {
+                showAlert('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            const newRule = {
+                id: Date.now().toString(),
+                name: name,
+                type: type,
+                condition: condition,
+                action: action,
+                enabled: enabled
+            };
+            
+            if (!currentConfiguration.customRules) {
+                currentConfiguration.customRules = [];
+            }
+            
+            currentConfiguration.customRules.push(newRule);
+            populateCustomRules(currentConfiguration.customRules);
+            closeAddRuleModal();
+            showAlert('Custom rule added successfully', 'success');
+        }
+        
+        function toggleCustomRule(index) {
+            if (currentConfiguration.customRules && currentConfiguration.customRules[index]) {
+                currentConfiguration.customRules[index].enabled = !currentConfiguration.customRules[index].enabled;
+                autoSave();
+            }
+        }
+        
+        function deleteCustomRule(index) {
+            if (currentConfiguration.customRules && currentConfiguration.customRules[index]) {
+                if (confirm('Are you sure you want to delete this rule?')) {
+                    currentConfiguration.customRules.splice(index, 1);
+                    populateCustomRules(currentConfiguration.customRules);
+                    autoSave();
+                    showAlert('Custom rule deleted', 'success');
+                }
+            }
+        }
+        
+        function exportConfiguration() {
+            if (!currentConfiguration) {
+                showAlert('No configuration to export', 'error');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(currentConfiguration, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `moderation-config-${currentGuildId}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function importConfiguration() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const config = JSON.parse(e.target.result);
+                            config.guildId = currentGuildId; // Ensure correct guild ID
+                            currentConfiguration = config;
+                            populateConfigurationForm(config);
+                            showAlert('Configuration imported successfully', 'success');
+                        } catch (error) {
+                            showAlert('Invalid configuration file', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+        
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+        }
+        
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        function throttle(func, limit) {
+            let inThrottle;
+            return function() {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            }
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('addRuleModal');
+            if (event.target === modal) {
+                closeAddRuleModal();
+            }
+        }
+    </script>
 </body>
 </html>

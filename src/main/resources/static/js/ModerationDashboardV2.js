@@ -946,11 +946,11 @@ class ModerationDashboardV2 {
         this.stateManager.setState('ui.loading', true);
         this.stateManager.setState('ui.loadingMessage', message);
         
-        // Show loading overlay
-        const loadingElement = document.querySelector('.loading-overlay');
+        // Show loading spinner
+        const loadingElement = document.getElementById('loading-spinner');
         if (loadingElement) {
-            loadingElement.style.display = 'flex';
-            const messageElement = loadingElement.querySelector('.loading-message');
+            loadingElement.classList.add('show');
+            const messageElement = loadingElement.querySelector('p');
             if (messageElement) {
                 messageElement.textContent = message;
             }
@@ -961,12 +961,12 @@ class ModerationDashboardV2 {
     hideLoading() {
         this.stateManager.setState('ui.loading', false);
         
-        // Hide loading overlay
-        const loadingElement = document.querySelector('.loading-overlay');
+        // Hide loading spinner
+        const loadingElement = document.getElementById('loading-spinner');
         if (loadingElement) {
             // Ensure minimum display time for better UX
             setTimeout(() => {
-                loadingElement.style.display = 'none';
+                loadingElement.classList.remove('show');
             }, this.config.ui.loading?.minDisplayTime || 100);
         }
         this.logger.debug('Loading indicator hidden');

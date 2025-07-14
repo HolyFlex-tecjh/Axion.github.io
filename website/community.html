@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - Axion Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.png" alt="Axion Bot" class="logo">
+                <span class="logo-text">Axion</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Hjem</a>
+                <a href="index.html#features" class="nav-link">Funktioner</a>
+                <a href="commands.html" class="nav-link">Kommandoer</a>
+                <a href="pricing.html" class="nav-link">Priser</a>
+                <a href="index.html#support" class="nav-link">Support</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary" id="loginBtn">Login</a>
+                <a href="index.html#invite" class="btn btn-primary">Tilføj til Server</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="hero-section community-hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1><i class="fas fa-users"></i> Axion Community</h1>
+                    <p>Bliv en del af vores voksende community af Discord server administratorer og bot entusiaster</p>
+                    <div class="community-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="15000">0</span>
+                            <span class="stat-label">Community Medlemmer</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="2500">0</span>
+                            <span class="stat-label">Aktive Servere</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="500">0</span>
+                            <span class="stat-label">Daglige Brugere</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="community-platforms">
+            <div class="container">
+                <h2>Hvor du kan finde os</h2>
+                <div class="platforms-grid">
+                    <div class="platform-card discord">
+                        <div class="platform-icon">
+                            <i class="fab fa-discord"></i>
+                        </div>
+                        <h3>Discord Server</h3>
+                        <p>Vores hovedcommunity hvor du kan få support, dele ideer og møde andre brugere</p>
+                        <div class="platform-stats">
+                            <span><i class="fas fa-users"></i> 12,000+ medlemmer</span>
+                            <span><i class="fas fa-comments"></i> 24/7 aktiv chat</span>
+                        </div>
+                        <a href="#" class="btn btn-primary">Deltag nu</a>
+                    </div>
+
+                    <div class="platform-card github">
+                        <div class="platform-icon">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <h3>GitHub</h3>
+                        <p>Rapporter bugs, foreslå funktioner og følg udviklingen af Axion Bot</p>
+                        <div class="platform-stats">
+                            <span><i class="fas fa-star"></i> 450+ stars</span>
+                            <span><i class="fas fa-code-branch"></i> Open source</span>
+                        </div>
+                        <a href="#" class="btn btn-secondary">Se Repository</a>
+                    </div>
+
+                    <div class="platform-card reddit">
+                        <div class="platform-icon">
+                            <i class="fab fa-reddit"></i>
+                        </div>
+                        <h3>Reddit</h3>
+                        <p>Del dine server setups, få tips og tricks fra andre administratorer</p>
+                        <div class="platform-stats">
+                            <span><i class="fas fa-users"></i> 3,200+ medlemmer</span>
+                            <span><i class="fas fa-fire"></i> Daglige posts</span>
+                        </div>
+                        <a href="#" class="btn btn-secondary">Besøg Subreddit</a>
+                    </div>
+
+                    <div class="platform-card twitter">
+                        <div class="platform-icon">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <h3>Twitter</h3>
+                        <p>Følg med i de seneste opdateringer, nyheder og announcements</p>
+                        <div class="platform-stats">
+                            <span><i class="fas fa-users"></i> 5,800+ følgere</span>
+                            <span><i class="fas fa-bell"></i> Daglige updates</span>
+                        </div>
+                        <a href="#" class="btn btn-secondary">Følg os</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="community-features">
+            <div class="container">
+                <h2>Hvad vores community tilbyder</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h3>24/7 Support</h3>
+                        <p>Få hjælp fra vores support team og erfarne community medlemmer når som helst</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3>Tips & Tricks</h3>
+                        <p>Lær de bedste praksisser for server management og bot konfiguration</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h3>Tidlige Funktioner</h3>
+                        <p>Få adgang til beta funktioner og vær blandt de første til at teste nye features</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3>Events & Konkurrencer</h3>
+                        <p>Deltag i community events, konkurrencer og vind eksklusive præmier</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>Tutorials & Guides</h3>
+                        <p>Adgang til omfattende guides og video tutorials lavet af community</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h3>Netværk</h3>
+                        <p>Mød andre server ejere og byg forbindelser i Discord community'et</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="community-guidelines">
+            <div class="container">
+                <h2>Community Retningslinjer</h2>
+                <div class="guidelines-content">
+                    <div class="guidelines-text">
+                        <p>For at sikre et positivt og hjælpsomt miljø for alle, beder vi dig om at følge disse simple retningslinjer:</p>
+                        
+                        <div class="guideline-category">
+                            <h3><i class="fas fa-heart"></i> Vær Respektfuld</h3>
+                            <ul>
+                                <li>Behandl alle medlemmer med respekt og venlighed</li>
+                                <li>Ingen chikane, mobning eller diskrimination</li>
+                                <li>Respekter forskellige meninger og perspektiver</li>
+                            </ul>
+                        </div>
+
+                        <div class="guideline-category">
+                            <h3><i class="fas fa-hands-helping"></i> Vær Hjælpsom</h3>
+                            <ul>
+                                <li>Hjælp andre når du kan</li>
+                                <li>Del din viden og erfaring</li>
+                                <li>Stil konstruktive spørgsmål</li>
+                            </ul>
+                        </div>
+
+                        <div class="guideline-category">
+                            <h3><i class="fas fa-comments"></i> Hold det Relevant</h3>
+                            <ul>
+                                <li>Hold diskussioner relateret til Axion Bot og Discord</li>
+                                <li>Brug de rigtige kanaler til forskellige emner</li>
+                                <li>Undgå spam og irrelevant indhold</li>
+                            </ul>
+                        </div>
+
+                        <div class="guideline-category">
+                            <h3><i class="fas fa-shield-alt"></i> Følg Reglerne</h3>
+                            <ul>
+                                <li>Ingen NSFW indhold</li>
+                                <li>Ingen reklame uden tilladelse</li>
+                                <li>Respekter Discord's Terms of Service</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="guidelines-image">
+                        <div class="community-illustration">
+                            <i class="fas fa-users-cog"></i>
+                            <h3>Sammen bygger vi et bedre community</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="community-events">
+            <div class="container">
+                <h2>Kommende Events</h2>
+                <div class="events-grid">
+                    <div class="event-card">
+                        <div class="event-date">
+                            <span class="day">25</span>
+                            <span class="month">DEC</span>
+                        </div>
+                        <div class="event-content">
+                            <h3>Jule Bot Setup Konkurrence</h3>
+                            <p>Vis din kreativitet med jule-themed bot konfigurationer og vind premium features</p>
+                            <div class="event-meta">
+                                <span><i class="fas fa-clock"></i> 19:00 CET</span>
+                                <span><i class="fas fa-gift"></i> Præmier til vindere</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="event-card">
+                        <div class="event-date">
+                            <span class="day">01</span>
+                            <span class="month">JAN</span>
+                        </div>
+                        <div class="event-content">
+                            <h3>Nytårs Community Meetup</h3>
+                            <p>Fejr det nye år sammen med community'et og få et sneak peek på 2025 features</p>
+                            <div class="event-meta">
+                                <span><i class="fas fa-clock"></i> 20:00 CET</span>
+                                <span><i class="fas fa-video"></i> Voice chat event</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="event-card">
+                        <div class="event-date">
+                            <span class="day">15</span>
+                            <span class="month">JAN</span>
+                        </div>
+                        <div class="event-content">
+                            <h3>Bot Development Workshop</h3>
+                            <p>Lær at lave dine egne Discord bots med vores udviklere som instruktører</p>
+                            <div class="event-meta">
+                                <span><i class="fas fa-clock"></i> 18:00 CET</span>
+                                <span><i class="fas fa-code"></i> Hands-on workshop</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="community-testimonials">
+            <div class="container">
+                <h2>Hvad siger vores community</h2>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <div class="testimonial-content">
+                            <p>"Axion community er fantastisk! Jeg har lært så meget om server management og fået hjælp hver gang jeg havde brug for det."</p>
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="author-info">
+                                <h4>Magnus K.</h4>
+                                <span>Server Administrator</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <div class="testimonial-content">
+                            <p>"Support teamet er utrolig hjælpsomt og community'et er meget venligt. Kan varmt anbefale at deltage!"</p>
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="author-info">
+                                <h4>Sarah L.</h4>
+                                <span>Community Moderator</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card">
+                        <div class="testimonial-content">
+                            <p>"De events og workshops de holder er super lærerige. Har fået mange nye ideer til min server!"</p>
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="author-info">
+                                <h4>Thomas R.</h4>
+                                <span>Gaming Community Owner</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="community-cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h2>Klar til at blive en del af community'et?</h2>
+                    <p>Deltag i tusindvis af andre Discord entusiaster og få det meste ud af din server</p>
+                    <div class="cta-buttons">
+                        <a href="#" class="btn btn-primary btn-large">
+                            <i class="fab fa-discord"></i>
+                            Deltag i Discord
+                        </a>
+                        <a href="contact.html" class="btn btn-secondary btn-large">
+                            <i class="fas fa-envelope"></i>
+                            Kontakt os
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Axion Bot</h3>
+                <p>Den ultimative Discord bot til din server</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-reddit"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Links</h4>
+                <ul>
+                    <li><a href="index.html#features">Funktioner</a></li>
+                    <li><a href="commands.html">Kommandoer</a></li>
+                    <li><a href="pricing.html">Priser</a></li>
+                    <li><a href="about.html">Om os</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Community</h4>
+                <ul>
+                    <li><a href="community.html">Community</a></li>
+                    <li><a href="#">Discord Server</a></li>
+                    <li><a href="#">GitHub</a></li>
+                    <li><a href="#">Reddit</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="docs.html">Dokumentation</a></li>
+                    <li><a href="contact.html">Kontakt</a></li>
+                    <li><a href="api-docs.html">API Docs</a></li>
+                    <li><a href="changelog.html">Changelog</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Axion Bot. Alle rettigheder forbeholdes.</p>
+            <div class="footer-links">
+                <a href="privacy.html">Privatlivspolitik</a>
+                <a href="terms.html">Servicevilkår</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Animate statistics
+        function animateStats() {
+            const stats = document.querySelectorAll('.stat-number');
+            
+            stats.forEach(stat => {
+                const target = parseInt(stat.getAttribute('data-target'));
+                const increment = target / 100;
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    stat.textContent = Math.floor(current).toLocaleString();
+                }, 20);
+            });
+        }
+
+        // Trigger animation when stats come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateStats();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        const statsSection = document.querySelector('.community-stats');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
+
+        // Add hover effects to platform cards
+        document.querySelectorAll('.platform-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

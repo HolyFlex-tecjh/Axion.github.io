@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokumentation - Axion Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.png" alt="Axion Bot" class="logo">
+                <span class="logo-text">Axion</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Hjem</a>
+                <a href="index.html#features" class="nav-link">Funktioner</a>
+                <a href="commands.html" class="nav-link">Kommandoer</a>
+                <a href="pricing.html" class="nav-link">Priser</a>
+                <a href="index.html#support" class="nav-link">Support</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary" id="loginBtn">Login</a>
+                <a href="index.html#invite" class="btn btn-primary">Tilføj til Server</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-book"></i> Dokumentation</h1>
+                <p>Alt du behøver at vide om Axion Bot</p>
+            </div>
+
+            <div class="docs-container">
+                <div class="docs-sidebar">
+                    <nav class="docs-nav">
+                        <h3>Indhold</h3>
+                        <ul>
+                            <li><a href="#getting-started">Kom i Gang</a></li>
+                            <li><a href="#setup">Opsætning</a></li>
+                            <li><a href="#commands">Kommandoer</a></li>
+                            <li><a href="#moderation">Moderation</a></li>
+                            <li><a href="#music">Musik</a></li>
+                            <li><a href="#leveling">Leveling</a></li>
+                            <li><a href="#custom-commands">Custom Commands</a></li>
+                            <li><a href="#permissions">Tilladelser</a></li>
+                            <li><a href="#troubleshooting">Fejlfinding</a></li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="docs-content">
+                    <section id="getting-started" class="docs-section">
+                        <h2>Kom i Gang</h2>
+                        <p>Velkommen til Axion Bot! Denne guide hjælper dig med at komme i gang med at bruge botten på din Discord server.</p>
+                        
+                        <div class="step-guide">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h3>Inviter Botten</h3>
+                                    <p>Klik på "Tilføj til Server" knappen og vælg din server.</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h3>Giv Tilladelser</h3>
+                                    <p>Sørg for at botten har de nødvendige tilladelser til at fungere korrekt.</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h3>Konfigurer Indstillinger</h3>
+                                    <p>Brug dashboard'et til at tilpasse botten til dine behov.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="setup" class="docs-section">
+                        <h2>Opsætning</h2>
+                        <p>Efter du har inviteret Axion Bot til din server, skal du konfigurere grundlæggende indstillinger.</p>
+                        
+                        <div class="setup-card">
+                            <h3><i class="fas fa-cog"></i> Grundlæggende Indstillinger</h3>
+                            <ul>
+                                <li><strong>Prefix:</strong> Standardprefixet er <code>!</code>, men du kan ændre det i dashboard'et</li>
+                                <li><strong>Sprog:</strong> Vælg mellem dansk og engelsk</li>
+                                <li><strong>Tidzone:</strong> Indstil din servers tidzone for korrekte timestamps</li>
+                            </ul>
+                        </div>
+
+                        <div class="setup-card">
+                            <h3><i class="fas fa-shield-alt"></i> Tilladelser</h3>
+                            <p>Axion Bot har brug for følgende tilladelser for at fungere optimalt:</p>
+                            <ul>
+                                <li>Læse beskeder</li>
+                                <li>Sende beskeder</li>
+                                <li>Administrere beskeder</li>
+                                <li>Administrere roller</li>
+                                <li>Kick medlemmer</li>
+                                <li>Ban medlemmer</li>
+                                <li>Forbinde til voice kanaler</li>
+                                <li>Tale i voice kanaler</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="commands" class="docs-section">
+                        <h2>Kommandoer</h2>
+                        <p>Axion Bot har over 100+ kommandoer fordelt på forskellige kategorier.</p>
+                        
+                        <div class="command-category">
+                            <h3><i class="fas fa-info-circle"></i> Generelle Kommandoer</h3>
+                            <div class="command-list">
+                                <div class="command-item">
+                                    <code>!help</code>
+                                    <span>Vis hjælpemenu</span>
+                                </div>
+                                <div class="command-item">
+                                    <code>!ping</code>
+                                    <span>Tjek bot latency</span>
+                                </div>
+                                <div class="command-item">
+                                    <code>!serverinfo</code>
+                                    <span>Vis server information</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="command-category">
+                            <h3><i class="fas fa-shield-alt"></i> Moderation</h3>
+                            <div class="command-list">
+                                <div class="command-item">
+                                    <code>!ban @user [reason]</code>
+                                    <span>Ban en bruger</span>
+                                </div>
+                                <div class="command-item">
+                                    <code>!kick @user [reason]</code>
+                                    <span>Kick en bruger</span>
+                                </div>
+                                <div class="command-item">
+                                    <code>!warn @user [reason]</code>
+                                    <span>Giv en advarsel</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="moderation" class="docs-section">
+                        <h2>Moderation</h2>
+                        <p>Axion Bot tilbyder kraftfulde moderation værktøjer til at holde din server sikker.</p>
+                        
+                        <div class="feature-card">
+                            <h3>Auto-Moderation</h3>
+                            <p>Automatisk detektering og handling på:</p>
+                            <ul>
+                                <li>Spam beskeder</li>
+                                <li>Toxic sprog</li>
+                                <li>Excessive caps</li>
+                                <li>Invite links</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-card">
+                            <h3>Moderation Logs</h3>
+                            <p>Hold styr på alle moderation handlinger med detaljerede logs der inkluderer:</p>
+                            <ul>
+                                <li>Hvem der udførte handlingen</li>
+                                <li>Hvornår det skete</li>
+                                <li>Årsag til handlingen</li>
+                                <li>Varighed (for timeouts)</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="music" class="docs-section">
+                        <h2>Musik</h2>
+                        <p>Axion Bot har en avanceret musik afspiller med support for YouTube, Spotify og SoundCloud.</p>
+                        
+                        <div class="music-commands">
+                            <h3>Musik Kommandoer</h3>
+                            <div class="command-list">
+                                <div class="command-item">
+                                    <code>!play [sang/url]</code>
+                                    <span>Afspil musik</span>
+                                </div>
+                                <div class="command-item">
+                                    <code>!pause</code>
+                                    <span>Pause musik</span>
+                                </div>
+                                <div class="command-item">
+                                    <code>!skip</code>
+                                    <span>Spring til næste sang</span>
+                                </div>
+                                <div class="command-item">
+                                    <code>!queue</code>
+                                    <span>Vis musik kø</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="leveling" class="docs-section">
+                        <h2>Leveling System</h2>
+                        <p>Belønning aktive medlemmer med XP og levels.</p>
+                        
+                        <div class="leveling-info">
+                            <h3>Sådan Fungerer Det</h3>
+                            <ul>
+                                <li>Medlemmer får XP for at sende beskeder</li>
+                                <li>XP mængde kan konfigureres (standard: 15-25 XP per besked)</li>
+                                <li>Level up beskeder kan tilpasses</li>
+                                <li>Rolle belønninger for specifikke levels</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="custom-commands" class="docs-section">
+                        <h2>Custom Commands</h2>
+                        <p>Opret dine egne kommandoer med avancerede funktioner.</p>
+                        
+                        <div class="custom-commands-guide">
+                            <h3>Variabler</h3>
+                            <p>Brug disse variabler i dine custom commands:</p>
+                            <ul>
+                                <li><code>{user}</code> - Brugerens navn</li>
+                                <li><code>{server}</code> - Server navn</li>
+                                <li><code>{channel}</code> - Kanal navn</li>
+                                <li><code>{date}</code> - Nuværende dato</li>
+                                <li><code>{time}</code> - Nuværende tid</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="permissions" class="docs-section">
+                        <h2>Tilladelser</h2>
+                        <p>Konfigurer hvem der kan bruge hvilke kommandoer.</p>
+                        
+                        <div class="permissions-guide">
+                            <h3>Tilladelsesniveauer</h3>
+                            <ul>
+                                <li><strong>Everyone:</strong> Alle kan bruge kommandoen</li>
+                                <li><strong>Moderator:</strong> Kun moderatorer og højere</li>
+                                <li><strong>Admin:</strong> Kun administratorer</li>
+                                <li><strong>Owner:</strong> Kun server ejeren</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="troubleshooting" class="docs-section">
+                        <h2>Fejlfinding</h2>
+                        <p>Løsninger på almindelige problemer.</p>
+                        
+                        <div class="troubleshooting-item">
+                            <h3>Botten svarer ikke</h3>
+                            <ul>
+                                <li>Tjek at botten er online</li>
+                                <li>Verificer at du bruger det korrekte prefix</li>
+                                <li>Sørg for at botten har tilladelse til at læse og sende beskeder</li>
+                            </ul>
+                        </div>
+
+                        <div class="troubleshooting-item">
+                            <h3>Musik virker ikke</h3>
+                            <ul>
+                                <li>Tjek at botten har tilladelse til at forbinde til voice kanaler</li>
+                                <li>Sørg for at du er i en voice kanal</li>
+                                <li>Verificer at URL'en er gyldig</li>
+                            </ul>
+                        </div>
+
+                        <div class="troubleshooting-item">
+                            <h3>Moderation kommandoer virker ikke</h3>
+                            <ul>
+                                <li>Tjek at botten har de nødvendige moderation tilladelser</li>
+                                <li>Sørg for at bottens rolle er højere end den bruger du prøver at moderere</li>
+                                <li>Verificer at du har tilladelse til at bruge kommandoen</li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Axion Bot</h3>
+                <p>Den ultimative Discord bot til din server</p>
+            </div>
+            <div class="footer-section">
+                <h4>Links</h4>
+                <ul>
+                    <li><a href="index.html#features">Funktioner</a></li>
+                    <li><a href="commands.html">Kommandoer</a></li>
+                    <li><a href="pricing.html">Priser</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="docs.html">Dokumentation</a></li>
+                    <li><a href="contact.html">Kontakt</a></li>
+                    <li><a href="#">Discord Server</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Axion Bot. Alle rettigheder forbeholdes.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -255,6 +255,12 @@
                 </div>
 
                 <div class="commands-list">
+                    <div class="results-counter">150+ commands found</div>
+                    <div class="empty-state" style="display: none;">
+                        <i class="fas fa-search"></i>
+                        <h3>Ingen kommandoer fundet</h3>
+                        <p>Prøv at justere dine søgekriterier eller filtre</p>
+                    </div>
                     <div class="command-category active" data-category="all">
                         <h3 class="category-title">
                             <i class="fas fa-grip-horizontal"></i>
@@ -262,14 +268,14 @@
                         </h3>
                         
                         <!-- Moderation Commands -->
-                        <div class="command-item" data-permission="moderator" data-popularity="high">
+                        <div class="command-item" data-permission="moderator" data-popularity="high" data-category="moderation">
                             <div class="command-header">
                                 <div class="command-title">
                                     <div class="command-syntax">ban [@bruger] [grund]</div>
                                     <div class="command-badges">
                                         <span class="permission-badge moderator">Moderator</span>
                                         <span class="popularity-badge high">Højt</span>
-                                        <button class="favorite-btn" data-command="ban">
+                                        <button class="favorite-btn" data-command="ban" data-command-id="ban">
                                             <i class="far fa-heart"></i>
                                         </button>
                                         <button class="copy-btn" data-command="!ban [@bruger] [grund]">
@@ -305,14 +311,14 @@
                         </div>
 
                         <!-- Music Commands -->
-                        <div class="command-item" data-permission="everyone" data-popularity="high">
+                        <div class="command-item" data-permission="everyone" data-popularity="high" data-category="music">
                             <div class="command-header">
                                 <div class="command-title">
                                     <div class="command-syntax">play [sang/url]</div>
                                     <div class="command-badges">
                                         <span class="permission-badge everyone">Alle</span>
                                         <span class="popularity-badge high">Højt</span>
-                                        <button class="favorite-btn" data-command="play">
+                                        <button class="favorite-btn" data-command="play" data-command-id="play">
                                             <i class="far fa-heart"></i>
                                         </button>
                                         <button class="copy-btn" data-command="!play [sang/url]">
@@ -348,14 +354,14 @@
                         </div>
 
                         <!-- Fun Commands -->
-                        <div class="command-item" data-permission="everyone" data-popularity="medium">
+                        <div class="command-item" data-permission="everyone" data-popularity="medium" data-category="fun">
                             <div class="command-header">
                                 <div class="command-title">
                                     <div class="command-syntax">meme [kategori]</div>
                                     <div class="command-badges">
                                         <span class="permission-badge everyone">Alle</span>
                                         <span class="popularity-badge medium">Medium</span>
-                                        <button class="favorite-btn" data-command="meme">
+                                        <button class="favorite-btn" data-command="meme" data-command-id="meme">
                                             <i class="far fa-heart"></i>
                                         </button>
                                         <button class="copy-btn" data-command="!meme [kategori]">

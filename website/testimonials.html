@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testimonials - Axion Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.png" alt="Axion Bot" class="logo">
+                <span class="logo-text">Axion</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Hjem</a>
+                <a href="index.html#features" class="nav-link">Funktioner</a>
+                <a href="commands.html" class="nav-link">Kommandoer</a>
+                <a href="pricing.html" class="nav-link">Priser</a>
+                <a href="index.html#support" class="nav-link">Support</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary" id="loginBtn">Login</a>
+                <a href="index.html#invite" class="btn btn-primary">Tilføj til Server</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="hero-section testimonials-hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1><i class="fas fa-quote-left"></i> Hvad siger vores brugere</h1>
+                    <p>Læs om oplevelserne fra tusindvis af Discord server administratorer der bruger Axion Bot</p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="98">0</span><span class="stat-symbol">%</span>
+                            <span class="stat-label">Tilfredse Brugere</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="4.9">0</span><span class="stat-symbol">/5</span>
+                            <span class="stat-label">Gennemsnitlig Rating</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" data-target="2500">0</span><span class="stat-symbol">+</span>
+                            <span class="stat-label">Anmeldelser</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="featured-testimonials">
+            <div class="container">
+                <h2>Fremhævede Anmeldelser</h2>
+                <div class="featured-grid">
+                    <div class="featured-testimonial">
+                        <div class="testimonial-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="testimonial-date">15. December 2024</span>
+                        </div>
+                        <blockquote>
+                            "Axion Bot har fuldstændig transformeret vores Discord server. Moderation funktionerne er utrolig kraftfulde og musikbotten fungerer perfekt. Vores community er vokset med 300% siden vi begyndte at bruge Axion!"
+                        </blockquote>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <img src="assets/testimonials/avatar1.png" alt="Lars Nielsen" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                <div class="avatar-fallback"><i class="fas fa-user"></i></div>
+                            </div>
+                            <div class="author-info">
+                                <h4>Lars Nielsen</h4>
+                                <span>Ejer af "Danish Gamers" (12,000 medlemmer)</span>
+                                <div class="server-info">
+                                    <i class="fas fa-server"></i>
+                                    <span>Gaming Community</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="featured-testimonial">
+                        <div class="testimonial-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="testimonial-date">10. December 2024</span>
+                        </div>
+                        <blockquote>
+                            "Som administrator af en stor uddannelsesserver var jeg bekymret for moderation. Axion's auto-moderation har gjort mit job så meget lettere. Jeg kan fokusere på at hjælpe studerende i stedet for at jage spam!"
+                        </blockquote>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <img src="assets/testimonials/avatar2.png" alt="Maria Andersen" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                                <div class="avatar-fallback"><i class="fas fa-user"></i></div>
+                            </div>
+                            <div class="author-info">
+                                <h4>Maria Andersen</h4>
+                                <span>Administrator på "IT Studerende DK" (8,500 medlemmer)</span>
+                                <div class="server-info">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    <span>Uddannelse</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials-by-category">
+            <div class="container">
+                <h2>Anmeldelser efter Kategori</h2>
+                <div class="category-tabs">
+                    <button class="tab-btn active" data-category="all">Alle</button>
+                    <button class="tab-btn" data-category="moderation">Moderation</button>
+                    <button class="tab-btn" data-category="music">Musik</button>
+                    <button class="tab-btn" data-category="custom">Custom Commands</button>
+                    <button class="tab-btn" data-category="analytics">Analytics</button>
+                    <button class="tab-btn" data-category="support">Support</button>
+                </div>
+
+                <div class="testimonials-grid" id="testimonialsGrid">
+                    <!-- Moderation testimonials -->
+                    <div class="testimonial-card" data-category="moderation">
+                        <div class="card-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="category-tag moderation">Moderation</span>
+                        </div>
+                        <p>"Auto-moderation funktionen er fantastisk. Den fanger spam og upassende indhold før jeg overhovedet ser det. Har sparet mig for timer hver dag!"</p>
+                        <div class="testimonial-footer">
+                            <div class="author">
+                                <strong>Thomas K.</strong>
+                                <span>Server med 5,000 medlemmer</span>
+                            </div>
+                            <span class="date">8. December 2024</span>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card" data-category="music">
+                        <div class="card-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="category-tag music">Musik</span>
+                        </div>
+                        <p>"Musikbotten er den bedste jeg har prøvet. Høj kvalitet lyd, ingen lag, og den understøtter alle de platforme vi bruger. Vores voice channels er altid fyldt nu!"</p>
+                        <div class="testimonial-footer">
+                            <div class="author">
+                                <strong>Sarah L.</strong>
+                                <span>Musik Community</span>
+                            </div>
+                            <span class="date">5. December 2024</span>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card" data-category="custom">
+                        <div class="card-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="category-tag custom">Custom Commands</span>
+                        </div>
+                        <p>"Custom commands systemet er utrolig fleksibelt. Jeg har lavet automatiske velkomstbeskeder, FAQ svar og endda mini-spil. Mulighederne er uendelige!"</p>
+                        <div class="testimonial-footer">
+                            <div class="author">
+                                <strong>Michael R.</strong>
+                                <span>Tech Community</span>
+                            </div>
+                            <span class="date">3. December 2024</span>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card" data-category="analytics">
+                        <div class="card-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="category-tag analytics">Analytics</span>
+                        </div>
+                        <p>"Analytics dashboardet giver mig indsigt i hvordan min server performer. Jeg kan se hvilke kanaler der er mest aktive og optimere derefter."</p>
+                        <div class="testimonial-footer">
+                            <div class="author">
+                                <strong>Emma J.</strong>
+                                <span>Business Server</span>
+                            </div>
+                            <span class="date">1. December 2024</span>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card" data-category="support">
+                        <div class="card-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="category-tag support">Support</span>
+                        </div>
+                        <p>"Support teamet er fantastisk! De svarede på mit spørgsmål inden for 10 minutter og hjalp mig med at sætte alt op perfekt. Førsteklasses service!"</p>
+                        <div class="testimonial-footer">
+                            <div class="author">
+                                <strong>Andreas P.</strong>
+                                <span>Ny bruger</span>
+                            </div>
+                            <span class="date">28. November 2024</span>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card" data-category="moderation">
+                        <div class="card-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="category-tag moderation">Moderation</span>
+                        </div>
+                        <p>"Leveling systemet har gjort vores community meget mere engageret. Folk konkurrerer om at nå højere levels og deltager mere i diskussioner."</p>
+                        <div class="testimonial-footer">
+                            <div class="author">
+                                <strong>Kasper M.</strong>
+                                <span>Gaming Guild</span>
+                            </div>
+                            <span class="date">25. November 2024</span>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card" data-category="music">
+                        <div class="card-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="category-tag music">Musik</span>
+                        </div>
+                        <p>"Playlist funktionen er genial. Vi har lavet forskellige playlists til forskellige stemninger og events. Musikken kører smooth hele tiden."</p>
+                        <div class="testimonial-footer">
+                            <div class="author">
+                                <strong>Julie H.</strong>
+                                <span>Chill Server</span>
+                            </div>
+                            <span class="date">22. November 2024</span>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card" data-category="custom">
+                        <div class="card-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="category-tag custom">Custom Commands</span>
+                        </div>
+                        <p>"Jeg har lavet en custom command der automatisk giver nye medlemmer roller baseret på deres interesser. Det har gjort onboarding så meget lettere!"</p>
+                        <div class="testimonial-footer">
+                            <div class="author">
+                                <strong>Oliver T.</strong>
+                                <span>Hobby Community</span>
+                            </div>
+                            <span class="date">20. November 2024</span>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-card" data-category="analytics">
+                        <div class="card-header">
+                            <div class="rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="category-tag analytics">Analytics</span>
+                        </div>
+                        <p>"Data eksport funktionen er perfekt til mine månedlige rapporter. Jeg kan nemt se trends og vækst i vores community."</p>
+                        <div class="testimonial-footer">
+                            <div class="author">
+                                <strong>Mette S.</strong>
+                                <span>Professional Server</span>
+                            </div>
+                            <span class="date">18. November 2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="load-more-container">
+                    <button class="btn btn-secondary" id="loadMoreBtn">Indlæs flere anmeldelser</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonial-stats">
+            <div class="container">
+                <h2>Statistikker fra vores brugere</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><span class="counter" data-target="87">0</span>%</h3>
+                            <p>Rapporterer øget server aktivitet</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><span class="counter" data-target="75">0</span>%</h3>
+                            <p>Sparer mere end 5 timer om ugen</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><span class="counter" data-target="92">0</span>%</h3>
+                            <p>Ser forbedret community engagement</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3><span class="counter" data-target="95">0</span>%</h3>
+                            <p>Reduceret moderation arbejde</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="submit-testimonial">
+            <div class="container">
+                <div class="submit-content">
+                    <h2>Del din oplevelse</h2>
+                    <p>Har du også en god oplevelse med Axion Bot? Vi vil gerne høre fra dig!</p>
+                    
+                    <form class="testimonial-form" id="testimonialForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="authorName">Dit navn</label>
+                                <input type="text" id="authorName" name="authorName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="serverName">Server navn (valgfrit)</label>
+                                <input type="text" id="serverName" name="serverName">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rating">Rating</label>
+                            <div class="rating-input" id="ratingInput">
+                                <i class="far fa-star" data-rating="1"></i>
+                                <i class="far fa-star" data-rating="2"></i>
+                                <i class="far fa-star" data-rating="3"></i>
+                                <i class="far fa-star" data-rating="4"></i>
+                                <i class="far fa-star" data-rating="5"></i>
+                            </div>
+                            <input type="hidden" id="rating" name="rating" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="category">Kategori</label>
+                            <select id="category" name="category" required>
+                                <option value="">Vælg kategori</option>
+                                <option value="general">Generelt</option>
+                                <option value="moderation">Moderation</option>
+                                <option value="music">Musik</option>
+                                <option value="custom">Custom Commands</option>
+                                <option value="analytics">Analytics</option>
+                                <option value="support">Support</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="testimonialText">Din anmeldelse</label>
+                            <textarea id="testimonialText" name="testimonialText" rows="5" placeholder="Fortæl os om din oplevelse med Axion Bot..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Send anmeldelse</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Axion Bot</h3>
+                <p>Den ultimative Discord bot til din server</p>
+            </div>
+            <div class="footer-section">
+                <h4>Links</h4>
+                <ul>
+                    <li><a href="index.html#features">Funktioner</a></li>
+                    <li><a href="commands.html">Kommandoer</a></li>
+                    <li><a href="pricing.html">Priser</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="docs.html">Dokumentation</a></li>
+                    <li><a href="contact.html">Kontakt</a></li>
+                    <li><a href="#">Discord Server</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Axion Bot. Alle rettigheder forbeholdes.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Category filtering
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                
+                // Update active tab
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Filter testimonials
+                const testimonials = document.querySelectorAll('.testimonial-card');
+                testimonials.forEach(testimonial => {
+                    if (category === 'all' || testimonial.getAttribute('data-category') === category) {
+                        testimonial.style.display = 'block';
+                    } else {
+                        testimonial.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Rating input
+        document.querySelectorAll('#ratingInput i').forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = this.getAttribute('data-rating');
+                document.getElementById('rating').value = rating;
+                
+                // Update visual rating
+                document.querySelectorAll('#ratingInput i').forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('far');
+                        s.classList.add('fas');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                    }
+                });
+            });
+        });
+
+        // Form submission
+        document.getElementById('testimonialForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show success message
+            alert('Tak for din anmeldelse! Vi vil gennemgå den og publicere den snart.');
+            
+            // Reset form
+            this.reset();
+            document.getElementById('rating').value = '';
+            document.querySelectorAll('#ratingInput i').forEach(s => {
+                s.classList.remove('fas');
+                s.classList.add('far');
+            });
+        });
+
+        // Animate counters
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const increment = target / 100;
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    counter.textContent = Math.floor(current);
+                }, 20);
+            });
+        }
+
+        // Trigger animation when stats come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        const statsSection = document.querySelector('.stats-grid');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
+
+        // Load more functionality
+        document.getElementById('loadMoreBtn').addEventListener('click', function() {
+            // Simulate loading more testimonials
+            this.textContent = 'Indlæser...';
+            
+            setTimeout(() => {
+                this.textContent = 'Alle anmeldelser indlæst';
+                this.disabled = true;
+            }, 1000);
+        });
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

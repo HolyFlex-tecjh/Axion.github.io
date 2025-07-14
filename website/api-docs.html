@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Dokumentation - Axion Bot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="assets/logo.png" alt="Axion Bot" class="logo">
+                <span class="logo-text">Axion</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Hjem</a>
+                <a href="index.html#features" class="nav-link">Funktioner</a>
+                <a href="commands.html" class="nav-link">Kommandoer</a>
+                <a href="pricing.html" class="nav-link">Priser</a>
+                <a href="index.html#support" class="nav-link">Support</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="login.html" class="btn btn-secondary" id="loginBtn">Login</a>
+                <a href="index.html#invite" class="btn btn-primary">Tilføj til Server</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-code"></i> API Dokumentation</h1>
+                <p>Integrer Axion Bot i dine egne applikationer</p>
+            </div>
+
+            <div class="api-docs-container">
+                <div class="api-sidebar">
+                    <nav class="api-nav">
+                        <h3>Indhold</h3>
+                        <ul>
+                            <li><a href="#getting-started">Kom i Gang</a></li>
+                            <li><a href="#authentication">Autentificering</a></li>
+                            <li><a href="#endpoints">API Endpoints</a></li>
+                            <li><a href="#webhooks">Webhooks</a></li>
+                            <li><a href="#rate-limits">Rate Limits</a></li>
+                            <li><a href="#examples">Eksempler</a></li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="api-content">
+                    <section id="getting-started" class="api-section">
+                        <h2>Kom i Gang</h2>
+                        <p>Axion Bot API giver dig mulighed for at interagere med bot funktioner programmatisk. Alle requests skal sendes til:</p>
+                        <div class="code-block">
+                            <code>https://api.axionbot.dk/v1/</code>
+                        </div>
+                    </section>
+
+                    <section id="authentication" class="api-section">
+                        <h2>Autentificering</h2>
+                        <p>API'et bruger Bearer token autentificering. Inkluder din API nøgle i Authorization headeren:</p>
+                        <pre class="code-block"><code class="language-http">Authorization: Bearer YOUR_API_KEY</code></pre>
+                        <div class="api-note">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Du kan få din API nøgle fra dashboard under "API Settings".</p>
+                        </div>
+                    </section>
+
+                    <section id="endpoints" class="api-section">
+                        <h2>API Endpoints</h2>
+                        
+                        <div class="endpoint">
+                            <h3>GET /server/{server_id}/stats</h3>
+                            <p>Hent server statistikker</p>
+                            <div class="endpoint-example">
+                                <h4>Response:</h4>
+                                <pre class="code-block"><code class="language-json">{
+  "server_id": "123456789",
+  "member_count": 1250,
+  "online_members": 342,
+  "total_messages": 45678,
+  "commands_used": 1234
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <h3>POST /server/{server_id}/commands</h3>
+                            <p>Opret en custom command</p>
+                            <div class="endpoint-example">
+                                <h4>Request Body:</h4>
+                                <pre class="code-block"><code class="language-json">{
+  "name": "hello",
+  "response": "Hello {user}!",
+  "permissions": ["everyone"]
+}</code></pre>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <h3>GET /server/{server_id}/moderation/logs</h3>
+                            <p>Hent moderation logs</p>
+                            <div class="endpoint-example">
+                                <h4>Query Parameters:</h4>
+                                <ul>
+                                    <li><code>limit</code> - Antal logs (max 100)</li>
+                                    <li><code>type</code> - Log type (ban, kick, warn, mute)</li>
+                                    <li><code>user_id</code> - Specifik bruger ID</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="webhooks" class="api-section">
+                        <h2>Webhooks</h2>
+                        <p>Modtag real-time events fra din server:</p>
+                        <div class="webhook-events">
+                            <h3>Tilgængelige Events:</h3>
+                            <ul>
+                                <li><code>member.join</code> - Ny medlem</li>
+                                <li><code>member.leave</code> - Medlem forlader</li>
+                                <li><code>message.delete</code> - Besked slettet</li>
+                                <li><code>moderation.action</code> - Moderation handling</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section id="rate-limits" class="api-section">
+                        <h2>Rate Limits</h2>
+                        <div class="rate-limit-info">
+                            <div class="rate-limit-tier">
+                                <h3>Free Tier</h3>
+                                <p>100 requests per time</p>
+                            </div>
+                            <div class="rate-limit-tier">
+                                <h3>Premium Tier</h3>
+                                <p>1000 requests per time</p>
+                            </div>
+                            <div class="rate-limit-tier">
+                                <h3>Enterprise Tier</h3>
+                                <p>Unlimited requests</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="examples" class="api-section">
+                        <h2>Eksempler</h2>
+                        <div class="example">
+                            <h3>JavaScript/Node.js</h3>
+                            <pre class="code-block"><code class="language-javascript">const axios = require('axios');
+
+const api = axios.create({
+  baseURL: 'https://api.axionbot.dk/v1/',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY'
+  }
+});
+
+// Hent server stats
+api.get('/server/123456789/stats')
+  .then(response => {
+    console.log(response.data);
+  })
+  .catch(error => {
+    console.error(error);
+  });</code></pre>
+                        </div>
+
+                        <div class="example">
+                            <h3>Python</h3>
+                            <pre class="code-block"><code class="language-python">import requests
+
+headers = {
+    'Authorization': 'Bearer YOUR_API_KEY'
+}
+
+response = requests.get(
+    'https://api.axionbot.dk/v1/server/123456789/stats',
+    headers=headers
+)
+
+if response.status_code == 200:
+    data = response.json()
+    print(data)
+else:
+    print(f'Error: {response.status_code}')</code></pre>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Axion Bot</h3>
+                <p>Den ultimative Discord bot til din server</p>
+            </div>
+            <div class="footer-section">
+                <h4>Links</h4>
+                <ul>
+                    <li><a href="index.html#features">Funktioner</a></li>
+                    <li><a href="commands.html">Kommandoer</a></li>
+                    <li><a href="pricing.html">Priser</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="docs.html">Dokumentation</a></li>
+                    <li><a href="contact.html">Kontakt</a></li>
+                    <li><a href="#">Discord Server</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Axion Bot. Alle rettigheder forbeholdes.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

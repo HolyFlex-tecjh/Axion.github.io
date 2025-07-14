@@ -33,38 +33,66 @@ public class ModerationConfigurationController {
     }
     
     /**
-     * Start the web server for the API
+     * Starts the HTTP server on the specified port
      */
-    public void startServer(int port) {
-        try {
-            server = HttpServer.create(new InetSocketAddress(port), 0);
-            
-            // API endpoints
-            server.createContext("/api/moderation/config/guild", new GuildConfigHandler());
-            server.createContext("/api/moderation/config/filters/options", new FilterOptionsHandler());
-            server.createContext("/api/moderation/config/actions/options", new ActionOptionsHandler());
-            server.createContext("/api/moderation/config/rules/conditions", new RuleConditionsHandler());
-            server.createContext("/api/moderation/config/ui/options", new UIOptionsHandler());
-            server.createContext("/api/moderation/config/templates", new TemplatesHandler());
-            
-            server.setExecutor(Executors.newFixedThreadPool(10));
-            server.start();
-            
-            logger.info("Moderation API server started on port " + port);
-        } catch (IOException e) {
-            logger.severe("Failed to start API server: " + e.getMessage());
-        }
+    public void startServer(int port) throws IOException {
+        server = HttpServer.create(new InetSocketAddress(port), 0);
+        
+        // Create contexts for all endpoints
+        server.createContext("/", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                // Serve static files from resources directory
+                String path = exchange.getRequestURI().getPath();
+                if (path.equals("/")) {
+                    path = "/index.html";
+                }
+                
+                try (InputStream is = getClass().getResourceAsStream("/static" + path)) {
+                    if (is == null) {
+                        String response = "404 (Not Found)\n";
+                        exchange.sendResponseHeaders(404, response.length());
+                        try (OutputStream os = exchange.getResponseBody()) {
+                            os.write(response.getBytes());
+                        }
+                    } else {
+                        byte[] response = is.readAllBytes();
+                        exchange.sendResponseHeaders(200, response.length);
+                        try (OutputStream os = exchange.getResponseBody()) {
+                            os.write(response);
+                        }
+                    }
+                }
+            }
+        });
+        server.createContext("/api/moderation/config/guild", new GuildConfigHandler());
+        server.createContext("/api/moderation/config/filters/options", new FilterOptionsHandler());
+        server.createContext("/api/moderation/config/actions/options", new ActionOptionsHandler());
+        server.createContext("/api/moderation/config/rules/conditions", new RuleConditionsHandler());
+        server.createContext("/api/moderation/config/ui/options", new UIOptionsHandler());
+        server.createContext("/api/moderation/config/templates", new TemplatesHandler());
+        server.createContext("/api/moderation/guilds", new GuildsHandler());
+        server.createContext("/api/moderation/stats", new StatsHandler());
+        server.createContext("/api/moderation/logs", new LogsHandler());
+        
+        server.setExecutor(null); // Use default executor
+        server.start();
+        
+        System.out.println("Moderation Configuration Server started on port " + port);
+        System.out.println("Access the dashboard at: http://localhost:" + port + "/moderation-dashboard.html");
     }
     
     /**
-     * Stop the web server
+     * Stops the HTTP server
      */
     public void stopServer() {
         if (server != null) {
             server.stop(0);
-            logger.info("Moderation API server stopped");
+            System.out.println("Moderation Configuration Server stopped");
         }
     }
+    
+
     
     /**
      * Initialize database tables for moderation configurations
@@ -416,9 +444,225 @@ public class ModerationConfigurationController {
             }
         }
     }
-    
+
+    /**
+     * Guilds Handler - Returns list of available guilds
+     */
+    private class GuildsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, Map.of("error", "Method not allowed"));
+                return;
+            }
+            
+            try (Connection conn = databaseService.getConnection()) {
+                String sql = "SELECT DISTINCT guild_id FROM moderation_configs ORDER BY guild_id";
+                try (Statement stmt = conn.createStatement()) {
+                    ResultSet rs = stmt.executeQuery(sql);
+                    List<Map<String, Object>> guilds = new ArrayList<>();
+                    
+                    while (rs.next()) {
+                        String guildId = rs.getString("guild_id");
+                        guilds.add(Map.of(
+                            "id", guildId,
+                            "name", "Guild " + guildId, // In real implementation, fetch from Discord API
+                            "hasConfig", true
+                        ));
+                    }
+                    
+                    // Add some default guilds for demo purposes
+                    if (guilds.isEmpty()) {
+                        guilds.add(Map.of(
+                            "id", "123456789012345678",
+                            "name", "Demo Server 1",
+                            "hasConfig", false
+                        ));
+                        guilds.add(Map.of(
+                            "id", "987654321098765432",
+                            "name", "Demo Server 2",
+                            "hasConfig", false
+                        ));
+                    }
+                    
+                    sendResponse(exchange, 200, Map.of("guilds", guilds));
+                }
+            } catch (SQLException e) {
+                logger.severe("Database error: " + e.getMessage());
+                sendResponse(exchange, 500, Map.of("error", "Database error"));
+            }
+        }
+    }
+
+    /**
+     * Stats Handler - Returns moderation statistics
+     */
+    private class StatsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, Map.of("error", "Method not allowed"));
+                return;
+            }
+            
+            String guildId = extractGuildIdFromQuery(exchange.getRequestURI().getQuery());
+            
+            try (Connection conn = databaseService.getConnection()) {
+                // Create moderation_logs table if it doesn't exist
+                String createLogsTable = """
+                    CREATE TABLE IF NOT EXISTS moderation_logs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        guild_id TEXT NOT NULL,
+                        user_id TEXT NOT NULL,
+                        action_type TEXT NOT NULL,
+                        reason TEXT,
+                        moderator_id TEXT,
+                        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        details TEXT
+                    )
+                """;
+                
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute(createLogsTable);
+                }
+                
+                // Get statistics
+                Map<String, Object> stats = new HashMap<>();
+                
+                if (guildId != null) {
+                    // Guild-specific stats
+                    String sql = """
+                        SELECT action_type, COUNT(*) as count 
+                        FROM moderation_logs 
+                        WHERE guild_id = ? AND timestamp >= datetime('now', '-30 days')
+                        GROUP BY action_type
+                    """;
+                    
+                    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                        stmt.setString(1, guildId);
+                        ResultSet rs = stmt.executeQuery();
+                        
+                        Map<String, Integer> actionCounts = new HashMap<>();
+                        while (rs.next()) {
+                            actionCounts.put(rs.getString("action_type"), rs.getInt("count"));
+                        }
+                        
+                        stats.put("actionCounts", actionCounts);
+                        stats.put("totalActions", actionCounts.values().stream().mapToInt(Integer::intValue).sum());
+                    }
+                } else {
+                    // Global stats
+                    stats.put("totalGuilds", getTotalGuilds(conn));
+                    stats.put("totalConfigurations", getTotalConfigurations(conn));
+                    stats.put("activeFilters", getActiveFilters(conn));
+                }
+                
+                sendResponse(exchange, 200, stats);
+                
+            } catch (SQLException e) {
+                logger.severe("Database error: " + e.getMessage());
+                sendResponse(exchange, 500, Map.of("error", "Database error"));
+            }
+        }
+    }
+
+    /**
+     * Logs Handler - Returns moderation logs
+     */
+    private class LogsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!"GET".equals(exchange.getRequestMethod())) {
+                sendResponse(exchange, 405, Map.of("error", "Method not allowed"));
+                return;
+            }
+            
+            String guildId = extractGuildIdFromQuery(exchange.getRequestURI().getQuery());
+            
+            try (Connection conn = databaseService.getConnection()) {
+                String sql = """
+                    SELECT id, user_id, action_type, reason, moderator_id, timestamp, details
+                    FROM moderation_logs 
+                    WHERE guild_id = ? 
+                    ORDER BY timestamp DESC 
+                    LIMIT 100
+                """;
+                
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, guildId != null ? guildId : "demo");
+                    ResultSet rs = stmt.executeQuery();
+                    
+                    List<Map<String, Object>> logs = new ArrayList<>();
+                    while (rs.next()) {
+                        logs.add(Map.of(
+                            "id", rs.getInt("id"),
+                            "userId", rs.getString("user_id"),
+                            "actionType", rs.getString("action_type"),
+                            "reason", rs.getString("reason"),
+                            "moderatorId", rs.getString("moderator_id"),
+                            "timestamp", rs.getTimestamp("timestamp").getTime(),
+                            "details", rs.getString("details")
+                        ));
+                    }
+                    
+                    // Add demo data if no logs exist
+                    if (logs.isEmpty()) {
+                        logs.add(Map.of(
+                            "id", 1,
+                            "userId", "123456789",
+                            "actionType", "warn",
+                            "reason", "Spam detected",
+                            "moderatorId", "987654321",
+                            "timestamp", System.currentTimeMillis() - 3600000,
+                            "details", "Automatic moderation action"
+                        ));
+                    }
+                    
+                    sendResponse(exchange, 200, Map.of("logs", logs));
+                }
+            } catch (SQLException e) {
+                logger.severe("Database error: " + e.getMessage());
+                sendResponse(exchange, 500, Map.of("error", "Database error"));
+            }
+        }
+    }
+
     // Utility methods
-    
+
+    private String extractGuildIdFromQuery(String query) {
+        if (query == null) return null;
+        String[] params = query.split("&");
+        for (String param : params) {
+            String[] keyValue = param.split("=");
+            if (keyValue.length == 2 && "guildId".equals(keyValue[0])) {
+                return keyValue[1];
+            }
+        }
+        return null;
+    }
+
+    private int getTotalGuilds(Connection conn) throws SQLException {
+        String sql = "SELECT COUNT(DISTINCT guild_id) FROM moderation_configs";
+        try (Statement stmt = conn.createStatement()) {
+            ResultSet rs = stmt.executeQuery(sql);
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+
+    private int getTotalConfigurations(Connection conn) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM moderation_configs";
+        try (Statement stmt = conn.createStatement()) {
+            ResultSet rs = stmt.executeQuery(sql);
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+
+    private int getActiveFilters(Connection conn) throws SQLException {
+        // This would count active filters across all configurations
+        // For now, return a demo value
+        return 42;
+    }
+
     private String extractGuildId(String path) {
         String[] parts = path.split("/");
         for (int i = 0; i < parts.length - 1; i++) {

@@ -54,8 +54,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         commandItems.forEach(item => {
             const commandText = item.textContent.toLowerCase();
-            const commandName = item.querySelector('.command-name')?.textContent.toLowerCase() || '';
-            const commandDesc = item.querySelector('.command-desc')?.textContent.toLowerCase() || '';
+            const commandName = item.querySelector('.command-syntax')?.textContent.toLowerCase() || '';
+            const commandDesc = item.querySelector('.command-description')?.textContent.toLowerCase() || '';
             const permission = item.getAttribute('data-permission') || '';
             const popularity = item.getAttribute('data-popularity') || '';
             const category = item.getAttribute('data-category') || '';
@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Highlight search terms
     const highlightSearchTerm = (item, term) => {
-        const nameElement = item.querySelector('.command-name');
-        const descElement = item.querySelector('.command-desc');
+        const nameElement = item.querySelector('.command-syntax');
+        const descElement = item.querySelector('.command-description');
         
         if (nameElement) {
             nameElement.innerHTML = highlightText(nameElement.textContent, term);
@@ -129,8 +129,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Remove highlights
     const removeHighlight = (item) => {
-        const nameElement = item.querySelector('.command-name');
-        const descElement = item.querySelector('.command-desc');
+        const nameElement = item.querySelector('.command-syntax');
+        const descElement = item.querySelector('.command-description');
         
         if (nameElement) {
             nameElement.innerHTML = nameElement.textContent;

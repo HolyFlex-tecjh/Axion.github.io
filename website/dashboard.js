@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded', function() {
         createParticleBackground();
         setupCardEffects();
         simulateLiveData();
+        initializeFormHandlers();
+        initializeInteractiveElements();
     }, 1000);
 });
 
@@ -40,10 +42,20 @@ function initializeAppealSystem() {
     loadAppealData();
 }
 
-// Navigation for appeal sections
+// Navigation for all sections
 function setupAppealNavigation() {
     const menuItems = document.querySelectorAll('.menu-item');
     const sections = {
+        'dashboard': document.querySelector('.dashboard-content'),
+        'analytics': document.getElementById('analytics-section'),
+        'general': document.getElementById('general-section'),
+        'moderation': document.getElementById('moderation-section'),
+        'automod': document.getElementById('automod-section'),
+        'music': document.getElementById('music-section'),
+        'commands': document.getElementById('commands-section'),
+        'roles': document.getElementById('roles-section'),
+        'welcome': document.getElementById('welcome-section'),
+        'levels': document.getElementById('levels-section'),
         'appeals': document.getElementById('appeals-section'),
         'my-appeals': document.getElementById('my-appeals-section'),
         'banned-servers': document.getElementById('banned-servers-section')
@@ -61,9 +73,18 @@ function setupAppealNavigation() {
                 // Update active state
                 menuItems.forEach(mi => mi.classList.remove('active'));
                 this.classList.add('active');
+                
+                // Update page title
+                updatePageTitle(sectionId);
             }
         });
     });
+    
+    // Set dashboard as active by default
+    const dashboardItem = document.querySelector('.menu-item[href="#dashboard"]');
+    if (dashboardItem) {
+        dashboardItem.classList.add('active');
+    }
 }
 
 function showSection(sectionId, sections) {
@@ -72,16 +93,6 @@ function showSection(sectionId, sections) {
         if (section) section.style.display = 'none';
     });
     
-    // Show default dashboard content
-    const dashboardContent = document.querySelector('.dashboard-content');
-    if (sectionId === 'dashboard') {
-        dashboardContent.style.display = 'block';
-        return;
-    }
-    
-    // Hide dashboard content when showing appeal sections
-    dashboardContent.style.display = 'none';
-    
     // Show selected section
     const targetSection = sections[sectionId];
     if (targetSection) {
@@ -89,6 +100,9 @@ function showSection(sectionId, sections) {
         
         // Load section-specific data
         switch(sectionId) {
+            case 'analytics':
+                loadAnalyticsData();
+                break;
             case 'appeals':
                 loadAdminAppeals();
                 break;
@@ -98,8 +112,40 @@ function showSection(sectionId, sections) {
             case 'banned-servers':
                 loadBannedServers();
                 break;
+            case 'commands':
+                loadCustomCommands();
+                break;
+            case 'roles':
+                loadRolesData();
+                break;
         }
     }
+}
+
+// Update page title based on section
+function updatePageTitle(sectionId) {
+    const pageTitle = document.querySelector('.page-title h1');
+    const pageSubtitle = document.querySelector('.page-title p');
+    
+    const titles = {
+        'dashboard': { title: 'Dashboard Oversigt', subtitle: 'Administrer din Axion Bot konfiguration' },
+        'analytics': { title: 'Analytics', subtitle: 'Se detaljerede statistikker og trends' },
+        'general': { title: 'Generelle Indstillinger', subtitle: 'Konfigurer grundlæggende bot indstillinger' },
+        'moderation': { title: 'Moderation', subtitle: 'Administrer moderation indstillinger' },
+        'automod': { title: 'Auto-Moderation', subtitle: 'Automatisk spam og toxic detection' },
+        'music': { title: 'Musik', subtitle: 'Konfigurer musik bot indstillinger' },
+        'commands': { title: 'Custom Commands', subtitle: 'Opret og administrer custom commands' },
+        'roles': { title: 'Roller & Permissions', subtitle: 'Administrer server roller og tilladelser' },
+        'welcome': { title: 'Velkomst Beskeder', subtitle: 'Opsæt personaliserede velkomst beskeder' },
+        'levels': { title: 'Leveling System', subtitle: 'Konfigurer XP og level system' },
+        'appeals': { title: 'Ban Appeals Management', subtitle: 'Administrer ban appeals fra brugere' },
+        'my-appeals': { title: 'Mine Appeals', subtitle: 'Se og administrer dine ban appeals' },
+        'banned-servers': { title: 'Banned Fra Servere', subtitle: 'Servere du er banned fra' }
+    };
+    
+    const titleData = titles[sectionId] || titles['dashboard'];
+    if (pageTitle) pageTitle.textContent = titleData.title;
+    if (pageSubtitle) pageSubtitle.textContent = titleData.subtitle;
 }
 
 // Modal setup
@@ -194,6 +240,171 @@ function loadAppealData() {
     loadBannedServersForDropdown();
 }
 
+// Load analytics data
+function loadAnalyticsData() {
+    console.log('Loading analytics data...');
+    // Initialize analytics charts if needed
+    initializeAnalyticsCharts();
+    
+    // Simulate loading analytics data
+    setTimeout(() => {
+        // Update analytics cards with sample data
+        const analyticsCards = document.querySelectorAll('.analytics-card');
+        analyticsCards.forEach(card => {
+            card.classList.add('loaded');
+        });
+    }, 500);
+}
+
+// Load custom commands
+function loadCustomCommands() {
+    console.log('Loading custom commands...');
+    
+    const commandsList = document.querySelector('.commands-list');
+    if (commandsList) {
+        // Sample commands data
+        const sampleCommands = [
+            { name: '!hello', response: 'Hello there!', uses: 45 },
+            { name: '!rules', response: 'Please follow server rules', uses: 23 },
+            { name: '!info', response: 'Server information here', uses: 67 },
+            { name: '!help', response: 'Available commands: !hello, !rules, !info', uses: 89 }
+        ];
+        
+        commandsList.innerHTML = sampleCommands.map(cmd => `
+            <div class="command-item">
+                <span class="command-name">${cmd.name}</span>
+                <span class="command-response">${cmd.response}</span>
+                <span class="command-uses">${cmd.uses} uses</span>
+                <div class="command-actions">
+                    <button class="btn btn-sm btn-secondary">Edit</button>
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+// Load roles data
+function loadRolesData() {
+    console.log('Loading roles data...');
+    
+    const rolesList = document.querySelector('.roles-list');
+    if (rolesList) {
+        // Sample roles data
+        const sampleRoles = [
+            { name: '@Admin', permissions: 'All Permissions', members: 3, color: '#ff6b6b' },
+            { name: '@Moderator', permissions: 'Moderation, Kick, Ban', members: 8, color: '#4ecdc4' },
+            { name: '@VIP', permissions: 'Special Channels, Custom Emoji', members: 15, color: '#ffd93d' },
+            { name: '@Member', permissions: 'Basic Permissions', members: 234, color: '#45b7d1' }
+        ];
+        
+        rolesList.innerHTML = sampleRoles.map(role => `
+            <div class="role-item">
+                <div class="role-color" style="background-color: ${role.color}; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px;"></div>
+                <span class="role-name">${role.name}</span>
+                <span class="role-permissions">${role.permissions}</span>
+                <span class="role-members">${role.members} members</span>
+                <button class="btn btn-sm btn-secondary">Configure</button>
+            </div>
+        `).join('');
+    }
+}
+
+// Initialize analytics charts
+function initializeAnalyticsCharts() {
+    // Growth Chart
+    const growthCtx = document.getElementById('growthChart');
+    if (growthCtx) {
+        new Chart(growthCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Members',
+                    data: [100, 150, 200, 280, 350, 400],
+                    borderColor: 'rgb(147, 51, 234)',
+                    backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            color: '#ffffff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#ffffff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Message Chart
+    const messageCtx = document.getElementById('messageChart');
+    if (messageCtx) {
+        new Chart(messageCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Messages',
+                    data: [120, 190, 300, 500, 200, 300, 450],
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            color: '#ffffff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#ffffff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
 function loadAppealCounts() {
     // Simulate API call to get appeal counts
     setTimeout(() => {
@@ -214,6 +425,107 @@ function loadAppealCounts() {
             bannedServersCount.style.display = bannedServers > 0 ? 'block' : 'none';
         }
     }, 500);
+}
+
+// Initialize form handlers for settings
+function initializeFormHandlers() {
+    // Handle toggle switches
+    const toggleSwitches = document.querySelectorAll('.toggle-switch input[type="checkbox"]');
+    toggleSwitches.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const setting = this.closest('.setting-group').querySelector('h3').textContent;
+            console.log(`${setting} ${this.checked ? 'enabled' : 'disabled'}`);
+            
+            // Show feedback
+            showSettingFeedback(this, `${setting} ${this.checked ? 'aktiveret' : 'deaktiveret'}`);
+        });
+    });
+    
+    // Handle form inputs
+    const formInputs = document.querySelectorAll('.form-control');
+    formInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const setting = this.closest('.setting-group').querySelector('h3, label').textContent;
+            console.log(`${setting} changed to: ${this.value}`);
+            
+            // Show feedback
+            showSettingFeedback(this, `${setting} opdateret`);
+        });
+    });
+}
+
+// Initialize interactive elements
+function initializeInteractiveElements() {
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.stat-card, .analytics-card, .command-item, .role-item');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Add click handlers for action buttons
+    const actionButtons = document.querySelectorAll('.btn');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Add ripple effect
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple');
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+}
+
+// Show setting feedback
+function showSettingFeedback(element, message) {
+    // Create feedback element
+    const feedback = document.createElement('div');
+    feedback.className = 'setting-feedback';
+    feedback.textContent = message;
+    feedback.style.cssText = `
+        position: absolute;
+        background: rgba(88, 101, 242, 0.9);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    `;
+    
+    // Position feedback near the element
+    const rect = element.getBoundingClientRect();
+    feedback.style.left = rect.left + 'px';
+    feedback.style.top = (rect.bottom + 5) + 'px';
+    
+    document.body.appendChild(feedback);
+    
+    // Animate in
+    setTimeout(() => {
+        feedback.style.opacity = '1';
+        feedback.style.transform = 'translateY(0)';
+    }, 10);
+    
+    // Remove after delay
+    setTimeout(() => {
+        feedback.style.opacity = '0';
+        feedback.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            feedback.remove();
+        }, 300);
+    }, 2000);
 }
 
 // Admin appeals management
