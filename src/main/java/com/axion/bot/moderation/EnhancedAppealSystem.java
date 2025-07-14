@@ -38,6 +38,126 @@ public class EnhancedAppealSystem {
     
     // Configuration
     private final AppealSystemConfig config;
+
+    // NotificationManager inner class definition
+    class NotificationManager {
+        public NotificationManager(NotificationConfig config) {
+            // config parameter is currently unused
+        }
+        
+        // Minimal AppealSystemMetrics class definition
+        class AppealSystemMetrics {
+            private final long totalAppeals;
+            private final long approvedAppeals;
+            private final long rejectedAppeals;
+            private final long autoProcessedAppeals;
+            private final int activeAppeals;
+            private final long cachedAnalyses;
+        
+            public AppealSystemMetrics(long totalAppeals, long approvedAppeals, long rejectedAppeals, long autoProcessedAppeals, int activeAppeals, long cachedAnalyses) {
+                this.totalAppeals = totalAppeals;
+                this.approvedAppeals = approvedAppeals;
+                this.rejectedAppeals = rejectedAppeals;
+                this.autoProcessedAppeals = autoProcessedAppeals;
+                this.activeAppeals = activeAppeals;
+                this.cachedAnalyses = cachedAnalyses;
+            }
+        
+            public long getTotalAppeals() { return totalAppeals; }
+            public long getApprovedAppeals() { return approvedAppeals; }
+            public long getRejectedAppeals() { return rejectedAppeals; }
+            public long getAutoProcessedAppeals() { return autoProcessedAppeals; }
+            public int getActiveAppeals() { return activeAppeals; }
+            public long getCachedAnalyses() { return cachedAnalyses; }
+        }
+        
+        // Minimal UserAppealHistory class definition
+        public static class UserAppealHistory {
+            private final String userId;
+            private final String guildId;
+            private final List<Appeal> appeals;
+            private final UserAppealStats stats;
+        
+            public UserAppealHistory(String userId, String guildId, List<Appeal> appeals, UserAppealStats stats) {
+                this.userId = userId;
+                this.guildId = guildId;
+                this.appeals = appeals;
+                this.stats = stats;
+            }
+        
+            public String getUserId() { return userId; }
+            public String getGuildId() { return guildId; }
+            public List<Appeal> getAppeals() { return appeals; }
+            public UserAppealStats getStats() { return stats; }
+        }
+        
+        // Minimal AppealStatusResult class definition
+        static class AppealStatusResult {
+            private final String appealId;
+            private final Appeal appeal;
+            private final Duration estimatedProcessingTime;
+            private final boolean found;
+        
+            private AppealStatusResult(String appealId, Appeal appeal, Duration estimatedProcessingTime, boolean found) {
+                this.appealId = appealId;
+                this.appeal = appeal;
+                this.estimatedProcessingTime = estimatedProcessingTime;
+                this.found = found;
+            }
+        
+            public static AppealStatusResult notFound(String appealId) {
+                return new AppealStatusResult(appealId, null, null, false);
+            }
+        
+            public AppealStatusResult(Appeal appeal, Duration estimatedProcessingTime) {
+                this(appeal != null ? appeal.getId() : null, appeal, estimatedProcessingTime, appeal != null);
+            }
+        
+            public String getAppealId() { return appealId; }
+            public Appeal getAppeal() { return appeal; }
+            public Duration getEstimatedProcessingTime() { return estimatedProcessingTime; }
+            public boolean isFound() { return found; }
+        }
+        
+        // Minimal ReviewResult class definition
+        static class ReviewResult {
+            private final boolean success;
+            private final String errorMessage;
+            private final Appeal appeal;
+            private final AppealReview review;
+            private final AppealExecutionResult executionResult;
+        
+            private ReviewResult(boolean success, String errorMessage, Appeal appeal, AppealReview review, AppealExecutionResult executionResult) {
+                this.success = success;
+                this.errorMessage = errorMessage;
+                this.appeal = appeal;
+                this.review = review;
+                this.executionResult = executionResult;
+            }
+        
+            public static ReviewResult success(Appeal appeal, AppealReview review, AppealExecutionResult executionResult) {
+                return new ReviewResult(true, null, appeal, review, executionResult);
+            }
+        
+            public static ReviewResult error(String errorMessage) {
+                return new ReviewResult(false, errorMessage, null, null, null);
+            }
+        
+            public boolean isSuccess() { return success; }
+            public String getErrorMessage() { return errorMessage; }
+            public Appeal getAppeal() { return appeal; }
+            public AppealReview getReview() { return review; }
+            public AppealExecutionResult getExecutionResult() { return executionResult; }
+        }
+
+        public void notifyAppealSubmitted(Appeal appeal, AppealSubmissionResult result) {
+            // Dummy implementation: log or send notification as needed
+        }
+
+        public void notifyAppealDecision(Appeal appeal, AppealReview review, AppealExecutionResult executionResult) {
+            // Dummy implementation: log or send notification as needed
+        }
+    }
     
     public EnhancedAppealSystem(AppealSystemConfig config) {
         this.config = config;
@@ -56,6 +176,138 @@ public class EnhancedAppealSystem {
         
         logger.info("EnhancedAppealSystem initialized with auto-review enabled: {}", 
                    config.isAutoReviewEnabled());
+    }
+    
+    // Minimal AppealSubmissionResult class definition (expand as needed)
+    public static class AppealSubmissionResult {
+        private final boolean accepted;
+        private final boolean autoProcessed;
+        private final List<String> errors;
+        private final Appeal appeal;
+        private final EnhancedAppealSystem.AutoReviewResult autoReviewResult;
+        private final AppealExecutionResult executionResult;
+        private final Duration estimatedProcessingTime;
+        private final String errorMessage;
+    
+        private AppealSubmissionResult(boolean accepted, boolean autoProcessed, List<String> errors, Appeal appeal,
+                                      EnhancedAppealSystem.AutoReviewResult autoReviewResult,
+                                      AppealExecutionResult executionResult,
+                                      Duration estimatedProcessingTime,
+                                      String errorMessage) {
+            this.accepted = accepted;
+            this.autoProcessed = autoProcessed;
+            this.errors = errors;
+            this.appeal = appeal;
+            this.autoReviewResult = autoReviewResult;
+            this.executionResult = executionResult;
+            this.estimatedProcessingTime = estimatedProcessingTime;
+            this.errorMessage = errorMessage;
+        }
+    
+        public static AppealSubmissionResult rejected(List<String> errors) {
+            return new AppealSubmissionResult(false, false, errors, null, null, null, null, null);
+        }
+    
+        public static AppealSubmissionResult error(String errorMessage) {
+            return new AppealSubmissionResult(false, false, Arrays.asList(errorMessage), null, null, null, null, errorMessage);
+        }
+    
+        public static AppealSubmissionResult autoProcessed(Appeal appeal, EnhancedAppealSystem.AutoReviewResult autoReviewResult, AppealExecutionResult executionResult) {
+            return new AppealSubmissionResult(true, true, Collections.emptyList(), appeal, autoReviewResult, executionResult, null, null);
+        }
+    
+        public static AppealSubmissionResult queued(Appeal appeal, Duration estimatedProcessingTime) {
+            return new AppealSubmissionResult(true, false, Collections.emptyList(), appeal, null, null, estimatedProcessingTime, null);
+        }
+    
+        public boolean isAccepted() { return accepted; }
+        public boolean isAutoProcessed() { return autoProcessed; }
+        public List<String> getErrors() { return errors; }
+        public Appeal getAppeal() { return appeal; }
+        public EnhancedAppealSystem.AutoReviewResult getAutoReviewResult() { return autoReviewResult; }
+        public AppealExecutionResult getExecutionResult() { return executionResult; }
+        public Duration getEstimatedProcessingTime() { return estimatedProcessingTime; }
+        public String getErrorMessage() { return errorMessage; }
+    }
+    
+    // Minimal AutoReviewEngine class definition (expand as needed)
+    class AutoReviewEngine {
+        private final AutoReviewConfig config;
+    
+        public AutoReviewEngine(AutoReviewConfig config) {
+            this.config = config;
+        }
+    
+        public AutoReviewResult processAppeal(Appeal appeal) {
+            // Dummy implementation for demonstration
+            // In a real system, this would use ML models or rules
+            ReviewDecision decision = ReviewDecision.REJECTED;
+            String reason = "Low confidence for auto-approval";
+    
+            if (appeal.getAnalysis() != null &&
+                appeal.getAnalysis().getAutoApprovalConfidence() >= config.getConfidenceThreshold()) {
+                decision = ReviewDecision.APPROVED;
+                reason = "High confidence for auto-approval";
+            }
+    
+            return new AutoReviewResult(decision, reason);
+        }
+    }
+    
+    // Minimal AutoReviewResult class definition (expand as needed)
+    class AutoReviewResult {
+        private final ReviewDecision decision;
+        private final String reason;
+    
+        public AutoReviewResult(ReviewDecision decision, String reason) {
+            this.decision = decision;
+            this.reason = reason;
+        }
+    
+        public ReviewDecision getDecision() { return decision; }
+        public String getReason() { return reason; }
+    }
+    
+    // Minimal AppealAnalyzer class definition (expand as needed)
+    class AppealAnalyzer {
+        public AppealAnalyzer(AppealAnalyzerConfig config) {
+            // config parameter is currently unused
+        }
+    
+        public AppealAnalysis analyze(Appeal appeal) {
+            // Dummy implementation for demonstration
+            // In a real system, this would perform NLP, context checks, etc.
+            double autoApprovalConfidence = 0.5;
+            double autoRejectionConfidence = 0.2;
+            double complexityScore = 0.3;
+            boolean priorityCase = false;
+    
+            // Example: If reason contains "sorry", increase approval confidence
+            if (appeal.getReason() != null && appeal.getReason().toLowerCase().contains("sorry")) {
+                autoApprovalConfidence += 0.3;
+            }
+    
+            return new AppealAnalysis(autoApprovalConfidence, autoRejectionConfidence, complexityScore, priorityCase);
+        }
+    }
+    
+    // Minimal ReviewWorkflowManager class definition (expand as needed)
+    class ReviewWorkflowManager {
+        private final WorkflowConfig config;
+        private final Queue<Appeal> reviewQueue = new LinkedList<>();
+    
+        public ReviewWorkflowManager(WorkflowConfig config) {
+            this.config = config;
+        }
+    
+        public void addToReviewQueue(Appeal appeal) {
+            if (reviewQueue.size() < config.getMaxQueueSize()) {
+                reviewQueue.add(appeal);
+            }
+            // else: handle overflow if needed
+        }
+    
+        // Add more methods as needed for review workflow management
     }
     
     /**
@@ -121,16 +373,16 @@ public class EnhancedAppealSystem {
     /**
      * Process manual review of an appeal
      */
-    public ReviewResult processManualReview(String appealId, String reviewerId, 
+    public NotificationManager.ReviewResult processManualReview(String appealId, String reviewerId, 
                                           ReviewDecision decision, String reviewNotes) {
         try {
             Appeal appeal = activeAppeals.get(appealId);
             if (appeal == null) {
-                return ReviewResult.error("Appeal not found: " + appealId);
+                return NotificationManager.ReviewResult.error("Appeal not found: " + appealId);
             }
             
             if (appeal.getStatus() != AppealStatus.PENDING_REVIEW) {
-                return ReviewResult.error("Appeal is not in reviewable state: " + appeal.getStatus());
+                return NotificationManager.ReviewResult.error("Appeal is not in reviewable state: " + appeal.getStatus());
             }
             
             // Create review record
@@ -164,37 +416,37 @@ public class EnhancedAppealSystem {
             logger.info("Appeal {} reviewed by {}: {} - {}", 
                        appealId, reviewerId, decision, reviewNotes);
             
-            return ReviewResult.success(appeal, review, executionResult);
+            return NotificationManager.ReviewResult.success(appeal, review, executionResult);
             
         } catch (Exception e) {
             logger.error("Error processing manual review for appeal {}", appealId, e);
-            return ReviewResult.error("Review processing failed: " + e.getMessage());
+            return NotificationManager.ReviewResult.error("Review processing failed: " + e.getMessage());
         }
     }
     
     /**
      * Get appeal status and details
      */
-    public AppealStatusResult getAppealStatus(String appealId) {
+    public NotificationManager.AppealStatusResult getAppealStatus(String appealId) {
         Appeal appeal = activeAppeals.get(appealId);
         if (appeal == null) {
-            return AppealStatusResult.notFound(appealId);
+            return NotificationManager.AppealStatusResult.notFound(appealId);
         }
         
-        return new AppealStatusResult(appeal, calculateEstimatedProcessingTime(appeal));
+        return new NotificationManager.AppealStatusResult(appeal, calculateEstimatedProcessingTime(appeal));
     }
     
     /**
      * Get user's appeal history
      */
-    public UserAppealHistory getUserAppealHistory(String userId, String guildId) {
+    public NotificationManager.UserAppealHistory getUserAppealHistory(String userId, String guildId) {
         List<Appeal> userAppeals = userAppealHistory.getOrDefault(userId, new ArrayList<>())
             .stream()
             .filter(appeal -> appeal.getGuildId().equals(guildId))
             .sorted(Comparator.comparing(Appeal::getSubmittedAt).reversed())
             .collect(Collectors.toList());
         
-        return new UserAppealHistory(userId, guildId, userAppeals, 
+        return new NotificationManager.UserAppealHistory(userId, guildId, userAppeals, 
                                    calculateUserAppealStats(userAppeals));
     }
     
@@ -288,7 +540,7 @@ public class EnhancedAppealSystem {
             request.getGuildId(),
             request.getViolationId(),
             request.getReason(),
-            request.getEvidence(),
+            request.getEvidence() != null ? String.join(", ", request.getEvidence()) : null,
             AppealStatus.PENDING_ANALYSIS,
             Instant.now()
         );
@@ -566,8 +818,8 @@ public class EnhancedAppealSystem {
     /**
      * Get system performance metrics
      */
-    public AppealSystemMetrics getMetrics() {
-        return new AppealSystemMetrics(
+    public NotificationManager.AppealSystemMetrics getMetrics() {
+        return notificationManager.new AppealSystemMetrics(
             totalAppeals.get(),
             approvedAppeals.get(),
             rejectedAppeals.get(),
@@ -604,6 +856,93 @@ public class EnhancedAppealSystem {
 }
 
 // Supporting enums and classes
+
+// Minimal AppealAnalysis class definition (expand as needed)
+class AppealAnalysis {
+    private double autoApprovalConfidence;
+    private double autoRejectionConfidence;
+    private double complexityScore;
+    private boolean priorityCase;
+
+    public AppealAnalysis(double autoApprovalConfidence, double autoRejectionConfidence, double complexityScore, boolean priorityCase) {
+        this.autoApprovalConfidence = autoApprovalConfidence;
+        this.autoRejectionConfidence = autoRejectionConfidence;
+        this.complexityScore = complexityScore;
+        this.priorityCase = priorityCase;
+    }
+
+    public double getAutoApprovalConfidence() { return autoApprovalConfidence; }
+    public double getAutoRejectionConfidence() { return autoRejectionConfidence; }
+    public double getComplexityScore() { return complexityScore; }
+    public boolean isPriorityCase() { return priorityCase; }
+}
+
+// Minimal Appeal class definition
+class Appeal {
+    private final String id;
+    private final String userId;
+    private final String guildId;
+    private final String violationId;
+    private final String reason;
+    private final String evidence;
+    private AppealStatus status;
+    private final Instant submittedAt;
+    private Instant resolvedAt;
+    private AppealAnalysis analysis;
+    private ProcessingPath processingPath;
+    private final List<AppealReview> reviews = new ArrayList<>();
+
+    public Appeal(String id, String userId, String guildId, String violationId, String reason, String evidence, AppealStatus status, Instant submittedAt) {
+        this.id = id;
+        this.userId = userId;
+        this.guildId = guildId;
+        this.violationId = violationId;
+        this.reason = reason;
+        this.evidence = evidence;
+        this.status = status;
+        this.submittedAt = submittedAt;
+    }
+
+    public String getId() { return id; }
+    public String getUserId() { return userId; }
+    public String getGuildId() { return guildId; }
+    public String getViolationId() { return violationId; }
+    public String getReason() { return reason; }
+    public String getEvidence() { return evidence; }
+    public AppealStatus getStatus() { return status; }
+    public void setStatus(AppealStatus status) { this.status = status; }
+    public Instant getSubmittedAt() { return submittedAt; }
+    public Instant getResolvedAt() { return resolvedAt; }
+    public void setResolvedAt(Instant resolvedAt) { this.resolvedAt = resolvedAt; }
+    public AppealAnalysis getAnalysis() { return analysis; }
+    public void setAnalysis(AppealAnalysis analysis) { this.analysis = analysis; }
+    public ProcessingPath getProcessingPath() { return processingPath; }
+    public void setProcessingPath(ProcessingPath processingPath) { this.processingPath = processingPath; }
+    public List<AppealReview> getReviews() { return reviews; }
+    public void addReview(AppealReview review) { this.reviews.add(review); }
+}
+
+// Minimal UserAppealStats class definition (moved from NotificationManager)
+class UserAppealStats {
+    private final int total;
+    private final int approved;
+    private final int rejected;
+    private final int pending;
+
+    public UserAppealStats(int total, int approved, int rejected, int pending) {
+        this.total = total;
+        this.approved = approved;
+        this.rejected = rejected;
+        this.pending = pending;
+    }
+
+    public int getTotal() { return total; }
+    public int getApproved() { return approved; }
+    public int getRejected() { return rejected; }
+    public int getPending() { return pending; }
+}
+
+
 enum AppealStatus {
     PENDING_ANALYSIS, PENDING_REVIEW, APPROVED, REJECTED, EXPIRED
 }
@@ -679,19 +1018,110 @@ class AppealAnalyzerConfig {
 class AutoReviewConfig {
     private boolean enabled = true;
     private double confidenceThreshold = 0.8;
-    private boolean requireHumanReviewForBans = true;
-    
+
     public boolean isEnabled() { return enabled; }
     public double getConfidenceThreshold() { return confidenceThreshold; }
-    public boolean isRequireHumanReviewForBans() { return requireHumanReviewForBans; }
 }
 
+// Minimal NotificationConfig class definition
 class NotificationConfig {
-    private boolean notifySubmission = true;
-    private boolean notifyDecision = true;
-    private boolean notifyModerators = true;
-    
-    public boolean isNotifySubmission() { return notifySubmission; }
-    public boolean isNotifyDecision() { return notifyDecision; }
-    public boolean isNotifyModerators() { return notifyModerators; }
+    // Add notification-related configuration fields as needed
+    // For now, this is a placeholder
+    private boolean notificationsEnabled = true;
+
+    public boolean isNotificationsEnabled() { return notificationsEnabled; }
+}
+
+// Minimal AppealExecutionResult class definition
+class AppealExecutionResult {
+    private final boolean success;
+    private final List<String> actionsPerformed;
+    private final String message;
+
+    private AppealExecutionResult(boolean success, List<String> actionsPerformed, String message) {
+        this.success = success;
+        this.actionsPerformed = actionsPerformed;
+        this.message = message;
+    }
+
+    public static AppealExecutionResult success(List<String> actionsPerformed) {
+        return new AppealExecutionResult(true, actionsPerformed, "Action(s) performed successfully");
+    }
+
+    public static AppealExecutionResult error(String message) {
+        return new AppealExecutionResult(false, new ArrayList<>(), message);
+    }
+
+    public static AppealExecutionResult noAction(String message) {
+        return new AppealExecutionResult(true, new ArrayList<>(), message);
+    }
+
+    public boolean isSuccess() { return success; }
+    public List<String> getActionsPerformed() { return actionsPerformed; }
+    public String getMessage() { return message; }
+}
+
+// Minimal AppealReview class definition
+class AppealReview {
+    private final String reviewerId;
+    private final ReviewDecision decision;
+    private final String reviewNotes;
+    private final Instant reviewedAt;
+
+    public AppealReview(String reviewerId, ReviewDecision decision, String reviewNotes, Instant reviewedAt) {
+        this.reviewerId = reviewerId;
+        this.decision = decision;
+        this.reviewNotes = reviewNotes;
+        this.reviewedAt = reviewedAt;
+    }
+
+    public String getReviewerId() { return reviewerId; }
+    public ReviewDecision getDecision() { return decision; }
+    public String getReviewNotes() { return reviewNotes; }
+    public Instant getReviewedAt() { return reviewedAt; }
+}
+
+// Minimal AppealAnalytics class definition
+class AppealAnalytics {
+    private final int totalAppeals;
+    private final int approvedCount;
+    private final int rejectedCount;
+    private final int pendingCount;
+    private final double approvalRate;
+    private final double avgProcessingTimeMinutes;
+    private final double autoProcessingRate;
+    private final Map<String, Long> violationTypes;
+    private final Duration period;
+
+    public AppealAnalytics(
+            int totalAppeals,
+            int approvedCount,
+            int rejectedCount,
+            int pendingCount,
+            double approvalRate,
+            double avgProcessingTimeMinutes,
+            double autoProcessingRate,
+            Map<String, Long> violationTypes,
+            Duration period
+    ) {
+        this.totalAppeals = totalAppeals;
+        this.approvedCount = approvedCount;
+        this.rejectedCount = rejectedCount;
+        this.pendingCount = pendingCount;
+        this.approvalRate = approvalRate;
+        this.avgProcessingTimeMinutes = avgProcessingTimeMinutes;
+        this.autoProcessingRate = autoProcessingRate;
+        this.violationTypes = violationTypes;
+        this.period = period;
+    }
+
+    public int getTotalAppeals() { return totalAppeals; }
+    public int getApprovedCount() { return approvedCount; }
+    public int getRejectedCount() { return rejectedCount; }
+    public int getPendingCount() { return pendingCount; }
+    public double getApprovalRate() { return approvalRate; }
+    public double getAvgProcessingTimeMinutes() { return avgProcessingTimeMinutes; }
+    public double getAutoProcessingRate() { return autoProcessingRate; }
+    public Map<String, Long> getViolationTypes() { return violationTypes; }
+    public Duration getPeriod() { return period; }
 }
