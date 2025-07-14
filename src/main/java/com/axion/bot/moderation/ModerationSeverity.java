@@ -5,6 +5,11 @@ package com.axion.bot.moderation;
  */
 public enum ModerationSeverity {
     /**
+     * Ingen alvorlighed - ingen handling
+     */
+    NONE(0, "Ingen", "\u2705"),
+    
+    /**
      * Meget lav alvorlighed - kun logging
      */
     VERY_LOW(1, "Meget Lav", "\uD83D\uDFE2"),
@@ -56,6 +61,8 @@ public enum ModerationSeverity {
      */
     public static ModerationSeverity fromLevel(int level) {
         switch (level) {
+            case 0:
+                return NONE;
             case 1:
                 return VERY_LOW;
             case 2:
@@ -76,6 +83,8 @@ public enum ModerationSeverity {
      */
     public ModerationSeverity escalate() {
         switch (this) {
+            case NONE:
+                return VERY_LOW;
             case VERY_LOW:
                 return LOW;
             case LOW:
@@ -96,7 +105,7 @@ public enum ModerationSeverity {
     public static ModerationSeverity fromToxicity(ToxicityAnalyzer.ToxicitySeverity toxicitySeverity) {
         switch (toxicitySeverity) {
             case NONE:
-                return VERY_LOW;
+                return NONE;
             case MILD:
                 return LOW;
             case MODERATE:
@@ -104,6 +113,58 @@ public enum ModerationSeverity {
             case SEVERE:
                 return HIGH;
             case VERY_HIGH:
+                return VERY_HIGH;
+            default:
+                return LOW;
+        }
+    }
+    
+    /**
+     * Konverterer fra numerisk værdi til ModerationSeverity
+     */
+    public static ModerationSeverity fromNumericValue(double value) {
+        int level = (int) Math.round(Math.max(0, Math.min(5, value)));
+        return fromLevel(level);
+    }
+    
+    /**
+     * Konverterer fra confidence score til ModerationSeverity
+     */
+    public static ModerationSeverity fromConfidence(double confidence) {
+        if (confidence >= 0.9) return VERY_HIGH;
+        if (confidence >= 0.7) return HIGH;
+        if (confidence >= 0.5) return MEDIUM;
+        if (confidence >= 0.3) return LOW;
+        if (confidence > 0.0) return VERY_LOW;
+        return NONE;
+    }
+    
+    /**
+     * Konverterer fra anomaly score til ModerationSeverity
+     */
+    public static ModerationSeverity fromAnomalyScore(double anomalyScore) {
+        if (anomalyScore >= 0.8) return VERY_HIGH;
+        if (anomalyScore >= 0.6) return HIGH;
+        if (anomalyScore >= 0.4) return MEDIUM;
+        if (anomalyScore >= 0.2) return LOW;
+        if (anomalyScore > 0.0) return VERY_LOW;
+        return NONE;
+    }
+    
+    /**
+     * Konverterer fra ThreatLevel til ModerationSeverity
+     */
+    public static ModerationSeverity fromThreatLevel(ThreatLevel threatLevel) {
+        switch (threatLevel) {
+            case NONE:
+                return NONE;
+            case LOW:
+                return LOW;
+            case MEDIUM:
+                return MEDIUM;
+            case HIGH:
+                return HIGH;
+            case CRITICAL:
                 return VERY_HIGH;
             default:
                 return LOW;

@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Axion Bot Moderation Dashboard - Configure and manage Discord server moderation settings">
+    <meta name="author" content="Axion Bot">
+    <title>Moderation Dashboard - Axion Bot</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/moderation-dashboard.css" as="style">
+    <link rel="preload" href="js/ModerationDashboardV2.js" as="script">
+    
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="css/moderation-dashboard.css" rel="stylesheet">
+    
+    <!-- Theme and accessibility -->
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="color-scheme" content="light dark">
+</head>
+<body>
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="visually-hidden-focusable">Skip to main content</a>
+    
+    <div id="dashboard-container" class="dashboard-container">
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="loading-spinner show" role="status" aria-live="polite">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading dashboard...</span>
+            </div>
+            <p>Loading dashboard...</p>
+        </div>
+        
+        <!-- Alert Container -->
+        <div id="alert-container" class="alert-container" role="alert" aria-live="assertive" aria-atomic="true"></div>
+        
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" role="navigation" aria-label="Dashboard navigation">
+            <header class="sidebar-header">
+                <h1 class="h3 mb-1 text-gradient">Axion Dashboard</h1>
+                <p class="text-muted small mb-0">Moderation Control</p>
+            </header>
+            
+            <ul class="nav nav-pills flex-column" role="menubar">
+                <li class="nav-item" role="none">
+                    <a href="#overview" class="nav-link active" data-section="overview" role="menuitem" aria-current="page">
+                        <i class="fas fa-tachometer-alt me-2" aria-hidden="true"></i>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#filters" class="nav-link" data-section="filters" role="menuitem">
+                        <i class="fas fa-filter me-2" aria-hidden="true"></i>
+                        <span>Content Filters</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#actions" class="nav-link" data-section="actions" role="menuitem">
+                        <i class="fas fa-gavel me-2" aria-hidden="true"></i>
+                        <span>Actions</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#rules" class="nav-link" data-section="rules" role="menuitem">
+                        <i class="fas fa-list-ul me-2" aria-hidden="true"></i>
+                        <span>Custom Rules</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#thresholds" class="nav-link" data-section="thresholds" role="menuitem">
+                        <i class="fas fa-chart-line me-2" aria-hidden="true"></i>
+                        <span>Thresholds</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#testing" class="nav-link" data-section="testing" role="menuitem">
+                        <i class="fas fa-vial me-2" aria-hidden="true"></i>
+                        <span>Testing</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#analytics" class="nav-link" data-section="analytics" role="menuitem">
+                        <i class="fas fa-chart-bar me-2" aria-hidden="true"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="none">
+                    <a href="#settings" class="nav-link" data-section="settings" role="menuitem">
+                        <i class="fas fa-cog me-2" aria-hidden="true"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    
+    <!-- Main Content -->
+    <main id="main-content" class="main-content" role="main">
+        <!-- Header -->
+        <header class="dashboard-header d-flex justify-content-between align-items-center mb-4" role="banner">
+            <div class="header-content">
+                <h1 class="text-gradient mb-0">Moderation Dashboard</h1>
+                <p class="text-muted">Configure and monitor your server's moderation settings</p>
+            </div>
+            <div class="header-actions d-flex gap-3">
+                <label for="guildSelect" class="visually-hidden">Select Guild</label>
+                <select id="guildSelect" class="form-select" style="width: 250px;" aria-label="Select a guild to manage">
+                    <option value="">Select a guild...</option>
+                </select>
+                <button class="btn btn-primary" data-action="save-config" aria-describedby="save-help">
+                    <i class="fas fa-save me-2" aria-hidden="true"></i>Save Configuration
+                </button>
+                <div id="save-help" class="visually-hidden">Save current moderation configuration settings</div>
+            </div>
+        </header>
+        
+        <!-- Overview Section -->
+        <section id="overview" class="content-section active" aria-labelledby="overview-heading">
+            <header class="section-header">
+                <h2 id="overview-heading" class="section-title visually-hidden">Dashboard Overview</h2>
+                <p class="section-description visually-hidden">Monitor your server's moderation activity and statistics</p>
+            </header>
+            
+            <div class="stats-grid row mb-4" role="region" aria-labelledby="stats-heading">
+                <h3 id="stats-heading" class="visually-hidden">Moderation Statistics</h3>
+                
+                <div class="col-md-3">
+                    <article class="stat-card" role="img" aria-labelledby="filters-label">
+                        <div id="filtersCount" class="stat-number">0</div>
+                        <div id="filters-label" class="stat-label">Active Filters</div>
+                    </article>
+                </div>
+                <div class="col-md-3">
+                    <article class="stat-card" role="img" aria-labelledby="actions-label">
+                        <div id="actionsCount" class="stat-number">0</div>
+                        <div id="actions-label" class="stat-label">Enabled Actions</div>
+                    </article>
+                </div>
+                <div class="col-md-3">
+                    <article class="stat-card" role="img" aria-labelledby="rules-label">
+                        <div id="rulesCount" class="stat-number">0</div>
+                        <div id="rules-label" class="stat-label">Custom Rules</div>
+                    </article>
+                </div>
+                <div class="col-md-3">
+                    <article class="stat-card" role="img" aria-labelledby="status-label">
+                        <div id="configStatus" class="stat-number">Inactive</div>
+                        <div id="status-label" class="stat-label">Status</div>
+                    </article>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">Activity Overview</h5>
+                        <canvas id="activityChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <h5 class="mb-3">Violation Types</h5>
+                        <canvas id="analyticsChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Settings</h5>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="moderationEnabled">
+                        <label class="form-check-label" for="moderationEnabled">
+                            Enable Moderation System
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Content Filters Section -->
+        <section id="filters" class="content-section" aria-labelledby="filters-heading">
+            <header class="section-header">
+                <h2 id="filters-heading" class="section-title mb-4">Content Filters</h2>
+                <p class="section-description text-muted">Configure automated content filtering and detection systems</p>
+            </header>
+            
+            <!-- Spam Filter -->
+            <article class="filter-card" role="region" aria-labelledby="spam-filter-heading">
+                <header class="filter-header">
+                    <h3 id="spam-filter-heading" class="filter-title">Spam Detection</h3>
+                    <p class="filter-description text-muted small">Automatically detect and handle spam messages</p>
+                </header>
+                
+                <form class="filter-form" role="form" aria-labelledby="spam-filter-heading">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <fieldset class="mb-4">
+                                <legend class="visually-hidden">Spam Filter Settings</legend>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="spamFilterEnabled" aria-describedby="spam-enabled-help">
+                                    <label class="form-check-label" for="spamFilterEnabled">Enable Spam Filter</label>
+                                    <div id="spam-enabled-help" class="form-text">Turn on automatic spam detection</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="spamThreshold" class="form-label">Detection Threshold: <span id="spamThresholdDisplay">0.7</span></label>
+                                    <input type="range" class="form-range" id="spamThreshold" min="0.1" max="1" step="0.1" value="0.7" aria-describedby="threshold-help">
+                                    <div id="threshold-help" class="form-text">Higher values require stronger evidence of spam</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="spamMaxMessages" class="form-label">Max Messages per Window</label>
+                                    <input type="number" class="form-control" id="spamMaxMessages" value="5" min="1" max="20" aria-describedby="max-messages-help">
+                                    <div id="max-messages-help" class="form-text">Maximum messages allowed in the time window</div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <fieldset>
+                                <legend class="form-label">Detection Options</legend>
+                                
+                                <div class="mb-3">
+                                    <label for="spamTimeWindow" class="form-label">Time Window</label>
+                                    <select class="form-select" id="spamTimeWindow" aria-describedby="time-window-help">
+                                        <option value="30s">30 seconds</option>
+                                        <option value="1m" selected>1 minute</option>
+                                        <option value="5m">5 minutes</option>
+                                        <option value="10m">10 minutes</option>
+                                    </select>
+                                    <div id="time-window-help" class="form-text">Time period to monitor for spam patterns</div>
+                                </div>
+                                
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="spamCheckDuplicates">
+                                    <label class="form-check-label" for="spamCheckDuplicates">Check for duplicate messages</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="spamCheckRapidTyping">
+                                    <label class="form-check-label" for="spamCheckRapidTyping">Check for rapid typing</label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </form>
+            </article>
+            
+            <!-- Toxicity Filter -->
+            <article class="filter-card" role="region" aria-labelledby="toxicity-filter-heading">
+                <header class="filter-header">
+                    <h3 id="toxicity-filter-heading" class="filter-title">Toxicity Detection</h3>
+                    <p class="filter-description text-muted small">Detect and filter toxic or harmful language</p>
+                </header>
+                
+                <form class="filter-form" role="form" aria-labelledby="toxicity-filter-heading">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <fieldset class="mb-4">
+                                <legend class="visually-hidden">Toxicity Filter Settings</legend>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="toxicityFilterEnabled" aria-describedby="toxicity-enabled-help">
+                                    <label class="form-check-label" for="toxicityFilterEnabled">Enable Toxicity Filter</label>
+                                    <div id="toxicity-enabled-help" class="form-text">Automatically detect toxic language and behavior</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="toxicityThreshold" class="form-label">Detection Threshold: <span id="toxicityThresholdDisplay">0.6</span></label>
+                                    <input type="range" class="form-range" id="toxicityThreshold" min="0.1" max="1" step="0.1" value="0.6" aria-describedby="toxicity-threshold-help">
+                                    <div id="toxicity-threshold-help" class="form-text">Higher values require stronger evidence of toxicity</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="toxicityLanguages" class="form-label">Detection Languages</label>
+                                    <select class="form-select" id="toxicityLanguages" multiple aria-describedby="languages-help">
+                                        <option value="en" selected>English</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="fr">French</option>
+                                        <option value="de">German</option>
+                                    </select>
+                                    <div id="languages-help" class="form-text">Languages for toxicity detection models</div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <fieldset>
+                                <legend class="form-label">Detection Methods</legend>
+                                
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="toxicityUseAI" checked>
+                                    <label class="form-check-label" for="toxicityUseAI">Use AI detection</label>
+                                </div>
+                                
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="toxicityCheckSentiment">
+                                    <label class="form-check-label" for="toxicityCheckSentiment">Check sentiment analysis</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="toxicityCheckContext">
+                                    <label class="form-check-label" for="toxicityCheckContext">Consider message context</label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </form>
+            </article>
+            
+            <!-- Link Filter -->
+            <article class="filter-card" role="region" aria-labelledby="link-filter-heading">
+                <header class="filter-header">
+                    <h3 id="link-filter-heading" class="filter-title">Link Filtering</h3>
+                    <p class="filter-description text-muted small">Control and monitor links shared in messages</p>
+                </header>
+                
+                <form class="filter-form" role="form" aria-labelledby="link-filter-heading">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <fieldset class="mb-4">
+                                <legend class="visually-hidden">Link Filter Settings</legend>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="linkFilterEnabled" aria-describedby="link-enabled-help">
+                                    <label class="form-check-label" for="linkFilterEnabled">Enable Link Filter</label>
+                                    <div id="link-enabled-help" class="form-text">Monitor and filter links in messages</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="linkMaxLinks" class="form-label">Max Links per Message</label>
+                                    <input type="number" class="form-control" id="linkMaxLinks" value="2" min="0" max="10" aria-describedby="max-links-help">
+                                    <div id="max-links-help" class="form-text">Maximum number of links allowed in a single message</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="linkBlockedDomains" class="form-label">Blocked Domains</label>
+                                    <textarea class="form-control" id="linkBlockedDomains" rows="4" placeholder="example.com&#10;bad-site.net" aria-describedby="blocked-domains-help"></textarea>
+                                    <div id="blocked-domains-help" class="form-text">Enter one domain per line to block</div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <fieldset>
+                                <legend class="form-label">Security Checks</legend>
+                                
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="linkCheckShorteners">
+                                    <label class="form-check-label" for="linkCheckShorteners">Check URL shorteners</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="linkCheckReputation">
+                                    <label class="form-check-label" for="linkCheckReputation">Check domain reputation</label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </form>
+            </article>
+            
+            <!-- Word Filter -->
+            <article class="filter-card" role="region" aria-labelledby="word-filter-heading">
+                <header class="filter-header">
+                    <h3 id="word-filter-heading" class="filter-title">Word Filtering</h3>
+                    <p class="filter-description text-muted small">Filter specific words and phrases from messages</p>
+                </header>
+                
+                <form class="filter-form" role="form" aria-labelledby="word-filter-heading">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <fieldset class="mb-4">
+                                <legend class="visually-hidden">Word Filter Settings</legend>
+                                
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="wordFilterEnabled" aria-describedby="word-enabled-help">
+                                    <label class="form-check-label" for="wordFilterEnabled">Enable Word Filter</label>
+                                    <div id="word-enabled-help" class="form-text">Filter messages containing banned words</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="wordBannedWords" class="form-label">Banned Words</label>
+                                    <textarea class="form-control" id="wordBannedWords" rows="6" placeholder="badword1&#10;badword2" aria-describedby="banned-words-help"></textarea>
+                                    <div id="banned-words-help" class="form-text">Enter one word or phrase per line</div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <fieldset>
+                                <legend class="form-label">Matching Options</legend>
+                                
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="wordUseRegex">
+                                    <label class="form-check-label" for="wordUseRegex">Use regular expressions</label>
+                                </div>
+                                
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="wordCaseSensitive">
+                                    <label class="form-check-label" for="wordCaseSensitive">Case sensitive</label>
+                                </div>
+                                
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="wordWholeWordsOnly" checked>
+                                    <label class="form-check-label" for="wordWholeWordsOnly">Whole words only</label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </form>
+            </article>
+        </section>
+        
+        <!-- Actions Section -->
+        <section id="actions" class="content-section" aria-labelledby="actions-heading">
+            <header class="section-header">
+                <h2 id="actions-heading" class="section-title mb-4">Moderation Actions</h2>
+                <p class="section-description text-muted">Configure automated responses to rule violations</p>
+            </header>
+            
+            <div class="actions-grid row">
+                <div class="col-md-6">
+                    <article class="action-card filter-card" role="region" aria-labelledby="warning-action-heading">
+                        <header class="action-header">
+                            <h3 id="warning-action-heading" class="filter-title">Warning</h3>
+                            <p class="filter-description text-muted small">Send warning messages to users</p>
+                        </header>
+                        
+                        <form class="action-form" role="form" aria-labelledby="warning-action-heading">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="actionwarn" aria-describedby="warn-enabled-help">
+                                <label class="form-check-label" for="actionwarn">Enable Warnings</label>
+                                <div id="warn-enabled-help" class="form-text">Send warning messages for violations</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="warnMessage" class="form-label">Warning Message Template</label>
+                                <textarea class="form-control" id="warnMessage" rows="3" placeholder="Please follow server rules" aria-describedby="warn-message-help"></textarea>
+                                <div id="warn-message-help" class="form-text">Custom message sent to users when warned</div>
+                            </div>
+                        </form>
+                    </article>
+                </div>
+                
+                <div class="col-md-6">
+                    <article class="action-card filter-card" role="region" aria-labelledby="mute-action-heading">
+                        <header class="action-header">
+                            <h3 id="mute-action-heading" class="filter-title">Mute</h3>
+                            <p class="filter-description text-muted small">Temporarily restrict user messaging</p>
+                        </header>
+                        
+                        <form class="action-form" role="form" aria-labelledby="mute-action-heading">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="actionmute" aria-describedby="mute-enabled-help">
+                                <label class="form-check-label" for="actionmute">Enable Muting</label>
+                                <div id="mute-enabled-help" class="form-text">Temporarily mute users for violations</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="muteDuration" class="form-label">Default Mute Duration</label>
+                                <select class="form-select" id="muteDuration" aria-describedby="mute-duration-help">
+                                    <option value="5m">5 minutes</option>
+                                    <option value="10m" selected>10 minutes</option>
+                                    <option value="30m">30 minutes</option>
+                                    <option value="1h">1 hour</option>
+                                    <option value="6h">6 hours</option>
+                                    <option value="24h">24 hours</option>
+                                </select>
+                                <div id="mute-duration-help" class="form-text">How long users are muted by default</div>
+                            </div>
+                        </form>
+                    </article>
+                </div>
+                
+                <div class="col-md-6">
+                    <article class="action-card filter-card" role="region" aria-labelledby="kick-action-heading">
+                        <header class="action-header">
+                            <h3 id="kick-action-heading" class="filter-title">Kick</h3>
+                            <p class="filter-description text-muted small">Remove users from the server temporarily</p>
+                        </header>
+                        
+                        <form class="action-form" role="form" aria-labelledby="kick-action-heading">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="actionkick" aria-describedby="kick-enabled-help">
+                                <label class="form-check-label" for="actionkick">Enable Kicking</label>
+                                <div id="kick-enabled-help" class="form-text">Remove users from server for violations</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="kickReason" class="form-label">Default Kick Reason</label>
+                                <input type="text" class="form-control" id="kickReason" placeholder="Violation of server rules" aria-describedby="kick-reason-help">
+                                <div id="kick-reason-help" class="form-text">Reason shown when users are kicked</div>
+                            </div>
+                        </form>
+                    </article>
+                </div>
+                
+                <div class="col-md-6">
+                    <article class="action-card filter-card" role="region" aria-labelledby="ban-action-heading">
+                        <header class="action-header">
+                            <h3 id="ban-action-heading" class="filter-title">Ban</h3>
+                            <p class="filter-description text-muted small">Permanently remove users from the server</p>
+                        </header>
+                        
+                        <form class="action-form" role="form" aria-labelledby="ban-action-heading">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="actionban" aria-describedby="ban-enabled-help">
+                                <label class="form-check-label" for="actionban">Enable Banning</label>
+                                <div id="ban-enabled-help" class="form-text">Permanently ban users for severe violations</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="banReason" class="form-label">Default Ban Reason</label>
+                                <input type="text" class="form-control" id="banReason" placeholder="Severe violation of server rules" aria-describedby="ban-reason-help">
+                                <div id="ban-reason-help" class="form-text">Reason shown when users are banned</div>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="banDeleteMessages">
+                                <label class="form-check-label" for="banDeleteMessages">Delete recent messages</label>
+                            </div>
+                        </form>
+                    </article>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Custom Rules Section -->
+        <section id="rules" class="content-section" aria-labelledby="custom-rules-heading">
+            <header class="section-header">
+                <h2 id="custom-rules-heading" class="section-title mb-4">Custom Rules</h2>
+                <p class="section-description text-muted">Create and manage custom moderation rules</p>
+            </header>
+            
+            <article class="rules-management filter-card" role="region" aria-labelledby="rule-management-heading">
+                <header class="rule-management-header d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h3 id="rule-management-heading" class="filter-title mb-0">Rule Management</h3>
+                        <p class="text-muted small mb-0">Add, edit, and organize custom rules</p>
+                    </div>
+                    <button class="btn btn-primary" data-action="add-rule" aria-describedby="add-rule-help">
+                        <i class="fas fa-plus me-2" aria-hidden="true"></i>Add Rule
+                    </button>
+                    <div id="add-rule-help" class="visually-hidden">Opens dialog to create a new custom rule</div>
+                </header>
+                
+                <div id="customRulesList" class="rules-list" role="list" aria-label="Custom rules list">
+                    <!-- Custom rules will be populated here -->
+                    <div class="empty-state text-center text-muted py-4" id="rules-empty-state">
+                        <i class="fas fa-gavel fa-2x mb-2" aria-hidden="true"></i>
+                        <p>No custom rules configured yet. Click "Add Rule" to get started.</p>
+                    </div>
+                </div>
+            </article>
+        </section>
+        
+        <!-- Thresholds Section -->
+        <section id="thresholds" class="content-section" aria-labelledby="thresholds-heading">
+            <header class="section-header">
+                <h2 id="thresholds-heading" class="section-title mb-4">Violation Thresholds</h2>
+                <p class="section-description text-muted">Configure automatic escalation and ban thresholds</p>
+            </header>
+            
+            <article class="threshold-card filter-card" role="region" aria-labelledby="action-thresholds-heading">
+                <header class="threshold-header">
+                    <h3 id="action-thresholds-heading" class="filter-title">Action Thresholds</h3>
+                    <p class="filter-description text-muted mb-4">Set the number of violations required to trigger each action</p>
+                </header>
+                
+                <form class="threshold-form" role="form" aria-labelledby="action-thresholds-heading">
+                    <fieldset class="thresholds-grid">
+                        <legend class="visually-hidden">Violation count thresholds for each action type</legend>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="thresholdWarn" class="form-label">Warnings</label>
+                                    <input type="number" class="form-control" id="thresholdWarn" value="1" min="1" aria-describedby="warn-threshold-help">
+                                    <div id="warn-threshold-help" class="form-text">Violations before warning</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="thresholdMute" class="form-label">Mute</label>
+                                    <input type="number" class="form-control" id="thresholdMute" value="3" min="1" aria-describedby="mute-threshold-help">
+                                    <div id="mute-threshold-help" class="form-text">Violations before mute</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="thresholdKick" class="form-label">Kick</label>
+                                    <input type="number" class="form-control" id="thresholdKick" value="5" min="1" aria-describedby="kick-threshold-help">
+                                    <div id="kick-threshold-help" class="form-text">Violations before kick</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="thresholdBan" class="form-label">Ban</label>
+                                    <input type="number" class="form-control" id="thresholdBan" value="10" min="1" aria-describedby="ban-threshold-help">
+                                    <div id="ban-threshold-help" class="form-text">Violations before ban</div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                    <div class="mb-3">
+                        <label for="thresholdTimeWindow" class="form-label">Time Window</label>
+                        <select class="form-select" id="thresholdTimeWindow" aria-describedby="time-window-threshold-help">
+                            <option value="1h">1 hour</option>
+                            <option value="6h">6 hours</option>
+                            <option value="24h" selected>24 hours</option>
+                            <option value="7d">7 days</option>
+                            <option value="30d">30 days</option>
+                        </select>
+                        <div id="time-window-threshold-help" class="form-text">Time period to count violations within</div>
+                    </div>
+                </form>
+            </article>
+        </section>
+        
+        <!-- Testing Section -->
+        <section id="testing" class="content-section" aria-labelledby="testing-heading">
+            <header class="section-header">
+                <h2 id="testing-heading" class="section-title mb-4">Configuration Testing</h2>
+                <p class="section-description text-muted">Test how your moderation settings would handle specific messages</p>
+            </header>
+            
+            <article class="testing-tool filter-card" role="region" aria-labelledby="test-tool-heading">
+                <header class="test-tool-header">
+                    <h3 id="test-tool-heading" class="filter-title">Test Your Configuration</h3>
+                    <p class="filter-description text-muted mb-4">Simulate message processing with current settings</p>
+                </header>
+                
+                <div class="testing-interface row">
+                    <div class="col-md-6">
+                        <form class="test-form" role="form" aria-labelledby="test-tool-heading">
+                            <fieldset class="test-inputs">
+                                <legend class="visually-hidden">Test message input fields</legend>
+                                
+                                <div class="mb-3">
+                                    <label for="testUserId" class="form-label">User ID</label>
+                                    <input type="text" class="form-control" id="testUserId" placeholder="123456789012345678" aria-describedby="test-user-help">
+                                    <div id="test-user-help" class="form-text">Enter a Discord user ID to simulate</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="testContent" class="form-label">Test Message</label>
+                                    <textarea class="form-control" id="testContent" rows="4" placeholder="Enter a message to test..." aria-describedby="test-message-help" required></textarea>
+                                    <div id="test-message-help" class="form-text">Type the message content you want to test against your filters</div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary" data-action="test-config" aria-describedby="run-test-help">
+                                    <i class="fas fa-play me-2" aria-hidden="true"></i>Run Test
+                                </button>
+                                <div id="run-test-help" class="form-text">Process the message through all active filters</div>
+                            </fieldset>
+                        </form>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <section class="test-results-section" aria-labelledby="test-results-heading">
+                            <h4 id="test-results-heading" class="h6 mb-3">Test Results</h4>
+                            <div id="testResults" class="test-results bg-light p-3 rounded" role="log" aria-live="polite" aria-label="Test results output">
+                                <div class="empty-results text-center text-muted py-3">
+                                    <i class="fas fa-flask fa-2x mb-2" aria-hidden="true"></i>
+                                    <p class="mb-0">Run a test to see results here</p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </article>
+        </section>
+        
+        <!-- Analytics Section -->
+        <section id="analytics" class="content-section" aria-labelledby="analytics-heading">
+            <header class="section-header">
+                <h2 id="analytics-heading" class="section-title mb-4">Analytics & Reports</h2>
+                <p class="section-description text-muted">View moderation statistics and trends</p>
+            </header>
+            
+            <article class="analytics-dashboard" role="region" aria-labelledby="moderation-activity-heading">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="chart-container filter-card">
+                            <header class="chart-header">
+                                <h3 id="moderation-activity-heading" class="filter-title mb-3">Moderation Activity</h3>
+                                <p class="filter-description text-muted small">Visual overview of moderation actions over time</p>
+                            </header>
+                            
+                            <div class="chart-wrapper" role="img" aria-labelledby="chart-description">
+                                <canvas id="analyticsDetailChart" width="800" height="300" aria-label="Moderation activity chart"></canvas>
+                                <div id="chart-description" class="visually-hidden">
+                                    Chart displaying moderation activity including warnings, mutes, kicks, and bans over the selected time period
+                                </div>
+                            </div>
+                            
+                            <div class="chart-controls mt-3" role="group" aria-label="Chart time period controls">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-period="24h">24 Hours</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary active" data-period="7d">7 Days</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-period="30d">30 Days</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+        
+        <!-- Settings Section -->
+        <section id="settings" class="content-section" aria-labelledby="settings-heading">
+            <header class="section-header">
+                <h2 id="settings-heading" class="section-title mb-4">General Settings</h2>
+                <p class="section-description text-muted">Configure dashboard preferences and system settings</p>
+            </header>
+            
+            <div class="settings-grid row">
+                <div class="col-md-6">
+                    <article class="logging-settings filter-card" role="region" aria-labelledby="logging-settings-heading">
+                        <header class="settings-header">
+                            <h3 id="logging-settings-heading" class="filter-title">Logging</h3>
+                            <p class="filter-description text-muted small">Configure moderation logging and roles</p>
+                        </header>
+                        
+                        <form class="logging-form" role="form" aria-labelledby="logging-settings-heading">
+                            <div class="mb-3">
+                                <label for="logChannel" class="form-label">Log Channel</label>
+                                <input type="text" class="form-control" id="logChannel" placeholder="Channel ID" aria-describedby="log-channel-help">
+                                <div id="log-channel-help" class="form-text">Discord channel ID where moderation logs will be sent</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="moderatorRole" class="form-label">Moderator Role</label>
+                                <input type="text" class="form-control" id="moderatorRole" placeholder="Role ID" aria-describedby="moderator-role-help">
+                                <div id="moderator-role-help" class="form-text">Discord role ID for users who can access moderation features</div>
+                            </div>
+                        </form>
+                    </article>
+                </div>
+                
+                <div class="col-md-6">
+                    <article class="ui-preferences filter-card" role="region" aria-labelledby="ui-preferences-heading">
+                        <header class="settings-header">
+                            <h3 id="ui-preferences-heading" class="filter-title">UI Preferences</h3>
+                            <p class="filter-description text-muted small">Customize dashboard appearance and behavior</p>
+                        </header>
+                        
+                        <form class="ui-form" role="form" aria-labelledby="ui-preferences-heading">
+                            <div class="mb-3">
+                                <label for="uiTheme" class="form-label">Theme</label>
+                                <select class="form-select" id="uiTheme" aria-describedby="theme-help">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="auto">Auto</option>
+                                </select>
+                                <div id="theme-help" class="form-text">Choose your preferred color scheme</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="uiLanguage" class="form-label">Language</label>
+                                <select class="form-select" id="uiLanguage" aria-describedby="language-help">
+                                    <option value="en">English</option>
+                                    <option value="es">Spanish</option>
+                                    <option value="fr">French</option>
+                                    <option value="de">German</option>
+                                </select>
+                                <div id="language-help" class="form-text">Select your preferred interface language</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="dashboardLayout" class="form-label">Dashboard Layout</label>
+                                <select class="form-select" id="dashboardLayout" aria-describedby="layout-help">
+                                    <option value="default">Default</option>
+                                    <option value="compact">Compact</option>
+                                    <option value="expanded">Expanded</option>
+                                </select>
+                                <div id="layout-help" class="form-text">Choose how dashboard sections are displayed</div>
+                            </div>
+                        </form>
+                    </article>
+                </div>
+            </div>
+            
+            <article class="import-export filter-card mt-4" role="region" aria-labelledby="import-export-heading">
+                <header class="settings-header">
+                    <h3 id="import-export-heading" class="filter-title">Import/Export</h3>
+                    <p class="filter-description text-muted">Backup and restore your configuration settings</p>
+                </header>
+                
+                <div class="import-export-interface row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="importFile" class="form-label">Import Configuration</label>
+                            <input type="file" class="form-control" id="importFile" accept=".json" aria-describedby="import-file-help">
+                            <div id="import-file-help" class="form-text">Upload a previously exported configuration JSON file</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="mb-3">
+                            <button class="btn btn-outline-primary" data-action="export-config" aria-describedby="export-button-help">
+                                <i class="fas fa-download me-2" aria-hidden="true"></i>Export Configuration
+                            </button>
+                            <div id="export-button-help" class="form-text">Download your current settings as a JSON file</div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+    
+    <!-- Add Rule Modal -->
+    <div class="modal fade" id="addRuleModal" tabindex="-1" aria-labelledby="addRuleModalLabel" aria-describedby="addRuleModalDescription" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h5 class="modal-title" id="addRuleModalLabel">Add Custom Rule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </header>
+                
+                <div class="modal-body">
+                    <p id="addRuleModalDescription" class="text-muted mb-4">
+                        Create a new custom moderation rule to enhance your server's content filtering.
+                    </p>
+                    
+                    <form id="addRuleForm" role="form" aria-labelledby="addRuleModalLabel">
+                        <fieldset class="rule-form-fields">
+                            <legend class="visually-hidden">Custom rule configuration</legend>
+                            
+                            <div class="mb-3">
+                                <label for="ruleName" class="form-label">Rule Name <span class="text-danger" aria-label="required">*</span></label>
+                                <input type="text" class="form-control" id="ruleName" required aria-describedby="rule-name-help">
+                                <div id="rule-name-help" class="form-text">Enter a descriptive name for this rule</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="ruleDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="ruleDescription" rows="3" aria-describedby="rule-description-help" placeholder="Describe what this rule does..."></textarea>
+                                <div id="rule-description-help" class="form-text">Optional description to help identify the rule's purpose</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="ruleType" class="form-label">Rule Type <span class="text-danger" aria-label="required">*</span></label>
+                                <select class="form-select" id="ruleType" required aria-describedby="rule-type-help">
+                                    <option value="">Select type...</option>
+                                    <option value="content">Content Filter</option>
+                                    <option value="behavior">Behavior Monitor</option>
+                                    <option value="custom">Custom Logic</option>
+                                </select>
+                                <div id="rule-type-help" class="form-text">Choose the category that best describes this rule</div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+                
+                <footer class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" form="addRuleForm" class="btn btn-primary">Add Rule</button>
+                </footer>
+            </div>
+        </div>
+    </div>
+    </div> <!-- End Dashboard Container -->
+
+    <!-- External JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom JavaScript (ES6 Modules) -->
+    <script type="module">
+        import ModerationDashboardV2 from './js/ModerationDashboardV2.js?v=' + Date.now();
+        
+        // Initialize dashboard when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingSpinner = document.getElementById('loading-spinner');
+            
+            try {
+                // Create dashboard instance
+                window.dashboard = new ModerationDashboardV2({
+                    containerId: 'dashboard-container',
+                    mockMode: true, // Enable for development
+                    autoSave: true,
+                    theme: 'light'
+                });
+                
+                // Initialize dashboard
+                await window.dashboard.init();
+                
+                console.log('Dashboard V2 initialized successfully');
+                
+                // Hide loading spinner after successful initialization
+                setTimeout(() => {
+                    loadingSpinner.classList.remove('show');
+                }, 500);
+                
+            } catch (error) {
+                console.error('Failed to initialize dashboard:', error);
+                
+                // Hide loading spinner even on error
+                setTimeout(() => {
+                    loadingSpinner.classList.remove('show');
+                }, 1000);
+            }
+        });
+        
+        // Hide loading spinner immediately if no JavaScript modules load
+         window.addEventListener('load', () => {
+             const loadingSpinner = document.getElementById('loading-spinner');
+             if (loadingSpinner.classList.contains('show')) {
+                 setTimeout(() => {
+                     loadingSpinner.classList.remove('show');
+                 }, 2000);
+             }
+         });
+     </script>
+</body>
+</html>

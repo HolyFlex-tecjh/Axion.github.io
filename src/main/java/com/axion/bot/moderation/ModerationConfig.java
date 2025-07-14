@@ -69,6 +69,18 @@ public class ModerationConfig {
     private double timeoutMultiplier = 2.0;
     private int maxTimeoutHours = 24;
     
+    // Behavioral analysis
+    private boolean behavioralAnalysisEnabled = true;
+    
+    // AI detection
+    private boolean aiDetectionEnabled = true;
+    
+    // Smart rules
+    private boolean smartRulesEnabled = true;
+    
+    // Threat intelligence
+    private boolean threatIntelEnabled = true;
+    
     // Whitelist
     private boolean whitelistEnabled = false;
     private Set<String> whitelistedUsers = new HashSet<>();
@@ -311,6 +323,22 @@ public class ModerationConfig {
     
     public int getMaxTimeoutHours() { return maxTimeoutHours; }
     public void setMaxTimeoutHours(int maxTimeoutHours) { this.maxTimeoutHours = maxTimeoutHours; }
+    
+    // Behavioral analysis getters and setters
+    public boolean isBehavioralAnalysisEnabled() { return behavioralAnalysisEnabled; }
+    public void setBehavioralAnalysisEnabled(boolean behavioralAnalysisEnabled) { this.behavioralAnalysisEnabled = behavioralAnalysisEnabled; }
+    
+    // AI detection getters and setters
+    public boolean isAiDetectionEnabled() { return aiDetectionEnabled; }
+    public void setAiDetectionEnabled(boolean aiDetectionEnabled) { this.aiDetectionEnabled = aiDetectionEnabled; }
+    
+    // Smart rules getters and setters
+    public boolean isSmartRulesEnabled() { return smartRulesEnabled; }
+    public void setSmartRulesEnabled(boolean smartRulesEnabled) { this.smartRulesEnabled = smartRulesEnabled; }
+    
+    // Threat intelligence getters and setters
+    public boolean isThreatIntelEnabled() { return threatIntelEnabled; }
+    public void setThreatIntelEnabled(boolean threatIntelEnabled) { this.threatIntelEnabled = threatIntelEnabled; }
     
     /**
      * Opretter en standard konfiguration med moderate indstillinger

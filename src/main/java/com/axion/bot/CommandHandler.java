@@ -1,6 +1,8 @@
 package com.axion.bot;
 
-import com.axion.bot.moderation.*;
+import com.axion.bot.moderation.ModerationManager;
+import com.axion.bot.moderation.ModerationConfig;
+import com.axion.bot.moderation.ModerationResult;
 import com.axion.bot.database.DatabaseService;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;

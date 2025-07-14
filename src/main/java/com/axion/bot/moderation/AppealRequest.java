@@ -13,6 +13,8 @@ public class AppealRequest {
     private final Instant timestamp;
     private final String originalAction;
     private final String originalReason;
+    private final String violationId;
+    private final java.util.List<String> evidence;
     private AppealStatus status;
     private String reviewerId;
     private String reviewerName;
@@ -45,6 +47,22 @@ public class AppealRequest {
         this.reason = reason;
         this.originalAction = originalAction;
         this.originalReason = originalReason;
+        this.violationId = null; // Default for backward compatibility
+        this.evidence = new java.util.ArrayList<>(); // Default empty list
+        this.timestamp = Instant.now();
+        this.status = AppealStatus.PENDING;
+    }
+    
+    public AppealRequest(String userId, String guildId, String violationId, 
+                        String reason, java.util.List<String> evidence) {
+        this.userId = userId;
+        this.userName = null; // Will need to be looked up
+        this.guildId = guildId;
+        this.violationId = violationId;
+        this.reason = reason;
+        this.evidence = evidence != null ? new java.util.ArrayList<>(evidence) : new java.util.ArrayList<>();
+        this.originalAction = null; // Will need to be looked up from violation
+        this.originalReason = null; // Will need to be looked up from violation
         this.timestamp = Instant.now();
         this.status = AppealStatus.PENDING;
     }
@@ -62,6 +80,8 @@ public class AppealRequest {
     public String getReviewerName() { return reviewerName; }
     public String getReviewNotes() { return reviewNotes; }
     public Instant getReviewTimestamp() { return reviewTimestamp; }
+    public String getViolationId() { return violationId; }
+    public java.util.List<String> getEvidence() { return new java.util.ArrayList<>(evidence); }
     
     // Setters for review
     public void setStatus(AppealStatus status) { this.status = status; }

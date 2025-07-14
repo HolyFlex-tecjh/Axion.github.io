@@ -368,6 +368,13 @@ public class UserModerationProfile {
     public Map<String, Integer> getContentPatterns() { return new HashMap<>(contentPatterns); }
     public Instant getTimeoutExpiry() { return timeoutExpiry; }
     
+    /**
+     * Get account age based on creation time
+     */
+    public Duration getAccountAge() {
+        return Duration.between(createdAt, Instant.now());
+    }
+    
     // Setters for investigation
     public void setUnderInvestigation(boolean underInvestigation, String reason) {
         this.isUnderInvestigation = underInvestigation;

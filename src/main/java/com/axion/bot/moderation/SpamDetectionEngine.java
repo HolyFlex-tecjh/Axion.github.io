@@ -11,6 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+// Missing imports for threat detection classes
+import com.axion.bot.moderation.ThreatDetection;
+import com.axion.bot.moderation.ThreatLevel;
+import com.axion.bot.moderation.ThreatType;
+import com.axion.bot.moderation.ContentType;
+import com.axion.bot.moderation.UserModerationProfile;
+
 /**
  * Advanced Spam Detection Engine
  * Provides sophisticated spam detection using multiple algorithms
@@ -41,6 +48,65 @@ public class SpamDetectionEngine {
         this.spamPatterns = initializeSpamPatterns();
         this.spamKeywords = initializeSpamKeywords();
         this.suspiciousDomains = initializeSuspiciousDomains();
+    }
+    
+    /**
+     * Analyze content for spam characteristics
+     */
+    public ThreatDetection analyzeContent(String content, ContentType contentType) {
+        List<SpamFlag> flags = new ArrayList<>();
+        int totalScore = 0;
+        
+        // Check for spam patterns
+        SpamFlag patternFlag = checkSpamPatterns(content);
+        if (patternFlag != null) {
+            flags.add(patternFlag);
+            totalScore += patternFlag.getScore();
+        }
+        
+        // Check for excessive links
+        SpamFlag linkFlag = checkExcessiveLinks(content);
+        if (linkFlag != null) {
+            flags.add(linkFlag);
+            totalScore += linkFlag.getScore();
+        }
+        
+        // Check for suspicious domains
+        SpamFlag domainFlag = checkSuspiciousDomains(content);
+        if (domainFlag != null) {
+            flags.add(domainFlag);
+            totalScore += domainFlag.getScore();
+        }
+        
+        // Determine if spam is detected
+        boolean isDetected = totalScore > 30; // Threshold for detection
+        ThreatLevel level = determineThreatLevel(totalScore);
+        
+        Map<String, Object> details = new HashMap<>();
+        details.put("spamScore", totalScore);
+        details.put("flags", flags);
+        details.put("contentType", contentType);
+        
+        List<String> indicators = flags.stream()
+            .map(SpamFlag::getDescription)
+            .collect(Collectors.toList());
+        
+        return new ThreatDetection(
+            ThreatType.SPAM,
+            level,
+            totalScore / 100.0, // Convert to confidence (0-1)
+            indicators,
+            "Spam detection analysis",
+            details
+        );
+    }
+    
+    private ThreatLevel determineThreatLevel(int score) {
+        if (score >= 70) return ThreatLevel.CRITICAL;
+        if (score >= 50) return ThreatLevel.HIGH;
+        if (score >= 30) return ThreatLevel.MEDIUM;
+        if (score >= 15) return ThreatLevel.LOW;
+        return ThreatLevel.NONE;
     }
     
     /**

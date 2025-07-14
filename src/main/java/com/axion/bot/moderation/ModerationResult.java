@@ -9,12 +9,18 @@ public class ModerationResult {
     private final String reason;
     private final ModerationAction action;
     private final int severity; // 1-5, hvor 5 er mest alvorligt
+    private final String detectionType; // Type of detection that triggered this result
     
     private ModerationResult(boolean allowed, String reason, ModerationAction action, int severity) {
+        this(allowed, reason, action, severity, "unknown");
+    }
+    
+    private ModerationResult(boolean allowed, String reason, ModerationAction action, int severity, String detectionType) {
         this.allowed = allowed;
         this.reason = reason;
         this.action = action;
         this.severity = severity;
+        this.detectionType = detectionType;
     }
     
     /**
@@ -59,6 +65,13 @@ public class ModerationResult {
         return new ModerationResult(allowed, reason, action, severity);
     }
     
+    /**
+     * Opretter et custom resultat med specificeret alvorlighed og detection type
+     */
+    public static ModerationResult custom(boolean allowed, String reason, ModerationAction action, int severity, String detectionType) {
+        return new ModerationResult(allowed, reason, action, severity, detectionType);
+    }
+    
     // Getters
     public boolean isAllowed() {
         return allowed;
@@ -74,6 +87,10 @@ public class ModerationResult {
     
     public int getSeverity() {
         return severity;
+    }
+    
+    public String getDetectionType() {
+        return detectionType;
     }
     
     /**

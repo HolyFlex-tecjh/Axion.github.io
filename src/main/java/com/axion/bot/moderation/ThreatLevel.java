@@ -8,7 +8,8 @@ public enum ThreatLevel {
     LOW(1, "Low Threat", "\uD83D\uDFE1"),
     MEDIUM(2, "Medium Threat", "\uD83D\uDFE0"),
     HIGH(3, "High Threat", "\uD83D\uDD34"),
-    VERY_HIGH(4, "Very High Threat", "\u26AB");
+    VERY_HIGH(4, "Very High Threat", "\u26AB"),
+    CRITICAL(5, "Critical Threat", "🚨");
     
     private final int level;
     private final String description;
@@ -30,6 +31,10 @@ public enum ThreatLevel {
     
     public String getEmoji() {
         return emoji;
+    }
+    
+    public String getSeverity() {
+        return description;
     }
     
     @Override

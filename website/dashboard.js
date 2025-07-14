@@ -1124,10 +1124,41 @@ function loadModerationSettings() {
     `;
 }
 
+let updateStatsInterval;
+let updateActivityInterval;
+let isPageVisible = true;
+
+// Track page visibility to pause updates when not visible
+document.addEventListener('visibilitychange', function() {
+    isPageVisible = !document.hidden;
+    if (isPageVisible) {
+        setupRealTimeUpdates();
+    } else {
+        clearRealTimeUpdates();
+    }
+});
+
 function setupRealTimeUpdates() {
-    // Simulate real-time updates
-    setInterval(updateStats, 30000); // Update every 30 seconds
-    setInterval(updateActivity, 10000); // Update activity every 10 seconds
+    // Clear existing intervals to prevent duplicates
+    clearRealTimeUpdates();
+    
+    // Only update if page is visible
+    if (!isPageVisible) return;
+    
+    // Reduced frequency: Update stats every 2 minutes, activity every 30 seconds
+    updateStatsInterval = setInterval(updateStats, 120000); // Update every 2 minutes
+    updateActivityInterval = setInterval(updateActivity, 30000); // Update activity every 30 seconds
+}
+
+function clearRealTimeUpdates() {
+    if (updateStatsInterval) {
+        clearInterval(updateStatsInterval);
+        updateStatsInterval = null;
+    }
+    if (updateActivityInterval) {
+        clearInterval(updateActivityInterval);
+        updateActivityInterval = null;
+    }
 }
 
 function updateStats() {
@@ -1144,50 +1175,68 @@ function updateStats() {
 }
 
 function animateValue(element, start, end, duration) {
+    // Use requestAnimationFrame for better performance
     const range = end - start;
-    const increment = range / (duration / 16);
-    let current = start;
+    const startTime = performance.now();
     
-    const timer = setInterval(() => {
-        current += increment;
-        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
-            current = end;
-            clearInterval(timer);
-        }
+    function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Use easing function for smoother animation
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+        const current = start + (range * easeProgress);
+        
         element.textContent = Math.floor(current).toLocaleString();
-    }, 16);
+        
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        }
+    }
+    
+    requestAnimationFrame(animate);
 }
 
 function updateActivity() {
-    // Add new activity items
-    const activities = [
-        {
-            icon: 'fas fa-music',
-            class: 'music',
-            action: 'Musik afspillet',
-            details: 'Random sang tilføjet til kø',
-            time: 'Lige nu'
-        },
-        {
-            icon: 'fas fa-user-plus',
-            class: 'welcome',
-            action: 'Nyt medlem',
-            details: `RandomUser#${Math.floor(Math.random() * 9999)} joinde serveren`,
-            time: 'Lige nu'
-        }
-    ];
+    // Only update if page is visible and activity feed exists
+    if (!isPageVisible) return;
     
     const activityFeed = document.querySelector('.activity-feed');
-    if (activityFeed && Math.random() > 0.7) { // 30% chance to add new activity
+    if (!activityFeed) return;
+    
+    // Reduced frequency: 20% chance to add new activity (was 30%)
+    if (Math.random() > 0.8) {
+        const activities = [
+            {
+                icon: 'fas fa-music',
+                class: 'music',
+                action: 'Musik afspillet',
+                details: 'Random sang tilføjet til kø',
+                time: 'Lige nu'
+            },
+            {
+                icon: 'fas fa-user-plus',
+                class: 'welcome',
+                action: 'Nyt medlem',
+                details: `RandomUser#${Math.floor(Math.random() * 9999)} joinde serveren`,
+                time: 'Lige nu'
+            }
+        ];
+        
         const randomActivity = activities[Math.floor(Math.random() * activities.length)];
         const newItem = createActivityItem(randomActivity);
         
-        activityFeed.insertBefore(newItem, activityFeed.firstChild);
+        // Use DocumentFragment for better performance
+        const fragment = document.createDocumentFragment();
+        fragment.appendChild(newItem);
+        activityFeed.insertBefore(fragment, activityFeed.firstChild);
         
-        // Remove old items if more than 10
+        // Remove old items if more than 8 (reduced from 10)
         const items = activityFeed.querySelectorAll('.activity-item');
-        if (items.length > 10) {
-            items[items.length - 1].remove();
+        if (items.length > 8) {
+            // Remove multiple items at once for better performance
+            const itemsToRemove = Array.from(items).slice(8);
+            itemsToRemove.forEach(item => item.remove());
         }
     }
 }

@@ -412,15 +412,41 @@ function initializeCharts() {
     console.log('Charts initialized');
 }
 
+let realTimeUpdateInterval;
+let isPageVisible = true;
+
+// Track page visibility to pause updates when not visible
+document.addEventListener('visibilitychange', function() {
+    isPageVisible = !document.hidden;
+    if (isPageVisible && currentServer) {
+        setupRealTimeUpdates();
+    } else {
+        clearRealTimeUpdates();
+    }
+});
+
 function setupRealTimeUpdates() {
-    // Real-time update setup
-    setInterval(() => {
-        if (currentServer) {
+    // Clear existing interval to prevent duplicates
+    clearRealTimeUpdates();
+    
+    // Only update if page is visible and server is selected
+    if (!isPageVisible || !currentServer) return;
+    
+    // Reduced frequency: Update every 2 minutes instead of 30 seconds
+    realTimeUpdateInterval = setInterval(() => {
+        if (currentServer && isPageVisible) {
             // Update live statistics
             const newData = generateServerData(currentServer);
             updateStatistics(newData.stats);
         }
-    }, 30000); // Update every 30 seconds
+    }, 120000); // Update every 2 minutes
+}
+
+function clearRealTimeUpdates() {
+    if (realTimeUpdateInterval) {
+        clearInterval(realTimeUpdateInterval);
+        realTimeUpdateInterval = null;
+    }
 }
 
 function setupFormHandlers() {

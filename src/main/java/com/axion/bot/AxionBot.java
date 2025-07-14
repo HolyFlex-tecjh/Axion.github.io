@@ -2,7 +2,10 @@ package com.axion.bot;
 
 import com.axion.bot.database.DatabaseManager;
 import com.axion.bot.database.DatabaseService;
+import com.axion.bot.database.MongoDBConfig;
+import com.axion.bot.database.MongoDBService;
 import com.axion.bot.translation.UserLanguageManager;
+import com.axion.bot.web.ModerationConfigurationController;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -28,11 +31,14 @@ public class AxionBot {
     private String token;
     private DatabaseManager databaseManager;
     private DatabaseService databaseService;
+    private MongoDBService mongoDBService;
     private ScheduledExecutorService activityUpdater;
+    private ModerationConfigurationController webController;
 
     public AxionBot() {
         loadConfiguration();
         initializeDatabase();
+        initializeMongoDB();
     }
 
     /**
@@ -86,6 +92,27 @@ public class AxionBot {
             System.exit(1);
         }
     }
+    
+    /**
+     * Initialiserer MongoDB forbindelse
+     */
+    private void initializeMongoDB() {
+        try {
+            // Initialize MongoDB connection
+            MongoDBConfig.initialize();
+            mongoDBService = new MongoDBService();
+            
+            // Test MongoDB connection
+            if (MongoDBConfig.isConnected()) {
+                logger.info("MongoDB forbindelse etableret succesfuldt");
+            } else {
+                logger.warn("MongoDB forbindelse kunne ikke etableres - fortsætter med SQLite");
+            }
+        } catch (Exception e) {
+            logger.warn("Fejl ved initialisering af MongoDB: {} - fortsætter med SQLite", e.getMessage());
+            // Don't exit - MongoDB is optional, SQLite is the fallback
+        }
+    }
 
     /**
      * Starter botten
@@ -122,6 +149,9 @@ public class AxionBot {
             
             // Start activity updater der opdaterer hver 30 sekunder
             startActivityUpdater();
+            
+            // Start web server for moderation dashboard
+            startWebServer();
 
         } catch (Exception e) {
             logger.error("Fejl ved start af bot", e);
@@ -141,6 +171,25 @@ public class AxionBot {
         // Planlæg opdateringer hver 30 sekunder
         activityUpdater.scheduleAtFixedRate(this::updateBotActivity, 30, 30, TimeUnit.SECONDS);
         logger.info("Activity updater startet - opdaterer hver 30 sekunder");
+    }
+    
+    /**
+     * Starter web server for moderation dashboard
+     */
+    private void startWebServer() {
+        try {
+            webController = new ModerationConfigurationController(databaseService);
+            
+            // Get port from environment variable or use default
+            String portStr = System.getenv("WEB_PORT");
+            int port = portStr != null ? Integer.parseInt(portStr) : 8080;
+            
+            webController.startServer(port);
+            logger.info("Moderation dashboard web server startet på port {}", port);
+        } catch (Exception e) {
+            logger.error("Fejl ved start af web server", e);
+            // Don't exit - web server is optional
+        }
     }
     
     /**
@@ -172,6 +221,11 @@ public class AxionBot {
             }
         }
         
+        if (webController != null) {
+            webController.stopServer();
+            logger.info("Web server stoppet");
+        }
+        
         if (jda != null) {
             jda.shutdown();
             logger.info("Axion Bot er lukket ned");
@@ -180,6 +234,13 @@ public class AxionBot {
         if (databaseManager != null) {
             databaseManager.disconnect();
             logger.info("Database forbindelse lukket");
+        }
+        
+        // Close MongoDB connection
+        try {
+            MongoDBConfig.close();
+        } catch (Exception e) {
+            logger.warn("Fejl ved lukning af MongoDB forbindelse: {}", e.getMessage());
         }
     }
 
@@ -195,6 +256,13 @@ public class AxionBot {
      */
     public DatabaseService getDatabaseService() {
         return databaseService;
+    }
+    
+    /**
+     * Får MongoDB service instans
+     */
+    public MongoDBService getMongoDBService() {
+        return mongoDBService;
     }
 
     /**

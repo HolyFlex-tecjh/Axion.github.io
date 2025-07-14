@@ -91,30 +91,28 @@ public class OptimizedTicketManager {
                     return false;
                 }
                 
-                // Generate ticket ID and create ticket object
+                // Generate ticket ID
                 String ticketId = generateTicketId();
-                Ticket ticket = createTicketObject(ticketId, user, guild, category, subject, description, priority);
                 
-                // Create thread asynchronously
-                Boolean result = createTicketThreadAsync(ticket, user, guild, supportCategory, config)
-                    .thenCompose(threadCreated -> {
-                        if (threadCreated) {
-                            // Save ticket to database asynchronously
-                            return asyncProcessor.submitDatabaseTask(() -> {
-                                boolean saved = ticketService.saveTicket(ticket);
-                                if (saved) {
-                                    // Invalidate user tickets cache
-                                    invalidateUserTicketsCache(user.getId(), guild.getId());
-                                    logger.info("Ticket created successfully: {} for user: {} in {}ms", 
-                                        ticketId, user.getId(), System.currentTimeMillis() - startTime);
-                                }
-                                return saved;
-                            });
-                        }
-                        return CompletableFuture.completedFuture(false);
-                    })
+                // Create thread and ticket asynchronously
+                Ticket createdTicket = createTicketWithThreadAsync(ticketId, user, guild, category, subject, description, priority, supportCategory, config)
                     .get(30, TimeUnit.SECONDS); // Timeout after 30 seconds
-                return result;
+                
+                if (createdTicket != null) {
+                    // Save ticket to database asynchronously
+                    Boolean result = asyncProcessor.submitDatabaseTask(() -> {
+                        boolean saved = ticketService.createTicket(createdTicket);
+                        if (saved) {
+                            // Invalidate user tickets cache
+                            invalidateUserTicketsCache(user.getId(), guild.getId());
+                            logger.info("Ticket created successfully: {} for user: {} in {}ms", 
+                                ticketId, user.getId(), System.currentTimeMillis() - startTime);
+                        }
+                        return saved;
+                    }).get(30, TimeUnit.SECONDS);
+                    return result;
+                }
+                return false;
                     
             } catch (Exception e) {
                 logger.error("Error creating ticket for user {}: {}", user.getId(), e.getMessage(), e);
@@ -244,7 +242,7 @@ public class OptimizedTicketManager {
         List<Ticket> userTickets = (List<Ticket>) translationManager.getFromCache(cacheKey);
         if (userTickets == null) {
             // Load from database and cache
-            userTickets = ticketService.getUserTickets(userId, guildId);
+            userTickets = ticketService.getUserOpenTickets(userId, guildId);
             translationManager.putInCache(cacheKey, userTickets, 5); // Cache for 5 minutes
         }
         
@@ -282,13 +280,14 @@ public class OptimizedTicketManager {
     }
     
     /**
-     * Creates ticket thread asynchronously
+     * Creates ticket thread and ticket object asynchronously with optimized performance
      */
-    private CompletableFuture<Boolean> createTicketThreadAsync(Ticket ticket, User user, Guild guild, 
-                                                              Category supportCategory, TicketConfig config) {
+    private CompletableFuture<Ticket> createTicketWithThreadAsync(String ticketId, User user, Guild guild, 
+                                                                  String category, String subject, String description, 
+                                                                  TicketPriority priority, Category supportCategory, TicketConfig config) {
         return asyncProcessor.submitNetworkTask(() -> {
             try {
-                String threadName = String.format("%s-%s", ticket.getCategory(), ticket.getTicketId());
+                String threadName = String.format("%s-%s", category, ticketId);
                 
                 // First, get a text channel from the category or create one
                 net.dv8tion.jda.api.entities.channel.concrete.TextChannel textChannel = supportCategory.getTextChannels().stream()
@@ -306,7 +305,9 @@ public class OptimizedTicketManager {
                     .complete();
                 
                 if (thread != null) {
-                    ticket.setThreadId(thread.getId());
+                    // Create ticket object with threadId
+                    Ticket ticket = new Ticket(ticketId, user.getId(), guild.getId(), thread.getId(), category, subject, description);
+                    ticket.setPriority(priority);
                     
                     // Add user and staff to thread
                     thread.addThreadMember(user).queue();
@@ -315,14 +316,14 @@ public class OptimizedTicketManager {
                     // Send welcome message
                     sendWelcomeMessageAsync(thread, ticket, user, config);
                     
-                    return true;
+                    return ticket;
                 }
                 
-                return false;
+                return null;
                 
             } catch (Exception e) {
-                logger.error("Error creating thread for ticket {}: {}", ticket.getTicketId(), e.getMessage(), e);
-                return false;
+                logger.error("Error creating thread for ticket {}: {}", ticketId, e.getMessage(), e);
+                return null;
             }
         });
     }
@@ -416,23 +417,10 @@ public class OptimizedTicketManager {
     }
     
     private Category findSupportCategory(Guild guild, TicketConfig config) {
-        return guild.getCategoryById(config.getCategoryId());
+        return guild.getCategoryById(config.getSupportCategoryId());
     }
     
-    private Ticket createTicketObject(String ticketId, User user, Guild guild, String category, 
-                                     String subject, String description, TicketPriority priority) {
-        Ticket ticket = new Ticket();
-        ticket.setTicketId(ticketId);
-        ticket.setUserId(user.getId());
-        ticket.setGuildId(guild.getId());
-        ticket.setCategory(category);
-        ticket.setSubject(subject);
-        ticket.setDescription(description);
-        ticket.setPriority(priority);
-        ticket.setStatus(TicketStatus.OPEN);
-        ticket.setCreatedAt(Instant.now());
-        return ticket;
-    }
+    // Removed createTicketObject method - ticket creation now handled in createTicketWithThreadAsync
     
     private void addStaffToThread(ThreadChannel thread, Guild guild, TicketConfig config) {
         // Implementation would go here
@@ -470,91 +458,7 @@ public class OptimizedTicketManager {
     }
 }
 
-// Local model classes
-class Ticket {
-    private String ticketId;
-    private String userId;
-    private String guildId;
-    private String category;
-    private String subject;
-    private String description;
-    private TicketPriority priority;
-    private TicketStatus status;
-    private String threadId;
-    private String assignedStaffId;
-    private Instant createdAt;
-    
-    // Getters and setters
-    public String getTicketId() { return ticketId; }
-    public void setTicketId(String ticketId) { this.ticketId = ticketId; }
-    
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
-    
-    public String getGuildId() { return guildId; }
-    public void setGuildId(String guildId) { this.guildId = guildId; }
-    
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
-    
-    public String getSubject() { return subject; }
-    public void setSubject(String subject) { this.subject = subject; }
-    
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    
-    public TicketPriority getPriority() { return priority; }
-    public void setPriority(TicketPriority priority) { this.priority = priority; }
-    
-    public TicketStatus getStatus() { return status; }
-    public void setStatus(TicketStatus status) { this.status = status; }
-    
-    public String getThreadId() { return threadId; }
-    public void setThreadId(String threadId) { this.threadId = threadId; }
-    
-    public String getAssignedStaffId() { return assignedStaffId; }
-    public void setAssignedStaffId(String assignedStaffId) { this.assignedStaffId = assignedStaffId; }
-    
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-    
-    public boolean isClosed() { return status == TicketStatus.CLOSED; }
-}
-
-class TicketConfig {
-    private String guildId;
-    private String categoryId;
-    private String welcomeMessage;
-    private int maxTicketsPerUser;
-    private String staffRoleId;
-    private String adminRoleId;
-    
-    // Getters and setters
-    public String getGuildId() { return guildId; }
-    public void setGuildId(String guildId) { this.guildId = guildId; }
-    
-    public String getCategoryId() { return categoryId; }
-    public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
-    
-    public String getWelcomeMessage() { return welcomeMessage; }
-    public void setWelcomeMessage(String welcomeMessage) { this.welcomeMessage = welcomeMessage; }
-    
-    public int getMaxTicketsPerUser() { return maxTicketsPerUser; }
-    public void setMaxTicketsPerUser(int maxTicketsPerUser) { this.maxTicketsPerUser = maxTicketsPerUser; }
-    
-    public String getStaffRoleId() { return staffRoleId; }
-    public void setStaffRoleId(String staffRoleId) { this.staffRoleId = staffRoleId; }
-    
-    public String getAdminRoleId() { return adminRoleId; }
-    public void setAdminRoleId(String adminRoleId) { this.adminRoleId = adminRoleId; }
-}
-
-enum TicketPriority {
-    LOW, MEDIUM, HIGH, URGENT
-}
-enum TicketStatus {
-    OPEN, IN_PROGRESS, CLOSED
-}
+// Note: Using proper Ticket, TicketConfig, TicketPriority, and TicketStatus classes from the ticket package
 
 // Simple TranslationManager implementation with caching
 class TranslationManager {
@@ -614,31 +518,7 @@ class OptimizedCommandRegistry {
     // Placeholder implementation
 }
 
-class TicketService {
-    public boolean saveTicket(Ticket ticket) {
-        return true;
-    }
-    
-    public Optional<Ticket> getTicket(String ticketId) {
-        return Optional.empty();
-    }
-    
-    public boolean deleteTicket(String ticketId) {
-        return true;
-    }
-    
-    public boolean updateTicket(Ticket ticket) {
-        return true;
-    }
-    
-    public List<Ticket> getUserTickets(String userId, String guildId) {
-        return new ArrayList<>();
-    }
-    
-    public Optional<TicketConfig> getTicketConfig(String guildId) {
-        return Optional.empty();
-    }
-}
+// TicketService class removed - using the main TicketService from TicketService.java
 
 class UserLanguageManager {
     public String getUserLanguage(String userId) {

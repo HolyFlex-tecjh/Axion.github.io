@@ -601,21 +601,7 @@ public class ThreatIntelligence {
         public int getScore() { return score; }
     }
     
-    public enum ThreatLevel {
-        NONE,
-        LOW,
-        MEDIUM,
-        HIGH,
-        VERY_HIGH
-    }
+    // ThreatLevel enum removed - using separate ThreatLevel.java file
     
-    public enum ThreatType {
-        PHISHING,
-        MALWARE,
-        SCAM,
-        DOXXING,
-        MALICIOUS_LINK,
-        SUSPICIOUS_ACTIVITY,
-        COORDINATED_ATTACK
-    }
+    // ThreatType enum removed - using separate ThreatType.java file
 }
