@@ -3,6 +3,7 @@ package com.axion.bot.moderation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -137,8 +138,14 @@ public class EscalationEngine {
         List<ViolationEvent> recent = history.subList(Math.max(0, history.size() - 3), history.size());
         Instant earliest = recent.get(0).getTimestamp();
         Instant latest = recent.get(recent.size() - 1).getTimestamp();
+
+        // Example usage of channelId: check if all violations happened in the same channel
+        boolean sameChannel = recent.stream()
+            .map(ViolationEvent::getChannelId)
+            .distinct()
+            .count() == 1;
         
-        return Duration.between(earliest, latest).toHours() < 1;
+        return Duration.between(earliest, latest).toHours() < 1 && sameChannel;
     }
     
     /**
@@ -170,27 +177,28 @@ public class EscalationEngine {
         
         return new EscalationStats(violationCount, isEscalated, escalationLevel);
     }
-    
+
     /**
-         * Represents a violation event for escalation tracking
-         */
-        private static class ViolationEvent {
-            private final Instant timestamp;
-            private final String guildId;
-            private final String channelId;
-            private final double confidence;
-            
-            public ViolationEvent(Instant timestamp, String guildId, String channelId, double confidence) {
-                this.timestamp = timestamp;
-                this.guildId = guildId;
-                this.channelId = channelId;
-                this.confidence = confidence;
-            }
-            
-            public Instant getTimestamp() { return timestamp; }
-            public String getGuildId() { return guildId; }
-            public double getConfidence() { return confidence; }
+     * Represents a violation event for escalation tracking
+     */
+    private static class ViolationEvent {
+        private final Instant timestamp;
+        private final String guildId;
+        private final String channelId;
+        private final double confidence;
+
+        public ViolationEvent(Instant timestamp, String guildId, String channelId, double confidence) {
+            this.timestamp = timestamp;
+            this.guildId = guildId;
+            this.channelId = channelId;
+            this.confidence = confidence;
         }
+
+        public Instant getTimestamp() { return timestamp; }
+        public String getGuildId() { return guildId; }
+        public String getChannelId() { return channelId; }
+        public double getConfidence() { return confidence; }
+    }
     
     /**
      * Result of escalation evaluation
