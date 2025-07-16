@@ -1,15 +1,14 @@
 package com.axion.bot.moderation;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.awt.Color;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -567,7 +566,7 @@ public class ModerationCommands {
      * Handle raid status command
      */
     private boolean handleRaidStatusCommand(MessageReceivedEvent event, String[] args) {
-        RaidStatus status = advancedSystem.getAntiRaidSystem().getRaidStatus(event.getGuild().getId());
+        AntiRaidSystem.RaidStatus status = advancedSystem.getAntiRaidSystem().getRaidStatus(event.getGuild().getId());
         
         // Handle null status (no raid activity recorded)
         if (status == null) {

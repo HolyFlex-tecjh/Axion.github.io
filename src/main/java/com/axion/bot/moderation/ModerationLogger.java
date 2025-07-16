@@ -2,7 +2,6 @@ package com.axion.bot.moderation;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 import java.awt.Color;
 import java.time.Instant;

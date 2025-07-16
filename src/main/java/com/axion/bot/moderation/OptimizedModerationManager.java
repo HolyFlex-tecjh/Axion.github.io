@@ -1,17 +1,10 @@
 package com.axion.bot.moderation;
 
-import com.axion.bot.moderation.ModerationConfig;
-import com.axion.bot.moderation.UserModerationProfile;
-import com.axion.bot.moderation.ModerationResult;
-import com.axion.bot.moderation.ModerationAction;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +18,6 @@ public class OptimizedModerationManager {
     private static final Logger logger = LoggerFactory.getLogger(OptimizedModerationManager.class);
     
     // Core dependencies - simplified for compilation
-    private final Object databaseManager; // Simplified to avoid missing dependency
     // private final OptimizedTranslationManager translationManager; // Removed unused field
     
     // Enhanced caching system (simplified)
@@ -44,12 +36,14 @@ public class OptimizedModerationManager {
     private final Map<String, List<String>> userActivityCache = new ConcurrentHashMap<>();
     
     public OptimizedModerationManager(Object databaseManager) {
-        this.databaseManager = databaseManager;
-        
         // Initialize basic patterns
         initializeBasicPatterns();
     }
     
+    public OptimizedModerationManager() {
+        // Initialize basic patterns
+        initializeBasicPatterns();
+    }
     /**
      * Main moderation processing method
      */
@@ -409,23 +403,17 @@ public class OptimizedModerationManager {
     
     private void logModerationAction(String userId, MessageReceivedEvent event, ModerationResult result, String analysisLog) {
         try {
-            User user = event.getAuthor();
-            String username = user.getName();
-            String moderatorId = "SYSTEM"; // Automated moderation
-            String moderatorName = "Axion Bot";
             String action = result.getAction().name();
             String reason = result.getReason() + (analysisLog != null && !analysisLog.isEmpty() ? " | Analysis: " + analysisLog : "");
             String guildId = event.getGuild().getId();
-            String channelId = event.getChannel().getId();
             String messageId = event.getMessage().getId();
             int severity = determineSeverity(result);
-            boolean automated = true;
             
             // databaseManager.logModerationAction(userId, username, moderatorId, moderatorName, 
             //                                        action, reason, guildId, channelId, messageId, 
             //                                        severity, automated);
             // Stub implementation - database logging disabled for compilation
-            System.out.println("Moderation action logged: " + action + " for user " + userId);
+            System.out.println("Moderation action logged: " + action + " for user " + userId + " (severity: " + severity + ") messageId: " + messageId + " reason: " + reason);
             
             logger.info("✅ Moderation action logged: User={}, Action={}, Reason={}, Guild={}", 
                        userId, action, result.getReason(), guildId);

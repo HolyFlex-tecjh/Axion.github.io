@@ -1,6 +1,5 @@
 package com.axion.bot.moderation;
 
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -165,27 +164,17 @@ public class AdvancedModerationSystem {
         if (settings.isAccountAgeCheckEnabled()) {
             Duration accountAge = Duration.between(member.getUser().getTimeCreated().toInstant(), Instant.now());
             if (accountAge.toDays() < settings.getMinAccountAgeDays()) {
-                return ModerationResult.moderate(
-                    "Account too new: " + accountAge.toDays() + " days old",
-                    ModerationAction.KICK
-                );
+                return ModerationResult.violation("Account too new: " + accountAge.toDays() + " days old", ModerationAction.KICK, ModerationSeverity.MEDIUM);
             }
         }
-        
-        // Suspicious username patterns
-        if (settings.isSuspiciousUsernameDetectionEnabled()) {
+            // Username pattern check
             if (isSuspiciousUsername(member.getUser().getName())) {
                 profile.addSuspicionPoints(2);
-                return ModerationResult.warn(
-                    "Suspicious username pattern detected",
-                    ModerationAction.FLAG_FOR_REVIEW
-                );
+                return ModerationResult.violation("Suspicious username pattern detected", ModerationAction.DELETE_AND_WARN, ModerationSeverity.LOW);
             }
+            
+            return ModerationResult.allowed();
         }
-        
-        return ModerationResult.allowed();
-    }
-    
     /**
      * Advanced timeout system with escalation
      */
@@ -309,51 +298,6 @@ public class AdvancedModerationSystem {
         }
     }
     
-    /**
-     * Mass action system for raid response
-     */
-    public void executeMassAction(Guild guild, List<String> userIds, ModerationAction action, String reason) {
-        logger.info("Executing mass {} action on {} users in guild {}", action, userIds.size(), guild.getName());
-        
-        for (String userId : userIds) {
-            try {
-                 // Note: Using placeholder member since getMemberById doesn't exist in current Guild implementation
-                 Member targetMember = new Member(); // TODO: Implement proper member lookup
-                 if (targetMember == null) {
-                     logger.warn("Could not retrieve member {} for mass action", userId);
-                     continue;
-                 }
-                 
-                 UserModerationProfile profile = getUserProfile(userId, guild.getId());
-                 User targetUser = new User(); // TODO: Get actual user object
-                 
-                 switch (action) {
-                     case BAN:
-                         guild.ban(targetMember, 7, java.util.concurrent.TimeUnit.DAYS);
-                         profile.addPunishment(ModerationAction.BAN, Duration.ofDays(7), reason);
-                         break;
-                     case KICK:
-                         guild.kick(targetMember);
-                         profile.addPunishment(ModerationAction.KICK, Duration.ZERO, reason);
-                         break;
-                     case TIMEOUT:
-                         Duration timeoutDuration = Duration.ofHours(1);
-                         // Note: timeout functionality not implemented in current Member class
-                         profile.addPunishment(ModerationAction.TIMEOUT, timeoutDuration, reason);
-                         break;
-                     default:
-                         break;
-                 }
-                 
-                 sendUserNotification(targetUser, action.toString().toLowerCase(), reason, 
-                     action == ModerationAction.TIMEOUT ? Duration.ofHours(1) : null);
-                 
-             } catch (Exception e) {
-                 logger.error("Failed to execute mass action {} on user {} in guild {}: {}", 
-                     action, userId, guild.getName(), e.getMessage());
-             }
-        }
-    }
     
     // Helper methods and utility functions
     
@@ -476,10 +420,8 @@ public class AdvancedModerationSystem {
     }
     
     public void executeSmartBan(Guild guild, User targetUser, User moderator, String reason) {
-        // Note: Using placeholder members since getMemberById doesn't exist in current Guild implementation
-        Member targetMember = new Member(); // TODO: Implement proper member lookup
-        Member moderatorMember = new Member(); // TODO: Implement proper member lookup
-        
+        Member targetMember = guild.getMemberById(targetUser.getId());
+        Member moderatorMember = guild.getMemberById(moderator.getId());
         if (targetMember != null && moderatorMember != null) {
             // Apply smart ban with intelligent analysis
             UserModerationProfile profile = getUserProfile(targetUser.getId(), guild.getId(), true);
@@ -501,9 +443,8 @@ public class AdvancedModerationSystem {
     }
     
     public void executeAdvancedTimeout(Guild guild, User targetUser, User moderator, String reason) {
-        // Note: Using placeholder members since getMemberById doesn't exist in current Guild implementation
-        Member targetMember = new Member(); // TODO: Implement proper member lookup
-        Member moderatorMember = new Member(); // TODO: Implement proper member lookup
+        Member targetMember = guild.getMemberById(targetUser.getId());
+        Member moderatorMember = guild.getMemberById(moderator.getId());
         
         if (targetMember != null && moderatorMember != null) {
             // Calculate intelligent timeout duration based on user profile
@@ -586,15 +527,14 @@ public class AdvancedModerationSystem {
         
         for (String userId : targetUserIds) {
             try {
-                // Note: Using placeholder member since getMemberById doesn't exist in current Guild implementation
-                Member targetMember = new Member(); // TODO: Implement proper member lookup
+                Member targetMember = guild.getMemberById(userId);
                 if (targetMember == null) {
                     failureCount++;
                     continue;
                 }
                 
                 UserModerationProfile profile = getUserProfile(userId, guild.getId());
-                User targetUser = new User(); // TODO: Get actual user object
+                User targetUser = targetMember.getUser();
                 
                 switch (action) {
                     case BAN:
@@ -642,42 +582,80 @@ public class AdvancedModerationSystem {
             Thread.currentThread().interrupt();
         }
     }
-    
-    // Placeholder methods for additional functionality
-    
-    private ModerationResult handleActivePunishment(UserModerationProfile profile, MessageReceivedEvent event) {
-        // Handle users who are currently under punishment
-        return ModerationResult.moderate("User is currently under active punishment", ModerationAction.DELETE_MESSAGE);
+    private ModerationResult convertSpamDetectionToModerationResult(SpamDetectionEngine.SpamDetectionResult spamDetection) {
+        String reason = "Spam detected: " + spamDetection.toString();
+        
+        // Determine severity based on spam score and likelihood
+        switch (spamDetection.getLikelihood()) {
+            case HIGH:
+                return ModerationResult.violation(reason, ModerationAction.DELETE_AND_TIMEOUT, ModerationSeverity.HIGH);
+            case MEDIUM:
+                return ModerationResult.violation(reason, ModerationAction.DELETE_MESSAGE, ModerationSeverity.MEDIUM);
+            case LOW:
+            default:
+                return ModerationResult.violation(reason, ModerationAction.DELETE_AND_WARN, ModerationSeverity.LOW);
+        }
     }
     
-    private ModerationResult processViolations(List<ModerationResult> violations, UserModerationProfile profile, MessageReceivedEvent event, GuildModerationSettings settings) {
-        // Process multiple violations and determine appropriate action
-        ModerationResult mostSevere = violations.stream()
-                .max(Comparator.comparing(r -> r.getSeverity()))
-                .orElse(ModerationResult.allowed());
+    private ModerationResult convertThreatAnalysisToModerationResult(ThreatIntelligence.ThreatAnalysisResult threatAnalysis) {
+        if (threatAnalysis.isThreat()) {
+            return ModerationResult.violation(
+                "Threat detected: " + threatAnalysis.getDescription(),
+                ModerationAction.DELETE_AND_WARN,
+                ModerationSeverity.MEDIUM);
+        }
+        return ModerationResult.allowed();
+    }
+    
+    private ModerationResult handleActivePunishment(UserModerationProfile profile, MessageReceivedEvent event) {
+        // Delete message and inform about active punishment
+        event.getMessage().delete().queue(
+            success -> logger.debug("Deleted message from user {} with active punishment", event.getAuthor().getId()),
+            error -> logger.warn("Failed to delete message from punished user: {}", error.getMessage())
+        );
+        return ModerationResult.violation(
+            "User currently has an active punishment", 
+            ModerationAction.DELETE_MESSAGE, 
+            ModerationSeverity.MEDIUM);
+    }
+    
+    private ModerationResult processViolations(List<ModerationResult> detectionResults, UserModerationProfile profile, MessageReceivedEvent event, GuildModerationSettings settings) {
+        ModerationResult mostSevere = detectionResults.stream()
+            .max((r1, r2) -> Integer.compare(r1.getAction().ordinal(), r2.getAction().ordinal()))
+            .orElse(ModerationResult.allowed());
         
-        profile.addViolation(mostSevere.getReason());
-        return mostSevere;
+        if (!mostSevere.isAllowed()) {
+            // Apply the action
+            profile.addViolation(mostSevere.getReason());
+            return mostSevere;
+        }
+        
+        return ModerationResult.allowed();
     }
     
     private void scheduleUnban(String guildId, String userId, Duration duration) {
         scheduler.schedule(() -> {
             // Implement automatic unban logic
-            logger.info("Scheduled unban executed for user {} in guild {}", userId, guildId);
+            logger.info("Scheduled unban for user {} in guild {} after {}", userId, guildId, formatDuration(duration));
         }, duration.toMillis(), TimeUnit.MILLISECONDS);
     }
     
-    private void sendUserNotification(User user, String actionType, String reason, Duration duration) {
-        // Send private message to user about moderation action
-        user.openPrivateChannel().queue(channel -> {
-            String message = String.format(
-                "You have received a %s for: %s%s",
-                actionType,
-                reason,
-                duration != null ? " (Duration: " + formatDuration(duration) + ")" : ""
-            );
-            channel.sendMessage(message).queue();
-        });
+    private void sendUserNotification(User user, String action, String reason, Duration duration) {
+        // Send notification to user about moderation action
+        String message = String.format("You have been %s for: %s", action, reason);
+        if (duration != null) {
+            message += String.format(" (Duration: %s)", formatDuration(duration));
+        }
+        
+        final String finalMessage = message;
+        user.openPrivateChannel().queue(
+            channel -> channel.sendMessage(finalMessage).queue(),
+            error -> logger.debug("Could not send notification to user {}: {}", user.getId(), error.getMessage())
+        );
+    }
+    
+    private void logModerationAction(ModerationLog log) {
+        logger.info("Moderation action logged: {}", log.toString());
     }
     
     private String formatDuration(Duration duration) {
@@ -693,55 +671,4 @@ public class AdvancedModerationSystem {
             return String.format("%d minutes", minutes);
         }
     }
-    
-    private void logModerationAction(ModerationLog log) {
-        // Log moderation action using the moderation logger
-        // Note: ModerationLogger expects different parameters, so we'll use the static logger for now
-        logger.info("Moderation action: {} - {} - {} - {}", 
-            log.getUsername(), log.getAction(), log.getReason(), log.getSeverity());
     }
-    
-    private ModerationResult convertSpamDetectionToModerationResult(SpamDetectionEngine.SpamDetectionResult spamDetection) {
-        if (!spamDetection.isSpam()) {
-            return ModerationResult.allowed();
-        }
-        
-        String reason = spamDetection.getDescription();
-        
-        // Determine severity based on spam score and likelihood
-        switch (spamDetection.getLikelihood()) {
-            case HIGH:
-                return ModerationResult.severe(reason, ModerationAction.DELETE_AND_TIMEOUT);
-            case MEDIUM:
-                return ModerationResult.moderate(reason, ModerationAction.DELETE_MESSAGE);
-            case LOW:
-            default:
-                return ModerationResult.warn(reason, ModerationAction.DELETE_MESSAGE);
-        }
-    }
-    
-    private ModerationResult convertThreatAnalysisToModerationResult(ThreatIntelligence.ThreatAnalysisResult threatAnalysis) {
-        if (!threatAnalysis.isThreat()) {
-            return ModerationResult.allowed();
-        }
-        
-        String reason = "Threat detected: " + threatAnalysis.getFlags().stream()
-            .map(flag -> flag.getType().toString())
-            .collect(java.util.stream.Collectors.joining(", "));
-        
-        // Determine severity based on threat level
-        switch (threatAnalysis.getLevel()) {
-            case VERY_HIGH:
-                return ModerationResult.ban(reason, ModerationAction.BAN);
-            case HIGH:
-                return ModerationResult.severe(reason, ModerationAction.DELETE_AND_TIMEOUT);
-            case MEDIUM:
-                return ModerationResult.moderate(reason, ModerationAction.DELETE_MESSAGE);
-            case LOW:
-                return ModerationResult.warn(reason, ModerationAction.FLAG_FOR_REVIEW);
-            case NONE:
-            default:
-                return ModerationResult.allowed();
-        }
-    }
-}

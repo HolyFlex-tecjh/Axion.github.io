@@ -1,16 +1,9 @@
 package com.axion.bot.moderation;
 
 import com.axion.bot.database.DatabaseService;
-import net.dv8tion.jda.api.Permission;
+
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.requests.RestAction;
-import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
-import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import java.awt.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +120,7 @@ public class ModerationManager {
             if (!spamResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "SPAM_DETECTION", spamResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), spamResult.getSeverity(), true);
+                    event.getMessage().getId(), spamResult.getSeverityLevel(), true);
                 return spamResult;
             }
         }
@@ -138,7 +131,7 @@ public class ModerationManager {
             if (!toxicResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "TOXIC_CONTENT", toxicResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), toxicResult.getSeverity(), true);
+                    event.getMessage().getId(), toxicResult.getSeverityLevel(), true);
                 return toxicResult;
             }
         }
@@ -148,7 +141,7 @@ public class ModerationManager {
         if (!attachmentResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "ATTACHMENT_CHECK", attachmentResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), attachmentResult.getSeverity(), true);
+                    event.getMessage().getId(), attachmentResult.getSeverityLevel(), true);
                 return attachmentResult;
             }
         
@@ -157,7 +150,7 @@ public class ModerationManager {
         if (!customResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "CUSTOM_FILTER", customResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), customResult.getSeverity(), true);
+                    event.getMessage().getId(), customResult.getSeverityLevel(), true);
                 return customResult;
             }
         
@@ -167,7 +160,7 @@ public class ModerationManager {
             if (!linkResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "LINK_PROTECTION", linkResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), linkResult.getSeverity(), true);
+                    event.getMessage().getId(), linkResult.getSeverityLevel(), true);
                 return linkResult;
             }
         }
@@ -224,7 +217,7 @@ public class ModerationManager {
         if (content.length() > 200 && messageTimes.size() >= 2) {
             Instant lastMessage = messageTimes.get(messageTimes.size() - 2);
             if (Duration.between(lastMessage, now).toSeconds() < 5) {
-                return ModerationResult.warn("Mulig spam: Meget hurtig typing", ModerationAction.DELETE_MESSAGE);
+                return ModerationResult.moderate("Mulig spam: Meget hurtig typing", ModerationAction.DELETE_MESSAGE);
             }
         }
         
@@ -238,14 +231,14 @@ public class ModerationManager {
         // Tjek for bannede ord
         for (Pattern pattern : bannedWords) {
             if (pattern.matcher(content).find()) {
-                return ModerationResult.warn("Upassende sprog detekteret", ModerationAction.DELETE_MESSAGE);
+                return ModerationResult.moderate("Upassende sprog detekteret", ModerationAction.DELETE_MESSAGE);
             }
         }
         
         // Tjek for mistænkelige mønstre
         for (Pattern pattern : suspiciousPatterns) {
             if (pattern.matcher(content).find()) {
-                return ModerationResult.warn("Mistænkeligt mønster detekteret", ModerationAction.DELETE_MESSAGE);
+                return ModerationResult.moderate("Mistænkeligt mønster detekteret", ModerationAction.DELETE_MESSAGE);
             }
         }
         
@@ -272,13 +265,13 @@ public class ModerationManager {
                 .count();
         
         if (linkCount > config.getMaxLinksPerMessage()) {
-            return ModerationResult.warn("For mange links i besked", ModerationAction.DELETE_MESSAGE);
+            return ModerationResult.moderate("For mange links i besked", ModerationAction.DELETE_MESSAGE);
         }
         
         // Tjek for mistænkelige domæner
         Pattern suspiciousLinks = Pattern.compile("(bit\\.ly|tinyurl|t\\.co|discord\\.gg/[a-zA-Z0-9]+)", Pattern.CASE_INSENSITIVE);
         if (suspiciousLinks.matcher(content).find()) {
-            return ModerationResult.warn("Mistænkeligt link detekteret", ModerationAction.DELETE_MESSAGE);
+            return ModerationResult.moderate("Mistænkeligt link detekteret", ModerationAction.DELETE_MESSAGE);
         }
         
         return ModerationResult.allowed();
@@ -296,13 +289,13 @@ public class ModerationManager {
             // Tjek for mistænkelige fil extensions
             for (String extension : suspiciousFileExtensions) {
                 if (fileName.endsWith(extension)) {
-                    return ModerationResult.warn("Mistænkelig fil type: " + extension, ModerationAction.DELETE_MESSAGE);
+                    return ModerationResult.moderate("Mistænkelig fil type: " + extension, ModerationAction.DELETE_MESSAGE);
                 }
             }
             
             // Tjek fil størrelse (over 50MB)
             if (attachment.getSize() > 50 * 1024 * 1024) {
-                return ModerationResult.warn("Fil for stor: " + attachment.getSize() + " bytes", ModerationAction.DELETE_MESSAGE);
+                return ModerationResult.moderate("Fil for stor: " + attachment.getSize() + " bytes", ModerationAction.DELETE_MESSAGE);
             }
         }
         
@@ -337,7 +330,7 @@ public class ModerationManager {
         } else if (violations >= 3) {
             return ModerationResult.moderate(reason + " (3+ violations)", ModerationAction.DELETE_AND_TIMEOUT);
         } else {
-            return ModerationResult.warn(reason, ModerationAction.DELETE_MESSAGE);
+            return ModerationResult.moderate(reason, ModerationAction.DELETE_MESSAGE);
         }
     }
     
@@ -371,7 +364,7 @@ public class ModerationManager {
         
         // Log handlingen
         databaseService.logModerationAction(userId, username, "SYSTEM", "AutoMod", 
-                          "FLAG_FOR_REVIEW", reason, guild.getId(), null, null, ModerationSeverity.LOW, true);
+                          "FLAG_FOR_REVIEW", reason, guild.getId(), "", "", ModerationSeverity.LOW.ordinal(), true);
         
         logger.warn("User flagged for review: {} (ID: {}) - Reason: {}", username, userId, reason);
     }
@@ -448,16 +441,10 @@ public class ModerationManager {
       * Får moderation statistikker for en guild
       */
      public ModerationStats getModerationStats(String guildId) {
-         return new ModerationStats(
-             getTotalTrackedUsers(),
-             getActiveViolationsCount(),
-             getActiveTempBansCount(),
-             0, // Total logs - would need database query
-             0, // kicks
-             0, // unbans
-             0, // spam detections
-             0  // raid detections
-         );
+         // Create a new ModerationStats with default values
+         ModerationStats stats = new ModerationStats(0, 0, 0, 0);
+         // Set any default values if needed
+         return stats;
      }
      
      /**
@@ -570,6 +557,8 @@ public class ModerationManager {
             case SYSTEM_ACTION:
                 // System handling - automatisk handling
                 logger.info("SYSTEM_ACTION moderation action for user {}: {}", event.getAuthor().getName(), result.getReason());
+                break;
+            default:
                 break;
         }
     }

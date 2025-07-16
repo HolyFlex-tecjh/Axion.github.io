@@ -6,15 +6,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-// Import enum classes
-import com.axion.bot.moderation.RuleCondition;
-import com.axion.bot.moderation.ConditionType;
-import com.axion.bot.moderation.ActionType;
-import com.axion.bot.moderation.UITheme;
-import com.axion.bot.moderation.DashboardLayout;
-import com.axion.bot.moderation.ModerationResult;
-import com.axion.bot.moderation.ModerationAction;
-
 /**
  * Fully Customizable Moderation System
  * Allows complete customization of all moderation aspects through configuration

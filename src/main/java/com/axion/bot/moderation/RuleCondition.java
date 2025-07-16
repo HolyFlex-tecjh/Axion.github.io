@@ -2,8 +2,6 @@ package com.axion.bot.moderation;
 
 import java.time.Duration;
 import java.util.*;
-import com.axion.bot.moderation.ConditionType;
-import com.axion.bot.moderation.ActionType;
 
 /**
  * Rule condition definition

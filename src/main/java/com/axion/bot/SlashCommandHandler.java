@@ -5,7 +5,6 @@ package com.axion.bot;
 // import com.axion.bot.commands.LanguageCommands;
 // import com.axion.bot.commands.developer.DeveloperCommands;
 import com.axion.bot.moderation.*;
-import com.axion.bot.moderation.ModerationLogger.LogEntry;
 import com.axion.bot.database.DatabaseService;
 import com.axion.bot.tickets.TicketManager;
 import com.axion.bot.tickets.TicketCommandHandler;
@@ -15,7 +14,6 @@ import com.axion.bot.commands.utility.DebugCommands;
 // import com.axion.bot.translation.UserLanguageManager;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
@@ -63,6 +61,68 @@ class HelpCommands {
     }
     public static void handleAbout(net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent event) {
         event.reply("About Axion Bot").queue();
+    }
+    
+    public static EmbedBuilder getBasicCommandsEmbed(String userLanguage) {
+        return new EmbedBuilder()
+                .setTitle("Basic Commands")
+                .setColor(java.awt.Color.BLUE)
+                .setDescription("List of basic commands")
+                .addField("ping", "Check bot latency", false)
+                .addField("hello", "Say hello", false)
+                .addField("info", "Bot information", false)
+                .addField("uptime", "Bot uptime", false);
+    }
+    
+    public static EmbedBuilder getModerationCommandsEmbed(String userLanguage) {
+        return new EmbedBuilder()
+                .setTitle("Moderation Commands")
+                .setColor(java.awt.Color.RED)
+                .setDescription("List of moderation commands")
+                .addField("ban", "Ban a user", false)
+                .addField("kick", "Kick a user", false)
+                .addField("timeout", "Timeout a user", false)
+                .addField("warn", "Warn a user", false);
+    }
+    
+    public static EmbedBuilder getUtilityCommandsEmbed(String userLanguage) {
+        return new EmbedBuilder()
+                .setTitle("Utility Commands")
+                .setColor(java.awt.Color.GREEN)
+                .setDescription("List of utility commands")
+                .addField("time", "Show current time", false)
+                .addField("serverinfo", "Server information", false)
+                .addField("userinfo", "User information", false)
+                .addField("avatar", "Show user avatar", false);
+    }
+    
+    public static EmbedBuilder getFunCommandsEmbed(String userLanguage) {
+        return new EmbedBuilder()
+                .setTitle("Fun Commands")
+                .setColor(java.awt.Color.YELLOW)
+                .setDescription("List of fun commands")
+                .addField("Coming Soon", "Fun commands will be added soon!", false);
+    }
+    
+    public static EmbedBuilder getConfigCommandsEmbed(String userLanguage) {
+        return new EmbedBuilder()
+                .setTitle("Configuration Commands")
+                .setColor(java.awt.Color.ORANGE)
+                .setDescription("List of configuration commands")
+                .addField("modconfig", "Configure moderation settings", false)
+                .addField("setlanguage", "Set user language", false)
+                .addField("automod", "Configure auto moderation", false);
+    }
+    
+    public static EmbedBuilder getOverviewEmbed(String userLanguage) {
+        return new EmbedBuilder()
+                .setTitle("Command Overview")
+                .setColor(java.awt.Color.CYAN)
+                .setDescription("Overview of all available commands")
+                .addField("Categories", "Use the dropdown menu to explore different command categories", false)
+                .addField("Basic", "Essential bot commands", true)
+                .addField("Moderation", "Server moderation tools", true)
+                .addField("Utility", "Useful utility commands", true);
     }
 }
 
@@ -334,7 +394,7 @@ public class SlashCommandHandler extends ListenerAdapter {
                 EmbedBuilder errorEmbed = new EmbedBuilder()
                         .setTitle(translationManager.translate("error.unknown.title", userLang))
                         .setColor(ERROR_COLOR)
-                        .setDescription(translationManager.translate("error.unknown.description", userLang, command))
+                        .setDescription(translationManager.translate("error.unknown.description", userLang))
                         .addField(translationManager.translate("error.unknown.tip", userLang), 
                                  translationManager.translate("error.unknown.help", userLang), false)
                         .setTimestamp(Instant.now());

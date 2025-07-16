@@ -44,6 +44,21 @@ class ModerationResult {
     public String getReason() { return reason; }
     public ModerationAction getAction() { return action; }
     public int getSeverityLevel() { return severityLevel; }
+
+    public static ModerationResult violation(String string, ModerationAction deleteAndWarn, ModerationSeverity low) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'violation'");
+    }
+
+    public static ModerationResult ban(String string, ModerationAction ban) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'ban'");
+    }
+
+    public static ModerationResult moderate(String string, ModerationAction deleteMessage) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'moderate'");
+    }
 }
 
 enum ModerationAction {

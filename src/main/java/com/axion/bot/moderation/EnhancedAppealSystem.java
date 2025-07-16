@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -413,13 +412,8 @@ public class EnhancedAppealSystem {
             return NotificationManager.ReviewResult.success(appeal, review, executionResult);
             
         } catch (Exception e) {
-<<<<<<< HEAD
-            logger.severe("Error processing manual review for appeal " + appealId + ": " + e.getMessage());
-            return ReviewResult.error("Review processing failed: " + e.getMessage());
-=======
-            logger.error("Error processing manual review for appeal {}", appealId, e);
-            return NotificationManager.ReviewResult.error("Review processing failed: " + e.getMessage());
->>>>>>> 607bfd75d51d903648240e51dce1be68ee93487d
+logger.severe("Error processing manual review for appeal " + appealId + ": " + e.getMessage());
+return NotificationManager.ReviewResult.error("Review processing failed: " + e.getMessage());
         }
     }
     
@@ -855,12 +849,7 @@ public class EnhancedAppealSystem {
     }
 }
 
-<<<<<<< HEAD
-// Supporting enums and classes are defined in AppealSystemModels.java
-=======
 // Supporting enums and classes
-
-// Minimal AppealAnalysis class definition (expand as needed)
 class AppealAnalysis {
     private double autoApprovalConfidence;
     private double autoRejectionConfidence;
@@ -1128,4 +1117,3 @@ class AppealAnalytics {
     public Map<String, Long> getViolationTypes() { return violationTypes; }
     public Duration getPeriod() { return period; }
 }
->>>>>>> 607bfd75d51d903648240e51dce1be68ee93487d

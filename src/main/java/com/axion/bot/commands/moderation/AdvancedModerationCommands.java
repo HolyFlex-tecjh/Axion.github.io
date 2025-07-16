@@ -2,10 +2,8 @@ package com.axion.bot.commands.moderation;
 
 import com.axion.bot.moderation.ModerationManager;
 import com.axion.bot.moderation.ModerationLog;
-import com.axion.bot.moderation.ModerationAction;
 // Removed utility imports - implementing functionality directly
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;

@@ -2,7 +2,6 @@ package com.axion.bot.moderation;
 
 import com.axion.bot.commands.moderation.AdvancedModerationCommands;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
