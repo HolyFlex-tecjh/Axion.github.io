@@ -1,6 +1,7 @@
 package com.axion.bot.database;
 
 import com.axion.bot.moderation.ModerationLog;
+import com.axion.bot.moderation.ModerationAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,12 +145,15 @@ public class DatabaseService {
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
+                    String actionString = rs.getString("action");
+                    ModerationAction action = convertStringToModerationAction(actionString);
+                    
                     ModerationLog log = new ModerationLog(
                         rs.getString("user_id"),
                         rs.getString("username"),
                         rs.getString("moderator_id"),
                         rs.getString("moderator_name"),
-                        null, // ModerationAction - vil blive konverteret
+                        action,
                         rs.getString("reason"),
                         rs.getString("guild_id"),
                         rs.getString("channel_id"),
@@ -324,6 +328,41 @@ public class DatabaseService {
             }
         } catch (SQLException e) {
             logger.error("Fejl ved oprydning af udløbne temp bans", e);
+        }
+    }
+    
+    /**
+     * Konverterer en string til ModerationAction enum
+     */
+    private ModerationAction convertStringToModerationAction(String actionString) {
+        if (actionString == null) {
+            return ModerationAction.NONE;
+        }
+        
+        try {
+            // Prøv at matche direkte med enum navn
+            return ModerationAction.valueOf(actionString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            // Hvis direkte match fejler, prøv at matche baseret på beskrivelse
+            switch (actionString.toLowerCase()) {
+                 case "warn":
+                 case "warning":
+                 case "advarsel":
+                     return ModerationAction.WARN_USER;
+                 case "kick":
+                     return ModerationAction.KICK;
+                 case "ban":
+                     return ModerationAction.BAN;
+                 case "timeout":
+                 case "mute":
+                     return ModerationAction.TIMEOUT;
+                 case "delete":
+                 case "delete_message":
+                     return ModerationAction.DELETE_MESSAGE;
+                 default:
+                     logger.warn("Ukendt moderation action: {}, bruger NONE", actionString);
+                     return ModerationAction.NONE;
+             }
         }
     }
 

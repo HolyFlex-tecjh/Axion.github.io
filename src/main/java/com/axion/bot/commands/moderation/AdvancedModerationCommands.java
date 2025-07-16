@@ -2,9 +2,10 @@ package com.axion.bot.commands.moderation;
 
 import com.axion.bot.moderation.ModerationManager;
 import com.axion.bot.moderation.ModerationLog;
-import com.axion.bot.utils.CommandUtils;
-import com.axion.bot.utils.EmbedUtils;
+import com.axion.bot.moderation.ModerationAction;
+// Removed utility imports - implementing functionality directly
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
@@ -34,9 +35,9 @@ public class AdvancedModerationCommands {
      * Temp ban kommando
      */
     public void handleTempBan(SlashCommandInteractionEvent event) {
-        if (!CommandUtils.hasModeratorPermissions(event)) {
-            event.replyEmbeds(EmbedUtils.createErrorEmbed("Ingen Tilladelse", 
-                CommandUtils.getNoPermissionMessage()).build()).setEphemeral(true).queue();
+        if (!hasModeratorPermissions(event)) {
+            event.replyEmbeds(createErrorEmbed("Ingen Tilladelse", 
+                getNoPermissionMessage()).build()).setEphemeral(true).queue();
             return;
         }
 
@@ -45,7 +46,7 @@ public class AdvancedModerationCommands {
         OptionMapping reasonOption = event.getOption("reason");
         
         if (userOption == null || durationOption == null) {
-            event.replyEmbeds(EmbedUtils.createErrorEmbed("Manglende Parameter", 
+            event.replyEmbeds(createErrorEmbed("Manglende Parameter", 
                 "Du skal angive både bruger og varighed")
                 .addField("Korrekt brug", "/tempban user:<@bruger> duration:<timer> reason:<årsag>", false)
                 .build()).setEphemeral(true).queue();
@@ -57,7 +58,7 @@ public class AdvancedModerationCommands {
         String reason = reasonOption != null ? reasonOption.getAsString() : "Ingen årsag angivet";
         
         if (hours < 1 || hours > 168) { // Max 1 uge
-            event.replyEmbeds(EmbedUtils.createErrorEmbed("Ugyldig Varighed", 
+            event.replyEmbeds(createErrorEmbed("Ugyldig Varighed", 
                 "Varighed skal være mellem 1 og 168 timer (1 uge)").build()).setEphemeral(true).queue();
             return;
         }
@@ -69,13 +70,13 @@ public class AdvancedModerationCommands {
             Member moderator = event.getMember();
             
             if (!selfMember.canInteract(targetMember)) {
-                event.replyEmbeds(EmbedUtils.createErrorEmbed("Hierarki Fejl", 
+                event.replyEmbeds(createErrorEmbed("Hierarki Fejl", 
                     "Jeg kan ikke banne denne bruger da de har en højere eller lige rolle som mig.").build()).setEphemeral(true).queue();
                 return;
             }
             
             if (moderator != null && !moderator.canInteract(targetMember)) {
-                event.replyEmbeds(EmbedUtils.createErrorEmbed("Hierarki Fejl", 
+                event.replyEmbeds(createErrorEmbed("Hierarki Fejl", 
                     "Du kan ikke banne denne bruger da de har en højere eller lige rolle som dig.").build()).setEphemeral(true).queue();
                 return;
             }
@@ -89,7 +90,7 @@ public class AdvancedModerationCommands {
                     .reason(reason + " (Temp ban: " + hours + "h by " + event.getUser().getName() + ")")
                     .queue(
                         success -> {
-                            EmbedBuilder tempBanEmbed = EmbedUtils.createModerationEmbed("Midlertidig Ban Udført", 
+                            EmbedBuilder tempBanEmbed = createModerationEmbed("Midlertidig Ban Udført", 
                                 "Brugeren er blevet midlertidigt bannet", targetUser, event.getUser())
                                     .addField("Varighed", hours + " timer", true)
                                     .addField("Udløber", formatTimestamp(expiry), true)
@@ -98,11 +99,11 @@ public class AdvancedModerationCommands {
                             tempBanEmbed.setTitle("⏰ Midlertidig Ban Udført");
                             event.replyEmbeds(tempBanEmbed.build()).queue();
                         },
-                        error -> event.replyEmbeds(EmbedUtils.createErrorEmbed("Temp Ban Fejlede", 
+                        error -> event.replyEmbeds(createErrorEmbed("Temp Ban Fejlede", 
                             "Kunne ikke temp banne brugeren: " + error.getMessage()).build()).setEphemeral(true).queue()
                     );
         } catch (Exception e) {
-            event.replyEmbeds(EmbedUtils.createErrorEmbed("Uventet Fejl", 
+            event.replyEmbeds(createErrorEmbed("Uventet Fejl", 
                 "Fejl ved temp ban: " + e.getMessage()).build()).setEphemeral(true).queue();
         }
     }
@@ -111,16 +112,16 @@ public class AdvancedModerationCommands {
      * Moderation logs kommando
      */
     public void handleModerationLogs(SlashCommandInteractionEvent event) {
-        if (!CommandUtils.hasModeratorPermissions(event)) {
-            event.replyEmbeds(EmbedUtils.createErrorEmbed("Ingen Tilladelse", 
-                CommandUtils.getNoPermissionMessage()).build()).setEphemeral(true).queue();
+        if (!hasModeratorPermissions(event)) {
+            event.replyEmbeds(createErrorEmbed("Ingen Tilladelse", 
+                getNoPermissionMessage()).build()).setEphemeral(true).queue();
             return;
         }
 
         OptionMapping userOption = event.getOption("user");
         
         if (userOption == null) {
-            event.replyEmbeds(EmbedUtils.createErrorEmbed("Manglende Parameter", 
+            event.replyEmbeds(createErrorEmbed("Manglende Parameter", 
                 "Du skal angive en bruger")
                 .addField("Korrekt brug", "/modlogs user:<@bruger>", false)
                 .build()).setEphemeral(true).queue();
@@ -161,16 +162,16 @@ public class AdvancedModerationCommands {
      * Reset violations kommando
      */
     public void handleResetViolations(SlashCommandInteractionEvent event) {
-        if (!CommandUtils.hasModeratorPermissions(event)) {
-            event.replyEmbeds(EmbedUtils.createErrorEmbed("Ingen Tilladelse", 
-                CommandUtils.getNoPermissionMessage()).build()).setEphemeral(true).queue();
+        if (!hasModeratorPermissions(event)) {
+            event.replyEmbeds(createErrorEmbed("Ingen Tilladelse", 
+                getNoPermissionMessage()).build()).setEphemeral(true).queue();
             return;
         }
 
         OptionMapping userOption = event.getOption("user");
         
         if (userOption == null) {
-            event.replyEmbeds(EmbedUtils.createErrorEmbed("Manglende Parameter", 
+            event.replyEmbeds(createErrorEmbed("Manglende Parameter", 
                 "Du skal angive en bruger")
                 .addField("Korrekt brug", "/resetviolations user:<@bruger>", false)
                 .build()).setEphemeral(true).queue();
@@ -197,9 +198,9 @@ public class AdvancedModerationCommands {
      * Moderation stats kommando
      */
     public void handleModerationStats(SlashCommandInteractionEvent event) {
-        if (!CommandUtils.hasModeratorPermissions(event)) {
-            event.replyEmbeds(EmbedUtils.createErrorEmbed("Ingen Tilladelse", 
-                CommandUtils.getNoPermissionMessage()).build()).setEphemeral(true).queue();
+        if (!hasModeratorPermissions(event)) {
+            event.replyEmbeds(createErrorEmbed("Ingen Tilladelse", 
+                getNoPermissionMessage()).build()).setEphemeral(true).queue();
             return;
         }
         
@@ -227,5 +228,51 @@ public class AdvancedModerationCommands {
         return DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
                 .withZone(ZoneId.systemDefault())
                 .format(timestamp);
+    }
+    
+    // Utility methods (previously from CommandUtils and EmbedUtils)
+    
+    /**
+     * Checker om brugeren har moderator tilladelser
+     */
+    private boolean hasModeratorPermissions(SlashCommandInteractionEvent event) {
+        Member member = event.getMember();
+        if (member == null) return false;
+        return member.hasPermission(net.dv8tion.jda.api.Permission.MODERATE_MEMBERS) ||
+               member.hasPermission(net.dv8tion.jda.api.Permission.ADMINISTRATOR) ||
+               member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER);
+    }
+    
+    /**
+     * Returnerer standard "ingen tilladelse" besked
+     */
+    private String getNoPermissionMessage() {
+        return "Du har ikke tilladelse til at bruge denne kommando. Du skal have moderator rettigheder.";
+    }
+    
+    /**
+     * Opretter en error embed
+     */
+    private EmbedBuilder createErrorEmbed(String title, String description) {
+        return new EmbedBuilder()
+                .setTitle("❌ " + title)
+                .setColor(new Color(239, 68, 68))
+                .setDescription(description)
+                .setTimestamp(Instant.now());
+    }
+    
+    /**
+     * Opretter en moderation embed
+     */
+    private EmbedBuilder createModerationEmbed(String title, String description, User targetUser, User moderator) {
+        return new EmbedBuilder()
+                .setTitle("🛡️ " + title)
+                .setColor(new Color(139, 69, 19))
+                .setDescription(description)
+                .setThumbnail(targetUser.getAvatarUrl())
+                .addField("Bruger", targetUser.getAsMention() + " (" + targetUser.getName() + ")", false)
+                .addField("Moderator", moderator.getAsMention(), true)
+                .setTimestamp(Instant.now())
+                .setFooter("User ID: " + targetUser.getId());
     }
 }

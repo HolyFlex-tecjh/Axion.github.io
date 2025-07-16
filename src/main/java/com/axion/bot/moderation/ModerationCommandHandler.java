@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-
 import java.awt.Color;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -164,7 +163,7 @@ public class ModerationCommandHandler {
     private void handleUserCommand(SlashCommandInteractionEvent event, String subcommand) {
         switch (subcommand) {
             case "tempban":
-                User user = event.getOption("user", OptionMapping::getAsUser);
+                User user = event.getOption("user") != null ? event.getOption("user").getAsUser() : null;
                 
                 if (user == null) {
                     event.reply("❌ Bruger ikke fundet!").setEphemeral(true).queue();
@@ -175,7 +174,7 @@ public class ModerationCommandHandler {
                 break;
                 
             case "violations":
-                User violationUser = event.getOption("user", OptionMapping::getAsUser);
+                User violationUser = event.getOption("user") != null ? event.getOption("user").getAsUser() : null;
                 if (violationUser == null) {
                     event.reply("❌ Bruger ikke fundet!").setEphemeral(true).queue();
                     return;
@@ -193,7 +192,7 @@ public class ModerationCommandHandler {
                 break;
                 
             case "reset":
-                User resetUser = event.getOption("user", OptionMapping::getAsUser);
+                User resetUser = event.getOption("user") != null ? event.getOption("user").getAsUser() : null;
                 if (resetUser == null) {
                     event.reply("❌ Bruger ikke fundet!").setEphemeral(true).queue();
                     return;
@@ -203,7 +202,7 @@ public class ModerationCommandHandler {
                 break;
                 
             case "history":
-                User historyUser = event.getOption("user", OptionMapping::getAsUser);
+                User historyUser = event.getOption("user") != null ? event.getOption("user").getAsUser() : null;
                 if (historyUser == null) {
                     event.reply("❌ Bruger ikke fundet!").setEphemeral(true).queue();
                     return;
@@ -220,7 +219,7 @@ public class ModerationCommandHandler {
     private void handleAppealCommand(SlashCommandInteractionEvent event, String subcommand) {
         switch (subcommand) {
             case "submit":
-                String appealReason = event.getOption("reason", OptionMapping::getAsString);
+                String appealReason = event.getOption("reason") != null ? event.getOption("reason").getAsString() : null;
                 if (appealReason == null || appealReason.trim().isEmpty()) {
                     event.reply("❌ Du skal angive en årsag til din appel!").setEphemeral(true).queue();
                     return;
@@ -244,9 +243,9 @@ public class ModerationCommandHandler {
                     return;
                 }
                 
-                User appealUser = event.getOption("user", OptionMapping::getAsUser);
-                String decision = event.getOption("decision", OptionMapping::getAsString);
-                String notes = event.getOption("notes", "", OptionMapping::getAsString);
+                User appealUser = event.getOption("user") != null ? event.getOption("user").getAsUser() : null;
+                String decision = event.getOption("decision") != null ? event.getOption("decision").getAsString() : null;
+                String notes = event.getOption("notes") != null ? event.getOption("notes").getAsString() : "";
                 
                 if (appealUser == null || decision == null) {
                     event.reply("❌ Manglende parametre!").setEphemeral(true).queue();
@@ -286,8 +285,8 @@ public class ModerationCommandHandler {
     }
     
     private void handleConfigCommand(SlashCommandInteractionEvent event) {
-        String setting = event.getOption("setting", OptionMapping::getAsString);
-        String value = event.getOption("value", OptionMapping::getAsString);
+        String setting = event.getOption("setting") != null ? event.getOption("setting").getAsString() : null;
+        String value = event.getOption("value") != null ? event.getOption("value").getAsString() : null;
         
         if (setting == null) {
             // Vis nuværende konfiguration
@@ -322,14 +321,16 @@ public class ModerationCommandHandler {
     
     private boolean hasModeratorPermission(Member member) {
         if (member == null) return false;
-        return member.hasPermission(Permission.KICK_MEMBERS) || 
-               member.hasPermission(Permission.BAN_MEMBERS) ||
-               member.hasPermission(Permission.MANAGE_SERVER);
+        return member.hasPermission(net.dv8tion.jda.api.Permission.KICK_MEMBERS) || 
+               member.hasPermission(net.dv8tion.jda.api.Permission.BAN_MEMBERS) ||
+               member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER);
     }
     
     private boolean hasAdminPermission(Member member) {
         if (member == null) return false;
-        return member.hasPermission(Permission.ADMINISTRATOR) ||
-               member.hasPermission(Permission.MANAGE_SERVER);
+        return member.hasPermission(net.dv8tion.jda.api.Permission.ADMINISTRATOR) ||
+               member.hasPermission(net.dv8tion.jda.api.Permission.MANAGE_SERVER);
     }
 }
+
+// Using stub classes from ModerationManager.java

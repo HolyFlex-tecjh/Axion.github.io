@@ -196,7 +196,7 @@ public class ModerationLogger {
         String channelId = guildLogChannels.get(guild.getId());
         if (channelId == null) return;
         
-        TextChannel logChannel = guild.getTextChannelById(channelId);
+        net.dv8tion.jda.api.entities.channel.concrete.TextChannel logChannel = guild.getTextChannelById(channelId);
         if (logChannel == null) return;
         
         EmbedBuilder embed = createLogEmbed(entry, target, moderator, false);
@@ -218,7 +218,7 @@ public class ModerationLogger {
         String channelId = guildAuditChannels.get(guild.getId());
         if (channelId == null) return;
         
-        TextChannel auditChannel = guild.getTextChannelById(channelId);
+        net.dv8tion.jda.api.entities.channel.concrete.TextChannel auditChannel = guild.getTextChannelById(channelId);
         if (auditChannel == null) return;
         
         EmbedBuilder embed = createLogEmbed(entry, target, moderator, true);
@@ -416,3 +416,5 @@ public class ModerationLogger {
         }
     }
 }
+
+// Using stub classes from ModerationManager.java

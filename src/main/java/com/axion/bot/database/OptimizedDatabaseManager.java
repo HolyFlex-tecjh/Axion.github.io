@@ -12,7 +12,10 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -326,7 +329,24 @@ public class OptimizedDatabaseManager {
                 welcome_message TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )"""
+            )""",
+            
+            // User activities table with indexes
+            """
+            CREATE TABLE IF NOT EXISTS user_activities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT NOT NULL,
+                guild_id TEXT NOT NULL,
+                channel_id TEXT,
+                activity_type TEXT NOT NULL,
+                content TEXT,
+                target_message_id TEXT,
+                severity REAL DEFAULT 0.0,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_user_activities_user_guild ON user_activities(user_id, guild_id)",
+            "CREATE INDEX IF NOT EXISTS idx_user_activities_timestamp ON user_activities(timestamp)",
+            "CREATE INDEX IF NOT EXISTS idx_user_activities_type ON user_activities(activity_type)"
         };
         
         try (Connection connection = getConnection()) {
@@ -358,6 +378,142 @@ public class OptimizedDatabaseManager {
         } catch (SQLException e) {
             logger.debug("Database health check failed", e);
             return false;
+        }
+    }
+    
+    /**
+     * Get recent user activities from the database
+     * @param userId The user ID to get activities for
+     * @return List of recent UserActivity objects
+     */
+    public List<com.axion.bot.moderation.UserActivity> getRecentUserActivity(String userId) {
+        List<com.axion.bot.moderation.UserActivity> activities = new ArrayList<>();
+        
+        String sql = """
+            SELECT user_id, content, activity_type, target_message_id, severity, timestamp
+            FROM user_activities 
+            WHERE user_id = ? 
+            ORDER BY timestamp DESC 
+            LIMIT 50
+            """;
+        
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            
+            stmt.setString(1, userId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String activityTypeStr = rs.getString("activity_type");
+                    com.axion.bot.moderation.ActivityType activityType;
+                    
+                    try {
+                        activityType = com.axion.bot.moderation.ActivityType.valueOf(activityTypeStr.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        activityType = com.axion.bot.moderation.ActivityType.MESSAGE; // Default fallback
+                    }
+                    
+                    com.axion.bot.moderation.UserActivity activity = new com.axion.bot.moderation.UserActivity(
+                        rs.getString("user_id"),
+                        rs.getString("content"),
+                        rs.getTimestamp("timestamp").toInstant(),
+                        activityType,
+                        rs.getString("target_message_id")
+                    );
+                    
+                    activity.setSeverity(rs.getDouble("severity"));
+                    activities.add(activity);
+                }
+            }
+            
+        } catch (SQLException e) {
+            logger.error("❌ Failed to get recent user activity for user: {}", userId, e);
+            errorCounter.increment();
+        }
+        
+        return activities;
+    }
+    
+    /**
+     * Save user activity to the database
+     * @param userId The user ID
+     * @param guildId The guild ID
+     * @param channelId The channel ID (optional)
+     * @param activity The UserActivity object to save
+     */
+    public void saveUserActivity(String userId, String guildId, String channelId, com.axion.bot.moderation.UserActivity activity) {
+        String sql = """
+            INSERT INTO user_activities (user_id, guild_id, channel_id, activity_type, content, target_message_id, severity, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+        
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            
+            stmt.setString(1, userId);
+            stmt.setString(2, guildId);
+            stmt.setString(3, channelId);
+            stmt.setString(4, activity.getType().name());
+            stmt.setString(5, activity.getContent());
+            stmt.setString(6, activity.getTargetMessageId());
+            stmt.setDouble(7, activity.getSeverity());
+            stmt.setTimestamp(8, java.sql.Timestamp.from(activity.getTimestamp()));
+            
+            stmt.executeUpdate();
+            
+        } catch (SQLException e) {
+            logger.error("❌ Failed to save user activity for user: {}", userId, e);
+            errorCounter.increment();
+        }
+    }
+    
+    /**
+     * Log a moderation action to the database
+     * @param userId The user ID who was moderated
+     * @param username The username of the user
+     * @param moderatorId The ID of the moderator (or "SYSTEM" for automated actions)
+     * @param moderatorName The name of the moderator
+     * @param action The moderation action taken
+     * @param reason The reason for the action
+     * @param guildId The guild ID where the action occurred
+     * @param channelId The channel ID (optional)
+     * @param messageId The message ID (optional)
+     * @param severity The severity level (1-5)
+     * @param automated Whether this was an automated action
+     */
+    public void logModerationAction(String userId, String username, String moderatorId, 
+                                   String moderatorName, String action, String reason, 
+                                   String guildId, String channelId, String messageId, 
+                                   int severity, boolean automated) {
+        String sql = """
+            INSERT INTO moderation_logs 
+            (user_id, username, moderator_id, moderator_name, action, reason, guild_id, 
+             channel_id, message_id, severity, automated, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            """;
+        
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            
+            stmt.setString(1, userId);
+            stmt.setString(2, username);
+            stmt.setString(3, moderatorId);
+            stmt.setString(4, moderatorName);
+            stmt.setString(5, action);
+            stmt.setString(6, reason);
+            stmt.setString(7, guildId);
+            stmt.setString(8, channelId);
+            stmt.setString(9, messageId);
+            stmt.setInt(10, severity);
+            stmt.setBoolean(11, automated);
+            
+            stmt.executeUpdate();
+            
+            logger.debug("✅ Logged moderation action: {} for user {} by {}", action, userId, moderatorName);
+            
+        } catch (SQLException e) {
+            logger.error("❌ Failed to log moderation action for user: {}", userId, e);
+            errorCounter.increment();
         }
     }
     

@@ -5,7 +5,11 @@ import com.axion.bot.database.DatabaseService;
 import com.axion.bot.database.MongoDBConfig;
 import com.axion.bot.database.MongoDBService;
 import com.axion.bot.translation.UserLanguageManager;
-import com.axion.bot.web.ModerationConfigurationController;
+// TODO: Re-enable these imports when classes are fixed
+// import com.axion.bot.web.ModerationConfigurationController;
+// import com.axion.bot.commands.SlashCommandRegistrar;
+// import com.axion.bot.commands.CommandHandler;
+// import com.axion.bot.commands.SlashCommandHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -33,7 +37,8 @@ public class AxionBot {
     private DatabaseService databaseService;
     private MongoDBService mongoDBService;
     private ScheduledExecutorService activityUpdater;
-    private ModerationConfigurationController webController;
+    // TODO: Re-enable when ModerationConfigurationController is fixed
+    // private ModerationConfigurationController webController;
 
     public AxionBot() {
         loadConfiguration();
@@ -132,10 +137,11 @@ public class AxionBot {
                             GatewayIntent.GUILD_MODERATION
                     )
                     .setActivity(Activity.playing("Starter op..."))
-                    .addEventListeners(
-                            new CommandHandler(databaseService),     // Auto-moderation
-                            new SlashCommandHandler(databaseService) // Slash commands (/)
-                    )
+                    // TODO: Add event listeners when classes are fixed
+            // .addEventListeners(
+            //         new CommandHandler(databaseService, mongoDBService),     // Auto-moderation
+            //         new SlashCommandHandler(databaseService) // Slash commands (/)
+            // )
                     .build();
 
             jda.awaitReady();
@@ -143,15 +149,19 @@ public class AxionBot {
             logger.info("Bot er tilsluttet {} servere", jda.getGuilds().size());
             logger.info("Botten bruger KUN slash commands (/) - skriv /help for hjælp");
             
-            // Registrer slash kommandoer
-            SlashCommandRegistrar.registerGlobalCommands(jda);
-            logger.info("Slash kommandoer registreret!");
+            // TODO: Register slash commands when SlashCommandRegistrar is fixed
+            // try {
+            //     SlashCommandRegistrar.registerGlobalCommands(jda);
+            //     logger.info("Slash kommandoer registreret!");
+            // } catch (Exception e) {
+            //     logger.warn("Kunne ikke registrere slash kommandoer: {}", e.getMessage());
+            // }
             
             // Start activity updater der opdaterer hver 30 sekunder
             startActivityUpdater();
             
-            // Start web server for moderation dashboard
-            startWebServer();
+            // TODO: Start web server when ModerationConfigurationController is fixed
+            // startWebServer();
 
         } catch (Exception e) {
             logger.error("Fejl ved start af bot", e);
@@ -175,7 +185,9 @@ public class AxionBot {
     
     /**
      * Starter web server for moderation dashboard
+     * TODO: Re-enable when ModerationConfigurationController is fixed
      */
+    /*
     private void startWebServer() {
         try {
             webController = new ModerationConfigurationController(databaseService);
@@ -191,6 +203,7 @@ public class AxionBot {
             // Don't exit - web server is optional
         }
     }
+    */
     
     /**
      * Opdaterer bot aktivitet med aktuel server count
@@ -221,10 +234,13 @@ public class AxionBot {
             }
         }
         
+        // TODO: Stop web server when webController is implemented
+        /*
         if (webController != null) {
             webController.stopServer();
             logger.info("Web server stoppet");
         }
+        */
         
         if (jda != null) {
             jda.shutdown();

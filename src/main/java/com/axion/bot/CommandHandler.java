@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// Removed duplicate class definitions - using separate class files
+
 /**
  * Håndterer auto-moderation af beskeder
  * Denne klasse håndterer IKKE kommandoer - kun slash commands (/) bruges i Axion Bot
@@ -25,7 +27,6 @@ public class CommandHandler extends ListenerAdapter {
         this.moderationManager = new ModerationManager(config, databaseService);
     }
     
-    @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         // Ignorer beskeder fra botter
         if (event.getAuthor().isBot()) {

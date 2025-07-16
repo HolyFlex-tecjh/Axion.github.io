@@ -1,9 +1,7 @@
 package com.axion.bot.moderation;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
+import java.util.concurrent.ConcurrentHashMap;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -12,17 +10,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+// Classes and enums from AppealSystemModels.java are accessible since they're in the same package
+// ValidationResult from ModerationConfigurationManager is also accessible since it's in the same package
+
 /**
  * Enhanced Appeal and Review System for moderation transparency and user experience
  * Provides automated appeal processing, review workflows, and appeal analytics
  */
 public class EnhancedAppealSystem {
-    private static final Logger logger = LoggerFactory.getLogger(EnhancedAppealSystem.class);
+    private static final Logger logger = Logger.getLogger(EnhancedAppealSystem.class.getName());
     
     // Appeal storage and caching
     private final Map<String, Appeal> activeAppeals = new ConcurrentHashMap<>();
     private final Map<String, List<Appeal>> userAppealHistory = new ConcurrentHashMap<>();
-    private final Cache<String, AppealAnalysis> appealAnalysisCache;
+    private final ConcurrentHashMap<String, AppealAnalysis> appealAnalysisCache;
     
     // Review workflow management
     private final ReviewWorkflowManager workflowManager;
@@ -43,10 +44,7 @@ public class EnhancedAppealSystem {
         this.config = config;
         
         // Initialize cache
-        this.appealAnalysisCache = Caffeine.newBuilder()
-            .maximumSize(config.getMaxCachedAnalyses())
-            .expireAfterWrite(Duration.ofHours(config.getAnalysisCacheHours()))
-            .build();
+        this.appealAnalysisCache = new ConcurrentHashMap<>();
         
         // Initialize components
         this.workflowManager = new ReviewWorkflowManager(config.getWorkflowConfig());
@@ -54,8 +52,7 @@ public class EnhancedAppealSystem {
         this.autoReviewEngine = new AutoReviewEngine(config.getAutoReviewConfig());
         this.notificationManager = new NotificationManager(config.getNotificationConfig());
         
-        logger.info("EnhancedAppealSystem initialized with auto-review enabled: {}", 
-                   config.isAutoReviewEnabled());
+        logger.info("EnhancedAppealSystem initialized with auto-review enabled: " + config.isAutoReviewEnabled());
     }
     
     /**
@@ -106,14 +103,12 @@ public class EnhancedAppealSystem {
             notificationManager.notifyAppealSubmitted(appeal, result);
             
             // Log appeal submission
-            logger.info("Appeal submitted: {} by user {} in guild {} - Path: {}", 
-                       appeal.getId(), appeal.getUserId(), appeal.getGuildId(), path);
+            logger.info("Appeal submitted: " + appeal.getId() + " by user " + appeal.getUserId() + " in guild " + appeal.getGuildId() + " - Path: " + path);
             
             return result;
             
         } catch (Exception e) {
-            logger.error("Error submitting appeal for user {} in guild {}", 
-                        request.getUserId(), request.getGuildId(), e);
+            logger.severe("Error submitting appeal for user " + request.getUserId() + " in guild " + request.getGuildId() + ": " + e.getMessage());
             return AppealSubmissionResult.error("Appeal submission failed: " + e.getMessage());
         }
     }
@@ -161,13 +156,12 @@ public class EnhancedAppealSystem {
             notificationManager.notifyAppealDecision(appeal, review, executionResult);
             
             // Log review
-            logger.info("Appeal {} reviewed by {}: {} - {}", 
-                       appealId, reviewerId, decision, reviewNotes);
+            logger.info("Appeal " + appealId + " reviewed by " + reviewerId + ": " + decision + " - " + reviewNotes);
             
             return ReviewResult.success(appeal, review, executionResult);
             
         } catch (Exception e) {
-            logger.error("Error processing manual review for appeal {}", appealId, e);
+            logger.severe("Error processing manual review for appeal " + appealId + ": " + e.getMessage());
             return ReviewResult.error("Review processing failed: " + e.getMessage());
         }
     }
@@ -299,7 +293,7 @@ public class EnhancedAppealSystem {
      */
     private AppealAnalysis analyzeAppeal(Appeal appeal) {
         String cacheKey = generateAnalysisCacheKey(appeal);
-        AppealAnalysis cached = appealAnalysisCache.getIfPresent(cacheKey);
+        AppealAnalysis cached = appealAnalysisCache.get(cacheKey);
         if (cached != null) {
             return cached;
         }
@@ -425,7 +419,7 @@ public class EnhancedAppealSystem {
             return AppealExecutionResult.success(actionsPerformed);
             
         } catch (Exception e) {
-            logger.error("Error executing appeal decision for appeal {}", appeal.getId(), e);
+            logger.severe("Error executing appeal decision for appeal " + appeal.getId() + ": " + e.getMessage());
             return AppealExecutionResult.error("Failed to execute appeal decision: " + e.getMessage());
         }
     }
@@ -573,7 +567,7 @@ public class EnhancedAppealSystem {
             rejectedAppeals.get(),
             autoProcessedAppeals.get(),
             activeAppeals.size(),
-            appealAnalysisCache.estimatedSize()
+            appealAnalysisCache.size()
         );
     }
     
@@ -596,102 +590,12 @@ public class EnhancedAppealSystem {
             history.removeIf(appeal -> 
                 appeal.getResolvedAt() != null && appeal.getResolvedAt().isBefore(cutoff)));
         
-        // Clean up cache
-        appealAnalysisCache.cleanUp();
+        // Clean up cache (remove old entries)
+        // Note: ConcurrentHashMap doesn't have automatic cleanup like Caffeine
+        // In a production system, you might want to implement time-based cleanup
         
         logger.info("Appeal system maintenance completed");
     }
 }
 
-// Supporting enums and classes
-enum AppealStatus {
-    PENDING_ANALYSIS, PENDING_REVIEW, APPROVED, REJECTED, EXPIRED
-}
-
-enum ProcessingPath {
-    AUTO_REVIEW, MANUAL_REVIEW, PRIORITY_REVIEW
-}
-
-enum ReviewDecision {
-    APPROVED, REJECTED
-}
-
-// Configuration class
-class AppealSystemConfig {
-    private boolean autoReviewEnabled = true;
-    private int maxCachedAnalyses = 5000;
-    private int analysisCacheHours = 6;
-    private int minAppealLength = 50;
-    private int maxAppealLength = 2000;
-    private int appealCooldownHours = 24;
-    private int maxAppealsPerUser = 3;
-    private double autoApprovalThreshold = 0.8;
-    private double autoRejectionThreshold = 0.8;
-    private double complexityThreshold = 0.6;
-    private int baseProcessingHours = 24;
-    private int processingTimePerAppeal = 30; // minutes
-    private int appealRetentionDays = 90;
-    
-    private WorkflowConfig workflowConfig = new WorkflowConfig();
-    private AppealAnalyzerConfig analyzerConfig = new AppealAnalyzerConfig();
-    private AutoReviewConfig autoReviewConfig = new AutoReviewConfig();
-    private NotificationConfig notificationConfig = new NotificationConfig();
-    
-    // Getters
-    public boolean isAutoReviewEnabled() { return autoReviewEnabled; }
-    public int getMaxCachedAnalyses() { return maxCachedAnalyses; }
-    public int getAnalysisCacheHours() { return analysisCacheHours; }
-    public int getMinAppealLength() { return minAppealLength; }
-    public int getMaxAppealLength() { return maxAppealLength; }
-    public int getAppealCooldownHours() { return appealCooldownHours; }
-    public int getMaxAppealsPerUser() { return maxAppealsPerUser; }
-    public double getAutoApprovalThreshold() { return autoApprovalThreshold; }
-    public double getAutoRejectionThreshold() { return autoRejectionThreshold; }
-    public double getComplexityThreshold() { return complexityThreshold; }
-    public int getBaseProcessingHours() { return baseProcessingHours; }
-    public int getProcessingTimePerAppeal() { return processingTimePerAppeal; }
-    public int getAppealRetentionDays() { return appealRetentionDays; }
-    public WorkflowConfig getWorkflowConfig() { return workflowConfig; }
-    public AppealAnalyzerConfig getAnalyzerConfig() { return analyzerConfig; }
-    public AutoReviewConfig getAutoReviewConfig() { return autoReviewConfig; }
-    public NotificationConfig getNotificationConfig() { return notificationConfig; }
-}
-
-// Placeholder configuration classes
-class WorkflowConfig {
-    private int maxQueueSize = 1000;
-    private boolean priorityQueueEnabled = true;
-    
-    public int getMaxQueueSize() { return maxQueueSize; }
-    public boolean isPriorityQueueEnabled() { return priorityQueueEnabled; }
-}
-
-class AppealAnalyzerConfig {
-    private boolean sentimentAnalysisEnabled = true;
-    private boolean contextAnalysisEnabled = true;
-    private double sinceritThreshold = 0.6;
-    
-    public boolean isSentimentAnalysisEnabled() { return sentimentAnalysisEnabled; }
-    public boolean isContextAnalysisEnabled() { return contextAnalysisEnabled; }
-    public double getSincerityThreshold() { return sinceritThreshold; }
-}
-
-class AutoReviewConfig {
-    private boolean enabled = true;
-    private double confidenceThreshold = 0.8;
-    private boolean requireHumanReviewForBans = true;
-    
-    public boolean isEnabled() { return enabled; }
-    public double getConfidenceThreshold() { return confidenceThreshold; }
-    public boolean isRequireHumanReviewForBans() { return requireHumanReviewForBans; }
-}
-
-class NotificationConfig {
-    private boolean notifySubmission = true;
-    private boolean notifyDecision = true;
-    private boolean notifyModerators = true;
-    
-    public boolean isNotifySubmission() { return notifySubmission; }
-    public boolean isNotifyDecision() { return notifyDecision; }
-    public boolean isNotifyModerators() { return notifyModerators; }
-}
+// Supporting enums and classes are defined in AppealSystemModels.java

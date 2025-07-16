@@ -6,10 +6,10 @@ import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.awt.Color;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -411,7 +411,7 @@ public class ModerationCommands {
         
         event.getChannel().getHistory().retrievePast(amount + 1).queue(messages -> {
             if (messages.size() > 1) {
-                event.getChannel().asTextChannel().deleteMessages(messages.subList(0, messages.size() - 1)).queue(
+                ((TextChannel) event.getChannel()).deleteMessages(messages.subList(0, messages.size() - 1)).queue(
                     success -> event.getChannel().sendMessage("✅ Slettede " + (messages.size() - 1) + " beskeder.").queue(),
                     error -> event.getChannel().sendMessage("❌ Kunne ikke slette beskeder: " + error.getMessage()).queue()
                 );
@@ -567,7 +567,7 @@ public class ModerationCommands {
      * Handle raid status command
      */
     private boolean handleRaidStatusCommand(MessageReceivedEvent event, String[] args) {
-        AntiRaidSystem.RaidStatus status = advancedSystem.getAntiRaidSystem().getRaidStatus(event.getGuild().getId());
+        RaidStatus status = advancedSystem.getAntiRaidSystem().getRaidStatus(event.getGuild().getId());
         
         // Handle null status (no raid activity recorded)
         if (status == null) {
@@ -605,7 +605,7 @@ public class ModerationCommands {
      * Handle lockdown command
      */
     private boolean handleLockdownCommand(MessageReceivedEvent event, String[] args) {
-        if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+        if (!event.getMember().hasPermission(net.dv8tion.jda.api.Permission.ADMINISTRATOR)) {
             event.getChannel().sendMessage("❌ Kun administratorer kan aktivere lockdown.").queue();
             return true;
         }
@@ -621,7 +621,7 @@ public class ModerationCommands {
      * Handle unlockdown command
      */
     private boolean handleUnlockdownCommand(MessageReceivedEvent event, String[] args) {
-        if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+        if (!event.getMember().hasPermission(net.dv8tion.jda.api.Permission.ADMINISTRATOR)) {
             event.getChannel().sendMessage("❌ Kun administratorer kan deaktivere lockdown.").queue();
             return true;
         }
@@ -710,7 +710,7 @@ public class ModerationCommands {
      * Handle mass action command
      */
     private boolean handleMassActionCommand(MessageReceivedEvent event, String[] args) {
-        if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+        if (!event.getMember().hasPermission(net.dv8tion.jda.api.Permission.ADMINISTRATOR)) {
             event.getChannel().sendMessage("❌ Kun administratorer kan bruge mass actions.").queue();
             return true;
         }
@@ -734,9 +734,11 @@ public class ModerationCommands {
      * Tjekker om en bruger har moderation rettigheder
      */
     private boolean hasModeratorPermissions(Member member) {
-        return member.hasPermission(Permission.MODERATE_MEMBERS) ||
-               member.hasPermission(Permission.KICK_MEMBERS) ||
-               member.hasPermission(Permission.BAN_MEMBERS) ||
-               member.hasPermission(Permission.ADMINISTRATOR);
+        return member.hasPermission(net.dv8tion.jda.api.Permission.MODERATE_MEMBERS) ||
+               member.hasPermission(net.dv8tion.jda.api.Permission.KICK_MEMBERS) ||
+               member.hasPermission(net.dv8tion.jda.api.Permission.BAN_MEMBERS) ||
+               member.hasPermission(net.dv8tion.jda.api.Permission.ADMINISTRATOR);
     }
 }
+
+// Using stub classes from ModerationManager.java

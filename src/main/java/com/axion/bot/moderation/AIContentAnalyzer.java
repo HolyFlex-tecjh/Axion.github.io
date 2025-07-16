@@ -536,42 +536,7 @@ class LanguageDetector {
     }
 }
 
-// Result classes
-class ContentAnalysisResult {
-    private final boolean isClean;
-    private final double confidence;
-    private final String detectionType;
-    private final List<String> reasons;
-    private final String language;
-    private final Map<String, Double> layerScores;
-    private final int contentLength;
-    
-    public ContentAnalysisResult(boolean isClean, double confidence, String detectionType, 
-                               List<String> reasons, String language, 
-                               Map<String, Double> layerScores, int contentLength) {
-        this.isClean = isClean;
-        this.confidence = confidence;
-        this.detectionType = detectionType;
-        this.reasons = reasons;
-        this.language = language;
-        this.layerScores = layerScores;
-        this.contentLength = contentLength;
-    }
-    
-    public static ContentAnalysisResult error(String message) {
-        return new ContentAnalysisResult(true, 0.0, "error", Arrays.asList(message), 
-                                       "unknown", new HashMap<>(), 0);
-    }
-    
-    // Getters
-    public boolean isClean() { return isClean; }
-    public double getConfidence() { return confidence; }
-    public String getDetectionType() { return detectionType; }
-    public List<String> getReasons() { return reasons; }
-    public String getLanguage() { return language; }
-    public Map<String, Double> getLayerScores() { return layerScores; }
-    public int getContentLength() { return contentLength; }
-}
+// Removed duplicate ContentAnalysisResult class - using separate class file
 
 // Additional supporting classes
 class ToxicityScore {

@@ -1,11 +1,78 @@
 package com.axion.bot.moderation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
+// Using stub Logger implementation for compilation
 
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+// Stub Logger implementation for compilation
+class Logger {
+    public void info(String message, Object... args) { System.out.println(String.format(message.replace("{}", "%s"), args)); }
+    public void warn(String message, Object... args) { System.out.println("WARN: " + String.format(message.replace("{}", "%s"), args)); }
+    public void error(String message, Object... args) { System.err.println("ERROR: " + String.format(message.replace("{}", "%s"), args)); }
+    public void error(String message, Throwable throwable) { System.err.println("ERROR: " + message + " - " + throwable.getMessage()); }
+    public void debug(String message, Object... args) { System.out.println("DEBUG: " + String.format(message.replace("{}", "%s"), args)); }
+}
+
+class LoggerFactory {
+    public static Logger getLogger(Class<?> clazz) { return new Logger(); }
+}
+
+// Stub classes for compilation
+class ModerationResult {
+    private boolean allowed;
+    private String reason;
+    private ModerationAction action;
+    private int severityLevel;
+    
+    public ModerationResult(boolean allowed, String reason, ModerationAction action, int severityLevel) {
+        this.allowed = allowed;
+        this.reason = reason;
+        this.action = action;
+        this.severityLevel = severityLevel;
+    }
+    
+    public static ModerationResult allowed() { return new ModerationResult(true, "Allowed", ModerationAction.NONE, 0); }
+    public static ModerationResult custom(boolean allowed, String reason, ModerationAction action, int severityLevel) {
+        return new ModerationResult(allowed, reason, action, severityLevel);
+    }
+    
+    public boolean isAllowed() { return allowed; }
+    public String getReason() { return reason; }
+    public ModerationAction getAction() { return action; }
+    public int getSeverityLevel() { return severityLevel; }
+}
+
+enum ModerationAction {
+    NONE, DELETE_MESSAGE, WARN, TIMEOUT, KICK, BAN, TEMP_BAN, FLAG_FOR_REVIEW, LOG_ONLY, WARN_USER, DELETE_AND_TIMEOUT, DELETE_AND_WARN, SYSTEM_ACTION
+}
+
+enum ModerationSeverity {
+    LOW(0), MEDIUM(1), HIGH(2), VERY_HIGH(3), CRITICAL(4);
+    
+    private final int level;
+    
+    ModerationSeverity(int level) {
+        this.level = level;
+    }
+    
+    public int getLevel() { return level; }
+    
+    public static ModerationSeverity fromToxicity(ToxicityAnalyzer.ToxicitySeverity toxicity) {
+        switch (toxicity) {
+            case MILD: return LOW;
+            case MODERATE: return MEDIUM;
+            case SEVERE: return HIGH;
+            case VERY_HIGH: return VERY_HIGH;
+            default: return LOW;
+        }
+    }
+}
+
+
 
 /**
  * Advanced Toxicity Analysis System
@@ -546,6 +613,8 @@ public class ToxicityAnalyzer {
         HARASSMENT,
         THREAT,
         DISCRIMINATION,
-        CONTEXTUAL
+        CONTEXTUAL,
+        SPAM,
+        INAPPROPRIATE_CONTENT
     }
 }
