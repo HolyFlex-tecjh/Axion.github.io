@@ -912,14 +912,4 @@ class ContextRuleConfig {
     public boolean isConsiderTimeOfDay() { return considerTimeOfDay; }
 }
 
-class EscalationConfig {
-    private boolean enableEscalation = true;
-    private int escalationThreshold = 3;
-    private Duration escalationWindow = Duration.ofDays(7);
-    private double escalationMultiplier = 1.5;
-    
-    public boolean isEnableEscalation() { return enableEscalation; }
-    public int getEscalationThreshold() { return escalationThreshold; }
-    public Duration getEscalationWindow() { return escalationWindow; }
-    public double getEscalationMultiplier() { return escalationMultiplier; }
-}
+// EscalationConfig is now defined in a separate file

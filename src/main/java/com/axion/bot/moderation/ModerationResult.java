@@ -72,6 +72,13 @@ public class ModerationResult {
         return new ModerationResult(allowed, reason, action, severity, detectionType);
     }
     
+    /**
+     * Opretter et violation resultat med specificeret grund, handling og alvorlighed
+     */
+    public static ModerationResult violation(String reason, ModerationAction action, ModerationSeverity severity) {
+        return new ModerationResult(false, reason, action, severity.getLevel(), "violation");
+    }
+    
     // Getters
     public boolean isAllowed() {
         return allowed;

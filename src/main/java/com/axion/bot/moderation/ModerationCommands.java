@@ -119,7 +119,7 @@ public class ModerationCommands {
         }
         
         // Udfør ban med logging
-        event.getGuild().ban(targetMember, 0, TimeUnit.SECONDS)
+        event.getGuild().ban((net.dv8tion.jda.api.entities.UserSnowflake) targetMember.getUser(), 0, TimeUnit.SECONDS)
                 .reason(reason + " (Udført af: " + event.getAuthor().getName() + ")")
                 .queue(
                     success -> {
@@ -173,7 +173,7 @@ public class ModerationCommands {
             return true;
         }
         
-        event.getGuild().kick(targetMember)
+        event.getGuild().kick((net.dv8tion.jda.api.entities.UserSnowflake) targetMember.getUser())
                 .reason(reason + " (Udført af: " + event.getAuthor().getName() + ")")
                 .queue(
                     success -> {

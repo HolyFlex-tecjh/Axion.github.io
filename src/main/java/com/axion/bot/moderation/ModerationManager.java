@@ -120,7 +120,7 @@ public class ModerationManager {
             if (!spamResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "SPAM_DETECTION", spamResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), spamResult.getSeverityLevel(), true);
+                    event.getMessage().getId(), ModerationSeverity.HIGH.ordinal(), true);
                 return spamResult;
             }
         }
@@ -131,7 +131,7 @@ public class ModerationManager {
             if (!toxicResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "TOXIC_CONTENT", toxicResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), toxicResult.getSeverityLevel(), true);
+                    event.getMessage().getId(), ModerationSeverity.HIGH.ordinal(), true);
                 return toxicResult;
             }
         }
@@ -141,7 +141,7 @@ public class ModerationManager {
         if (!attachmentResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "ATTACHMENT_CHECK", attachmentResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), attachmentResult.getSeverityLevel(), true);
+                    event.getMessage().getId(), ModerationSeverity.HIGH.ordinal(), true);
                 return attachmentResult;
             }
         
@@ -150,7 +150,7 @@ public class ModerationManager {
         if (!customResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "CUSTOM_FILTER", customResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), customResult.getSeverityLevel(), true);
+                    event.getMessage().getId(), ModerationSeverity.HIGH.ordinal(), true);
                 return customResult;
             }
         
@@ -160,7 +160,7 @@ public class ModerationManager {
             if (!linkResult.isAllowed()) {
                 databaseService.logModerationAction(userId, author.getName(), "SYSTEM", "Auto-Moderation", 
                     "LINK_PROTECTION", linkResult.getReason(), event.getGuild().getId(), event.getChannel().getId(), 
-                    event.getMessage().getId(), linkResult.getSeverityLevel(), true);
+                    event.getMessage().getId(), ModerationSeverity.HIGH.ordinal(), true);
                 return linkResult;
             }
         }
