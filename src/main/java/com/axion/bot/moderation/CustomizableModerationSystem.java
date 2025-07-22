@@ -850,6 +850,41 @@ class UIConfig {
 
 // ModerationResult class removed - using separate ModerationResult.java file
 
+// Placeholder ModerationResult class - should match the separate ModerationResult.java file
+class ModerationResult {
+    private final boolean allowed;
+    private final String reason;
+    private final ModerationAction action;
+    
+    private ModerationResult(boolean allowed, String reason, ModerationAction action) {
+        this.allowed = allowed;
+        this.reason = reason;
+        this.action = action;
+    }
+    
+    public static ModerationResult allowed() {
+        return new ModerationResult(true, "No violations detected", ModerationAction.NONE);
+    }
+    
+    public static ModerationResult moderate(String reason, ModerationAction action) {
+        return new ModerationResult(false, reason, action);
+    }
+    
+    public static ModerationResult warn(String reason, ModerationAction action) {
+        return new ModerationResult(false, reason, action);
+    }
+    
+    // Getters
+    public boolean isAllowed() { return allowed; }
+    public String getReason() { return reason; }
+    public ModerationAction getAction() { return action; }
+}
+
+// Placeholder ModerationAction enum - should match the separate ModerationAction.java file
+enum ModerationAction {
+    NONE, DELETE_MESSAGE, WARN_USER, TIMEOUT_USER, BAN_USER, LOCKDOWN_CHANNEL, LOG_VIOLATION
+}
+
 class FilterResult {
     private final String filterType;
     private final boolean triggered;
