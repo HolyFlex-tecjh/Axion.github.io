@@ -240,7 +240,7 @@ public class AntiRaidSystem {
         
         return ModerationResult.moderate(
             "Participating in coordinated spam attack",
-            ModerationAction.DELETE_AND_TIMEOUT
+        ModerationAction.TIMEOUT
         );
     }
     

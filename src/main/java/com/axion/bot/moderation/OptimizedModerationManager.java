@@ -209,7 +209,7 @@ public class OptimizedModerationManager {
         
         try {
             for (ModerationResult result : results) {
-                double weight = getDetectionWeight(result.getDetectionType());
+                double weight = getDetectionWeight(result.getReason().split(":")[0].trim());
                 totalSeverityScore += result.getSeverity() * weight;
                 
                 if (consolidatedReason.length() > 0) {

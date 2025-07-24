@@ -10,6 +10,8 @@ import com.axion.bot.tickets.TicketManager;
 import com.axion.bot.tickets.TicketCommandHandler;
 import com.axion.bot.tickets.TicketService;
 import com.axion.bot.commands.utility.DebugCommands;
+import com.axion.bot.gdpr.GDPRComplianceManager;
+import com.axion.bot.gdpr.GDPRSlashCommands;
 // import com.axion.bot.translation.TranslationManager;
 // import com.axion.bot.translation.UserLanguageManager;
 
@@ -198,6 +200,10 @@ public class SlashCommandHandler extends ListenerAdapter {
     private final TicketManager ticketManager;
     private final TicketCommandHandler ticketCommandHandler;
     
+    // GDPR Compliance system
+    private final GDPRComplianceManager gdprManager;
+    private final GDPRSlashCommands gdprCommands;
+    
     public SlashCommandHandler(DatabaseService databaseService) {
         // Initialiser moderation system med standard konfiguration
         ModerationConfig config = ModerationConfig.createDefault();
@@ -210,6 +216,10 @@ public class SlashCommandHandler extends ListenerAdapter {
         TicketService ticketService = new TicketService(databaseService);
         this.ticketManager = new TicketManager(ticketService);
         this.ticketCommandHandler = new TicketCommandHandler(ticketManager);
+        
+        // Initialiser GDPR compliance system
+        this.gdprManager = new GDPRComplianceManager(databaseService);
+        this.gdprCommands = new GDPRSlashCommands(gdprManager);
     }
     
     @Override
@@ -389,6 +399,12 @@ public class SlashCommandHandler extends ListenerAdapter {
             case "ticketconfig":
                 ticketCommandHandler.handleSlashCommand(event);
                 break;
+            case "gdpr":
+                gdprCommands.handleSlashCommand(event);
+                break;
+            case "gdpradmin":
+                gdprCommands.handleSlashCommand(event);
+                break;
             default:
                 String userLang = userLanguageManager.getUserLanguage(event.getUser().getId());
                 EmbedBuilder errorEmbed = new EmbedBuilder()
@@ -500,9 +516,9 @@ public class SlashCommandHandler extends ListenerAdapter {
                                 event.getGuild(),
                                 targetUser,
                                 event.getUser(),
-                                ModerationAction.BAN,
+                                "BAN",
                                 reason,
-                                ModerationSeverity.HIGH,
+                                "HIGH",
                                 false
                             );
                             

@@ -48,7 +48,7 @@ public class AutoModerationRule {
         this.name = name;
         this.ruleType = ruleType;
         this.enabled = true;
-        this.action = ModerationAction.DELETE_AND_WARN;
+        this.action = ModerationAction.WARNING; // Default to WARNING action
         this.severity = ModerationSeverity.LOW;
         this.exemptRoles = new ArrayList<>();
         this.exemptUsers = new ArrayList<>();

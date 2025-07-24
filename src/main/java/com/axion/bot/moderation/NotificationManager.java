@@ -1,30 +1,6 @@
 package com.axion.bot.moderation;
 
 /**
- * Configuration class for notification settings
- */
-class NotificationConfig {
-    private boolean notifySubmission = true;
-    private boolean notifyDecision = true;
-    
-    public boolean isNotifySubmission() {
-        return notifySubmission;
-    }
-    
-    public boolean isNotifyDecision() {
-        return notifyDecision;
-    }
-    
-    public void setNotifySubmission(boolean notifySubmission) {
-        this.notifySubmission = notifySubmission;
-    }
-    
-    public void setNotifyDecision(boolean notifyDecision) {
-        this.notifyDecision = notifyDecision;
-    }
-}
-
-/**
  * Manager class for handling appeal-related notifications
  */
 public class NotificationManager {

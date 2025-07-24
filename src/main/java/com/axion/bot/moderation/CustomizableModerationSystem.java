@@ -878,11 +878,26 @@ class ModerationResult {
     public boolean isAllowed() { return allowed; }
     public String getReason() { return reason; }
     public ModerationAction getAction() { return action; }
+
+    public static ModerationResult ban(String string, ModerationAction ban) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'ban'");
+    }
+
+    public static ModerationResult custom(boolean b, String string, ModerationAction deleteAndWarn, int i) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'custom'");
+    }
+
+    public double getSeverity() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getSeverity'");
+    }
 }
 
 // Placeholder ModerationAction enum - should match the separate ModerationAction.java file
-enum ModerationAction {
-    NONE, DELETE_MESSAGE, WARN_USER, TIMEOUT_USER, BAN_USER, LOCKDOWN_CHANNEL, LOG_VIOLATION
+public enum ModerationAction {
+    NONE, DELETE_MESSAGE, WARN_USER, TIMEOUT_USER, BAN_USER, LOCKDOWN_CHANNEL, LOG_VIOLATION, WARNING, TIMEOUT, KICK, BAN, SYSTEM_ACTION, DELETE_AND_WARN, DELETE_AND_TIMEOUT, TEMP_BAN, FLAG_FOR_REVIEW, LOG_ONLY
 }
 
 class FilterResult {

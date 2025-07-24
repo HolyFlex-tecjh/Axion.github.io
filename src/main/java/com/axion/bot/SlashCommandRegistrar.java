@@ -370,6 +370,78 @@ public class SlashCommandRegistrar {
                     new SubcommandData("view", "Vis nuværende konfiguration"),
                     new SubcommandData("enable", "Aktiver ticket systemet"),
                     new SubcommandData("disable", "Deaktiver ticket systemet")
+                ),
+            
+            // GDPR Compliance kommandoer
+            Commands.slash("gdpr", "GDPR data protection and privacy commands")
+                .addSubcommands(
+                    new SubcommandData("consent", "Manage your data processing consent")
+                        .addOptions(
+                            new OptionData(OptionType.STRING, "action", "Consent action", true)
+                                .addChoice("Grant", "grant")
+                                .addChoice("Withdraw", "withdraw")
+                                .addChoice("View", "view"),
+                            new OptionData(OptionType.STRING, "purpose", "Data processing purpose", false)
+                                .addChoice("Moderation", "moderation")
+                                .addChoice("Analytics", "analytics")
+                                .addChoice("Communication", "communication")
+                                .addChoice("All", "all")
+                        ),
+                    new SubcommandData("export", "Export your personal data")
+                        .addOptions(
+                            new OptionData(OptionType.STRING, "format", "Export format", false)
+                                .addChoice("JSON", "json")
+                                .addChoice("CSV", "csv")
+                        ),
+                    new SubcommandData("delete", "Request deletion of your personal data")
+                        .addOptions(
+                            new OptionData(OptionType.BOOLEAN, "confirm", "Confirm data deletion request", true)
+                        ),
+                    new SubcommandData("anonymize", "Request anonymization of your data")
+                        .addOptions(
+                            new OptionData(OptionType.BOOLEAN, "confirm", "Confirm anonymization request", true)
+                        ),
+                    new SubcommandData("status", "Check your GDPR compliance status"),
+                    new SubcommandData("policies", "View data retention policies")
+                ),
+            
+            Commands.slash("gdpradmin", "GDPR administration commands (Admin only)")
+                .addSubcommands(
+                    new SubcommandData("activities", "View data processing activities")
+                        .addOptions(
+                            new OptionData(OptionType.STRING, "filter", "Filter activities", false)
+                                .addChoice("Active", "active")
+                                .addChoice("All", "all")
+                        ),
+                    new SubcommandData("audit", "View GDPR audit logs")
+                        .addOptions(
+                            new OptionData(OptionType.USER, "user", "Filter by user", false),
+                            new OptionData(OptionType.INTEGER, "days", "Days back (1-90)", false)
+                                .setMinValue(1)
+                                .setMaxValue(90)
+                        ),
+                    new SubcommandData("cleanup", "Run data retention cleanup")
+                        .addOptions(
+                            new OptionData(OptionType.BOOLEAN, "dry_run", "Dry run (preview only)", false)
+                        ),
+                    new SubcommandData("userdata", "Manage user data")
+                        .addOptions(
+                            new OptionData(OptionType.USER, "user", "Target user", true),
+                            new OptionData(OptionType.STRING, "action", "Action", true)
+                                .addChoice("View", "view")
+                                .addChoice("Export", "export")
+                                .addChoice("Delete", "delete")
+                                .addChoice("Anonymize", "anonymize")
+                        ),
+                    new SubcommandData("settings", "Configure GDPR settings")
+                        .addOptions(
+                            new OptionData(OptionType.STRING, "setting", "Setting to configure", true)
+                                .addChoice("Auto cleanup", "auto_cleanup")
+                                .addChoice("Retention period", "retention_period")
+                                .addChoice("Consent required", "consent_required")
+                                .addChoice("View settings", "view"),
+                            new OptionData(OptionType.STRING, "value", "New value", false)
+                        )
                 )
         ).queue(
             success -> logger.info("Slash kommandoer registreret succesfuldt!"),

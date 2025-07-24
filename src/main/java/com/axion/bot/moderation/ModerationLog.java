@@ -76,7 +76,7 @@ public class ModerationLog {
     public String getShortDescription() {
         String automatedText = automated ? "[AUTO]" : "[MANUAL]";
         return String.format("%s %s %s - %s", 
-                automatedText, action.getEmoji(), action.getDescription(), reason);
+                automatedText, action.name(), action.toString(), reason);
     }
     
     /**
@@ -90,7 +90,7 @@ public class ModerationLog {
                 "**Tidspunkt:** %s\n" +
                 "**Alvorlighed:** %d/5\n" +
                 "**Type:** %s",
-                action.getEmoji(), action.getDescription(),
+                action.name(), action.toString(),
                 username, userId,
                 moderatorName, moderatorId,
                 reason,
