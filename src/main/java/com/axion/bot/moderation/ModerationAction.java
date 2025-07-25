@@ -21,6 +21,11 @@ public enum ModerationAction {
     WARN_USER("Advar bruger", 2),
     
     /**
+     * Advarsel - alias for WARN_USER
+     */
+    WARNING("Advarsel", 2),
+    
+    /**
      * Giv brugeren en timeout (mute)
      */
     TIMEOUT("Timeout bruger", 3),
@@ -101,6 +106,7 @@ public enum ModerationAction {
      */
     public boolean involvesUserDiscipline() {
         return this == WARN_USER || 
+               this == WARNING ||
                this == TIMEOUT || 
                this == KICK || 
                this == BAN ||
@@ -134,6 +140,7 @@ public enum ModerationAction {
             case DELETE_MESSAGE:
                 return "🗑️";
             case WARN_USER:
+            case WARNING:
             case DELETE_AND_WARN:
                 return "⚠️";
             case TIMEOUT:
@@ -161,6 +168,7 @@ public enum ModerationAction {
             case DELETE_MESSAGE:
                 return "Din besked blev slettet på grund af overtrædelse af serverreglerne.";
             case WARN_USER:
+            case WARNING:
                 return "Du har modtaget en advarsel for overtrædelse af serverreglerne.";
             case TIMEOUT:
                 return "Du er blevet givet en timeout på grund af overtrædelse af serverreglerne.";
@@ -192,6 +200,7 @@ public enum ModerationAction {
             case DELETE_MESSAGE:
                 return emoji + " Slettet besked fra **" + username + "**: " + reason;
             case WARN_USER:
+            case WARNING:
                 return emoji + " Advaret **" + username + "**: " + reason;
             case TIMEOUT:
                 return emoji + " Timeout givet til **" + username + "**: " + reason;
@@ -249,6 +258,7 @@ public enum ModerationAction {
             case DELETE_MESSAGE:
                 return DELETE_AND_WARN;
             case WARN_USER:
+            case WARNING:
             case DELETE_AND_WARN:
                 return DELETE_AND_TIMEOUT;
             case TIMEOUT:

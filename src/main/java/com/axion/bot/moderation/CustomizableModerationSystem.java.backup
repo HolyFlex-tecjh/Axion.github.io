@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BooleanSupplier;
 
 /**
  * Fully Customizable Moderation System
@@ -644,10 +645,115 @@ class CustomRule {
     }
 }
 
-// RuleCondition class removed - using separate class file
+/**
+ * Rule condition definition
+ */
+class RuleCondition {
+    private final ConditionType type;
+    private final double threshold;
+    private final Duration timeWindow;
+    private final Map<String, Object> parameters;
+    
+    private RuleCondition(Builder builder) {
+        this.type = builder.type;
+        this.threshold = builder.threshold;
+        this.timeWindow = builder.timeWindow;
+        this.parameters = new HashMap<>(builder.parameters);
+    }
+    
+    // Getters
+    public ConditionType getType() { return type; }
+    public double getThreshold() { return threshold; }
+    public Duration getTimeWindow() { return timeWindow; }
+    public Map<String, Object> getParameters() { return new HashMap<>(parameters); }
+    
+    public static class Builder {
+        private ConditionType type;
+        private double threshold = 1.0;
+        private Duration timeWindow = Duration.ofMinutes(1);
+        private Map<String, Object> parameters = new HashMap<>();
+        
+        public Builder withType(ConditionType type) {
+            this.type = type;
+            return this;
+        }
+        
+        public Builder withThreshold(double threshold) {
+            this.threshold = threshold;
+            return this;
+        }
+        
+        public Builder withTimeWindow(Duration timeWindow) {
+            this.timeWindow = timeWindow;
+            return this;
+        }
+        
+        public Builder withParameters(Map<String, Object> parameters) {
+            this.parameters = new HashMap<>(parameters);
+            return this;
+        }
+        
+        public RuleCondition build() {
+            return new RuleCondition(this);
+        }
+    }
+}
 
-// ConditionType enum moved to separate file
-// ActionType enum moved to separate file
+/**
+ * Types of conditions that can be evaluated
+ */
+enum ConditionType {
+    MESSAGE_FREQUENCY,
+    TOXICITY_SCORE,
+    RAPID_JOINS,
+    CAPS_PERCENTAGE,
+    MENTION_COUNT,
+    LINK_COUNT,
+    WORD_MATCH,
+    CUSTOM_PATTERN
+}
+
+/**
+ * Types of actions that can be taken
+ */
+enum ActionType {
+    NONE,
+    DELETE_MESSAGE,
+    WARN_USER,
+    TIMEOUT_USER,
+    BAN_USER,
+    LOCKDOWN_CHANNEL,
+    LOG_VIOLATION,
+    WARNING,
+    TIMEOUT,
+    KICK,
+    BAN,
+    SYSTEM_ACTION,
+    DELETE_AND_WARN,
+    DELETE_AND_TIMEOUT,
+    TEMP_BAN,
+    FLAG_FOR_REVIEW,
+    LOG_ONLY
+}
+
+/**
+ * UI Theme options
+ */
+enum UITheme {
+    DARK,
+    LIGHT,
+    AUTO
+}
+
+/**
+ * Dashboard layout options
+ */
+enum DashboardLayout {
+    COMPACT,
+    DETAILED,
+    GRID,
+    LIST
+}
 
 /**
  * Threshold configuration for escalating actions
@@ -850,55 +956,9 @@ class UIConfig {
 
 // ModerationResult class removed - using separate ModerationResult.java file
 
-// Placeholder ModerationResult class - should match the separate ModerationResult.java file
-class ModerationResult {
-    private final boolean allowed;
-    private final String reason;
-    private final ModerationAction action;
-    
-    private ModerationResult(boolean allowed, String reason, ModerationAction action) {
-        this.allowed = allowed;
-        this.reason = reason;
-        this.action = action;
-    }
-    
-    public static ModerationResult allowed() {
-        return new ModerationResult(true, "No violations detected", ModerationAction.NONE);
-    }
-    
-    public static ModerationResult moderate(String reason, ModerationAction action) {
-        return new ModerationResult(false, reason, action);
-    }
-    
-    public static ModerationResult warn(String reason, ModerationAction action) {
-        return new ModerationResult(false, reason, action);
-    }
-    
-    // Getters
-    public boolean isAllowed() { return allowed; }
-    public String getReason() { return reason; }
-    public ModerationAction getAction() { return action; }
+// ModerationResult class removed - should be defined in separate ModerationResult.java file
 
-    public static ModerationResult ban(String string, ModerationAction ban) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'ban'");
-    }
-
-    public static ModerationResult custom(boolean b, String string, ModerationAction deleteAndWarn, int i) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'custom'");
-    }
-
-    public double getSeverity() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getSeverity'");
-    }
-}
-
-// Placeholder ModerationAction enum - should match the separate ModerationAction.java file
-public enum ModerationAction {
-    NONE, DELETE_MESSAGE, WARN_USER, TIMEOUT_USER, BAN_USER, LOCKDOWN_CHANNEL, LOG_VIOLATION, WARNING, TIMEOUT, KICK, BAN, SYSTEM_ACTION, DELETE_AND_WARN, DELETE_AND_TIMEOUT, TEMP_BAN, FLAG_FOR_REVIEW, LOG_ONLY
-}
+// ModerationAction enum moved to separate ModerationAction.java file
 
 class FilterResult {
     private final String filterType;

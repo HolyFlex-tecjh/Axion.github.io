@@ -5,6 +5,8 @@ package com.axion.bot;
 // import com.axion.bot.commands.LanguageCommands;
 // import com.axion.bot.commands.developer.DeveloperCommands;
 import com.axion.bot.moderation.*;
+import com.axion.bot.moderation.ModerationAction;
+import com.axion.bot.moderation.ModerationSeverity;
 import com.axion.bot.database.DatabaseService;
 import com.axion.bot.tickets.TicketManager;
 import com.axion.bot.tickets.TicketCommandHandler;
@@ -516,9 +518,9 @@ public class SlashCommandHandler extends ListenerAdapter {
                                 event.getGuild(),
                                 targetUser,
                                 event.getUser(),
-                                "BAN",
+                                ModerationAction.BAN,
                                 reason,
-                                "HIGH",
+                                ModerationSeverity.HIGH,
                                 false
                             );
                             

@@ -1,9 +1,6 @@
 package com.axion.bot.gdpr;
 
 import com.axion.bot.gdpr.GDPRComplianceManager.DataProcessingPurpose;
-import com.axion.bot.gdpr.UserConsent;
-import com.axion.bot.gdpr.DataProcessingActivity;
-import com.axion.bot.gdpr.DataRetentionPolicy;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -14,9 +11,6 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.Guild;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.Color;
 import java.time.Instant;
@@ -174,17 +168,17 @@ public class GDPRSlashCommands {
             case "give" -> {
                 Set<DataProcessingPurpose> purposes = parsePurposes(event.getOption("purposes"));
                 if (purposes.isEmpty()) {
-                    final Set<DataProcessingPurpose> defaultPurposes = Set.of(DataProcessingPurpose.PERSONALIZATION, DataProcessingPurpose.MODERATION);
-                    purposes = defaultPurposes;
+                    purposes = Set.of(DataProcessingPurpose.PERSONALIZATION, DataProcessingPurpose.MODERATION);
                 }
+                final Set<DataProcessingPurpose> finalPurposes = purposes;
                 
-                CompletableFuture<Boolean> result = gdprManager.recordConsent(userId, guildId, purposes, "slash_command");
+                CompletableFuture<Boolean> result = gdprManager.recordConsent(userId, guildId, finalPurposes, "slash_command");
                 result.thenAccept(success -> {
                     if (success) {
                         EmbedBuilder embed = new EmbedBuilder()
                             .setTitle("✅ Consent Recorded")
                             .setDescription("Your consent for data processing has been recorded.")
-                            .addField("Purposes", Set.copyOf(purposes).stream().map(Enum::name).collect(Collectors.joining(", ")), false)
+                            .addField("Purposes", finalPurposes.stream().map(Enum::name).collect(Collectors.joining(", ")), false)
                             .setColor(Color.GREEN)
                             .setTimestamp(Instant.now());
                         event.replyEmbeds(embed.build()).setEphemeral(true).queue();

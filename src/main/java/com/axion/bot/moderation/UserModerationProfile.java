@@ -69,6 +69,7 @@ public class UserModerationProfile {
         
         // Update specific violation counts
         switch (action) {
+            case WARNING:
             case WARN_USER:
             case DELETE_AND_WARN:
                 warningCount++;

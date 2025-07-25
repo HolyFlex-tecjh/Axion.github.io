@@ -27,20 +27,18 @@ public class CommandHandler extends ListenerAdapter {
         this.moderationManager = new ModerationManager(config, databaseService);
     }
     
+    @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         // Ignorer beskeder fra botter
         if (event.getAuthor().isBot()) {
             return;
         }
-
-        // Kør moderation tjek på alle beskeder
-        ModerationResult result = moderationManager.moderateMessage(event);
-        if (!result.isAllowed()) {
-            logger.debug("Moderation action triggered for message from {}: {}", 
-                        event.getAuthor().getName(), result.getReason());
-            moderationManager.executeModerationAction(event, result);
+        
+            // Kør moderation tjek på alle beskeder
+            ModerationResult result = moderationManager.moderateMessage(event);
+            if (!result.isAllowed()) {
+                logger.debug("Moderation action triggered for message from {}", event.getAuthor().getName());
+                moderationManager.executeModerationAction(event, result);
+            }
         }
     }
-
-
-}

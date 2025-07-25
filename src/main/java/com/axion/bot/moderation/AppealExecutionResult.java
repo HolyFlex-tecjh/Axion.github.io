@@ -1,35 +1,32 @@
 package com.axion.bot.moderation;
 
-import java.util.*;
-
 /**
- * Model class representing the result of appeal execution
+ * Class representing appeal execution result
  */
 public class AppealExecutionResult {
     private final boolean success;
-    private final List<String> actionsPerformed;
-    private final String errorMessage;
+    private final String message;
+    private final java.util.List<String> actionsPerformed;
     
-    private AppealExecutionResult(boolean success, List<String> actionsPerformed, String errorMessage) {
+    private AppealExecutionResult(boolean success, String message, java.util.List<String> actionsPerformed) {
         this.success = success;
-        this.actionsPerformed = actionsPerformed != null ? new ArrayList<>(actionsPerformed) : new ArrayList<>();
-        this.errorMessage = errorMessage;
+        this.message = message;
+        this.actionsPerformed = actionsPerformed != null ? actionsPerformed : new java.util.ArrayList<>();
     }
     
-    public static AppealExecutionResult success(List<String> actions) {
-        return new AppealExecutionResult(true, actions, null);
+    public static AppealExecutionResult success(java.util.List<String> actionsPerformed) {
+        return new AppealExecutionResult(true, "Success", actionsPerformed);
     }
     
-    public static AppealExecutionResult noAction(String reason) {
-        return new AppealExecutionResult(true, Arrays.asList("No action required: " + reason), null);
+    public static AppealExecutionResult error(String message) {
+        return new AppealExecutionResult(false, message, null);
     }
     
-    public static AppealExecutionResult error(String errorMessage) {
-        return new AppealExecutionResult(false, null, errorMessage);
+    public static AppealExecutionResult noAction(String message) {
+        return new AppealExecutionResult(true, message, new java.util.ArrayList<>());
     }
     
-    // Getters
     public boolean isSuccess() { return success; }
-    public List<String> getActionsPerformed() { return new ArrayList<>(actionsPerformed); }
-    public String getErrorMessage() { return errorMessage; }
+    public String getMessage() { return message; }
+    public java.util.List<String> getActionsPerformed() { return actionsPerformed; }
 }

@@ -12,6 +12,69 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * Represents a detected threat with its classification and details
+ */
+class ThreatDetection {
+    private final ThreatType type;
+    private final ThreatLevel level;
+    private final double confidence;
+    private final List<String> indicators;
+    private final String description;
+    private final Map<String, Object> details;
+    
+    public ThreatDetection(ThreatType type, ThreatLevel level, double confidence, 
+                          List<String> indicators, String description, Map<String, Object> details) {
+        this.type = type;
+        this.level = level;
+        this.confidence = confidence;
+        this.indicators = indicators;
+        this.description = description;
+        this.details = details;
+    }
+    
+    // Getters
+    public ThreatType getType() { return type; }
+    public ThreatLevel getLevel() { return level; }
+    public double getConfidence() { return confidence; }
+    public List<String> getIndicators() { return indicators; }
+    public String getDescription() { return description; }
+    public Map<String, Object> getDetails() { return details; }
+}
+
+/**
+ * Types of threats that can be detected
+ */
+enum ThreatType {
+    SPAM,
+    MALWARE,
+    PHISHING,
+    HARASSMENT,
+    SCAM
+}
+
+/**
+ * Severity levels for detected threats
+ */
+enum ThreatLevel {
+    NONE,
+    LOW,
+    MEDIUM,
+    HIGH,
+    CRITICAL
+}
+
+/**
+ * Types of content being analyzed
+ */
+enum ContentType {
+    MESSAGE,
+    IMAGE,
+    LINK,
+    ATTACHMENT,
+    EMBED
+}
+
+/**
  * Advanced Spam Detection Engine
  * Provides sophisticated spam detection using multiple algorithms
  * Tracks user behavior patterns and adapts to new spam techniques

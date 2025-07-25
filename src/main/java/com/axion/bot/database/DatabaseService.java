@@ -336,7 +336,7 @@ public class DatabaseService {
      */
     private ModerationAction convertStringToModerationAction(String actionString) {
         if (actionString == null) {
-            return ModerationAction.NONE;
+            return ModerationAction.WARN_USER; // Use a valid enum value as default
         }
         
         try {
@@ -360,8 +360,8 @@ public class DatabaseService {
                  case "delete_message":
                      return ModerationAction.DELETE_MESSAGE;
                  default:
-                     logger.warn("Ukendt moderation action: {}, bruger NONE", actionString);
-                     return ModerationAction.NONE;
+                     logger.warn("Ukendt moderation action: {}, bruger WARN_USER", actionString);
+                     return ModerationAction.WARN_USER; // Use a valid enum value as default
              }
         }
     }
@@ -523,165 +523,5 @@ public class DatabaseService {
             logger.error("Fejl ved hentning af alle bruger sprog", e);
         }
         return languages;
-    }
-
-    // ==================== GDPR DATA PROCESSING OPERATIONS ====================
-
-    /**
-     * Records a data processing activity for GDPR compliance
-     */
-    public void recordDataProcessingActivity(com.axion.bot.gdpr.DataProcessingActivity activity) {
-        String sql = "INSERT INTO data_processing_activities " +
-                     "(activity_id, name, description, purpose, legal_basis, " +
-                     "controller, processor, created_at, last_updated, is_active) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        try (PreparedStatement stmt = databaseManager.getConnection().prepareStatement(sql)) {
-            stmt.setString(1, activity.getActivityId());
-            stmt.setString(2, activity.getName());
-            stmt.setString(3, activity.getDescription());
-            stmt.setString(4, activity.getPurpose().toString());
-            stmt.setString(5, activity.getLegalBasis());
-            stmt.setString(6, activity.getController());
-            stmt.setString(7, activity.getProcessor());
-            stmt.setTimestamp(8, Timestamp.from(activity.getCreatedAt()));
-            stmt.setTimestamp(9, Timestamp.from(activity.getLastUpdated()));
-            stmt.setBoolean(10, activity.isActive());
-            stmt.executeUpdate();
-            
-            logger.info("Data processing activity recorded: {} for purpose: {}", 
-                       activity.getName(), activity.getPurpose());
-        } catch (SQLException e) {
-            logger.error("Error recording data processing activity", e);
-        }
-    }
-
-    /**
-     * Gets data processing activities for a user
-     */
-    public List<com.axion.bot.gdpr.DataProcessingActivity> getDataProcessingActivities(String userId, String guildId) {
-        List<com.axion.bot.gdpr.DataProcessingActivity> activities = new ArrayList<>();
-        String sql = "SELECT * FROM data_processing_activities " +
-                     "WHERE activity_id LIKE ? AND is_active = true " +
-                     "ORDER BY created_at DESC";
-        
-        try (PreparedStatement stmt = databaseManager.getConnection().prepareStatement(sql)) {
-            stmt.setString(1, userId + ":" + guildId + ":%");
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    // Create a simplified activity object from database data
-                    com.axion.bot.gdpr.GDPRComplianceManager.DataProcessingPurpose purpose = 
-                        com.axion.bot.gdpr.GDPRComplianceManager.DataProcessingPurpose.valueOf(rs.getString("purpose"));
-                    
-                    com.axion.bot.gdpr.DataProcessingActivity activity = 
-                        new com.axion.bot.gdpr.DataProcessingActivity(
-                            userId, guildId, purpose, rs.getString("name"), 
-                            rs.getString("legal_basis"), rs.getTimestamp("created_at").toInstant());
-                    
-                    activities.add(activity);
-                }
-            }
-        } catch (SQLException e) {
-            logger.error("Error retrieving data processing activities", e);
-        }
-        return activities;
-    }
-
-    /**
-     * Deletes user behavior data for GDPR compliance
-     */
-    public void deleteUserBehaviorData(String userId, String guildId) {
-        String[] tables = {"user_violations", "moderation_logs", "temp_bans", "warnings"};
-        
-        for (String table : tables) {
-            String sql = "DELETE FROM " + table + " WHERE user_id = ? AND guild_id = ?";
-            
-            try (PreparedStatement stmt = databaseManager.getConnection().prepareStatement(sql)) {
-                stmt.setString(1, userId);
-                stmt.setString(2, guildId);
-                int deleted = stmt.executeUpdate();
-                
-                if (deleted > 0) {
-                    logger.info("Deleted {} records from {} for user: {} in guild: {}", 
-                               deleted, table, userId, guildId);
-                }
-            } catch (SQLException e) {
-                logger.error("Error deleting user behavior data from table: " + table, e);
-            }
-        }
-    }
-
-    /**
-     * Deletes user preferences for GDPR compliance
-     */
-    public void deleteUserPreferences(String userId, String guildId) {
-        String[] tables = {"user_languages"};
-        
-        for (String table : tables) {
-            String sql = "DELETE FROM " + table + " WHERE user_id = ?";
-            
-            try (PreparedStatement stmt = databaseManager.getConnection().prepareStatement(sql)) {
-                stmt.setString(1, userId);
-                int deleted = stmt.executeUpdate();
-                
-                if (deleted > 0) {
-                    logger.info("Deleted {} records from {} for user: {}", 
-                               deleted, table, userId);
-                }
-            } catch (SQLException e) {
-                logger.error("Error deleting user preferences from table: " + table, e);
-            }
-        }
-    }
-
-    /**
-     * Deletes all user data for GDPR compliance
-     */
-    public void deleteAllUserData(String userId, String guildId) {
-        // Delete behavior data
-        deleteUserBehaviorData(userId, guildId);
-        
-        // Delete preferences
-        deleteUserPreferences(userId, guildId);
-        
-        // Delete any remaining user-specific data
-        String[] additionalTables = {"data_processing_activities"};
-        
-        for (String table : additionalTables) {
-            String sql = "DELETE FROM " + table + " WHERE activity_id LIKE ?";
-            
-            try (PreparedStatement stmt = databaseManager.getConnection().prepareStatement(sql)) {
-                stmt.setString(1, userId + ":" + guildId + ":%");
-                int deleted = stmt.executeUpdate();
-                
-                if (deleted > 0) {
-                    logger.info("Deleted {} records from {} for user: {} in guild: {}", 
-                               deleted, table, userId, guildId);
-                }
-            } catch (SQLException e) {
-                logger.error("Error deleting all user data from table: " + table, e);
-            }
-        }
-        
-        logger.info("All user data deleted for user: {} in guild: {}", userId, guildId);
-    }
-
-    /**
-     * Gets the total number of data processing activities for GDPR compliance metrics
-     */
-    public int getTotalProcessingActivities() {
-        String sql = "SELECT COUNT(*) FROM data_processing_activities WHERE is_active = true";
-        
-        try (PreparedStatement stmt = databaseManager.getConnection().prepareStatement(sql)) {
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-        } catch (SQLException e) {
-            logger.error("Error getting total processing activities count", e);
-        }
-        return 0;
     }
 }

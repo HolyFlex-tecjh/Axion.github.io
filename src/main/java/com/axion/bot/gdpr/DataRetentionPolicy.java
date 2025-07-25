@@ -120,6 +120,7 @@ public class DataRetentionPolicy {
      * Performs cleanup of expired data (placeholder implementation)
      * In a real system, this would interact with the database
      */
+    @SuppressWarnings("unused")
     public int cleanupExpiredData() {
         // This is a placeholder implementation
         // In a real system, this would:
@@ -131,11 +132,8 @@ public class DataRetentionPolicy {
         
         // Simulate cleanup logic
         for (Map.Entry<DataProcessingPurpose, Duration> entry : retentionPeriods.entrySet()) {
-            DataProcessingPurpose purpose = entry.getKey();
-            Duration retention = entry.getValue();
             
-            // Calculate cutoff time
-            Instant cutoffTime = Instant.now().minus(retention);
+            
             
             // In a real implementation, you would:
             // - Query database for records older than cutoffTime for this purpose
