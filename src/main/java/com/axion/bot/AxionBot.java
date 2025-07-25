@@ -2,14 +2,7 @@ package com.axion.bot;
 
 import com.axion.bot.database.DatabaseManager;
 import com.axion.bot.database.DatabaseService;
-import com.axion.bot.database.MongoDBConfig;
-import com.axion.bot.database.MongoDBService;
 import com.axion.bot.translation.UserLanguageManager;
-// TODO: Re-enable these imports when classes are fixed
-// import com.axion.bot.web.ModerationConfigurationController;
-// import com.axion.bot.commands.SlashCommandRegistrar;
-// import com.axion.bot.commands.CommandHandler;
-// import com.axion.bot.commands.SlashCommandHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -35,15 +28,11 @@ public class AxionBot {
     private String token;
     private DatabaseManager databaseManager;
     private DatabaseService databaseService;
-    private MongoDBService mongoDBService;
     private ScheduledExecutorService activityUpdater;
-    // TODO: Re-enable when ModerationConfigurationController is fixed
-    // private ModerationConfigurationController webController;
 
     public AxionBot() {
         loadConfiguration();
         initializeDatabase();
-        initializeMongoDB();
     }
 
     /**
@@ -58,7 +47,16 @@ public class AxionBot {
                 return;
             }
             properties.load(input);
-            token = properties.getProperty("discord.token");
+            // Try both property names for backwards compatibility
+            token = properties.getProperty("DISCORD_TOKEN");
+            if (token == null) {
+                token = properties.getProperty("discord.token");
+            }
+            // If still null, try environment variable
+            if (token == null || "YOUR_DISCORD_BOT_TOKEN".equals(token)) {
+                logger.warn("Discord token ikke konfigureret i config.properties. Bruger miljøvariabel.");
+                token = System.getenv("DISCORD_TOKEN");
+            }
         } catch (IOException ex) {
             logger.error("Fejl ved indlæsning af konfiguration", ex);
             System.exit(1);
@@ -97,27 +95,6 @@ public class AxionBot {
             System.exit(1);
         }
     }
-    
-    /**
-     * Initialiserer MongoDB forbindelse
-     */
-    private void initializeMongoDB() {
-        try {
-            // Initialize MongoDB connection
-            MongoDBConfig.initialize();
-            mongoDBService = new MongoDBService();
-            
-            // Test MongoDB connection
-            if (MongoDBConfig.isConnected()) {
-                logger.info("MongoDB forbindelse etableret succesfuldt");
-            } else {
-                logger.warn("MongoDB forbindelse kunne ikke etableres - fortsætter med SQLite");
-            }
-        } catch (Exception e) {
-            logger.warn("Fejl ved initialisering af MongoDB: {} - fortsætter med SQLite", e.getMessage());
-            // Don't exit - MongoDB is optional, SQLite is the fallback
-        }
-    }
 
     /**
      * Starter botten
@@ -137,11 +114,10 @@ public class AxionBot {
                             GatewayIntent.GUILD_MODERATION
                     )
                     .setActivity(Activity.playing("Starter op..."))
-                    // TODO: Add event listeners when classes are fixed
-            // .addEventListeners(
-            //         new CommandHandler(databaseService, mongoDBService),     // Auto-moderation
-            //         new SlashCommandHandler(databaseService) // Slash commands (/)
-            // )
+                    .addEventListeners(
+                            new CommandHandler(databaseService),     // Auto-moderation
+                            new SlashCommandHandler(databaseService) // Slash commands (/)
+                    )
                     .build();
 
             jda.awaitReady();
@@ -149,19 +125,12 @@ public class AxionBot {
             logger.info("Bot er tilsluttet {} servere", jda.getGuilds().size());
             logger.info("Botten bruger KUN slash commands (/) - skriv /help for hjælp");
             
-            // TODO: Register slash commands when SlashCommandRegistrar is fixed
-            // try {
-            //     SlashCommandRegistrar.registerGlobalCommands(jda);
-            //     logger.info("Slash kommandoer registreret!");
-            // } catch (Exception e) {
-            //     logger.warn("Kunne ikke registrere slash kommandoer: {}", e.getMessage());
-            // }
+            // Registrer slash kommandoer
+            SlashCommandRegistrar.registerGlobalCommands(jda);
+            logger.info("Slash kommandoer registreret!");
             
             // Start activity updater der opdaterer hver 30 sekunder
             startActivityUpdater();
-            
-            // TODO: Start web server when ModerationConfigurationController is fixed
-            // startWebServer();
 
         } catch (Exception e) {
             logger.error("Fejl ved start af bot", e);
@@ -182,28 +151,6 @@ public class AxionBot {
         activityUpdater.scheduleAtFixedRate(this::updateBotActivity, 30, 30, TimeUnit.SECONDS);
         logger.info("Activity updater startet - opdaterer hver 30 sekunder");
     }
-    
-    /**
-     * Starter web server for moderation dashboard
-     * TODO: Re-enable when ModerationConfigurationController is fixed
-     */
-    /*
-    private void startWebServer() {
-        try {
-            webController = new ModerationConfigurationController(databaseService);
-            
-            // Get port from environment variable or use default
-            String portStr = System.getenv("WEB_PORT");
-            int port = portStr != null ? Integer.parseInt(portStr) : 8080;
-            
-            webController.startServer(port);
-            logger.info("Moderation dashboard web server startet på port {}", port);
-        } catch (Exception e) {
-            logger.error("Fejl ved start af web server", e);
-            // Don't exit - web server is optional
-        }
-    }
-    */
     
     /**
      * Opdaterer bot aktivitet med aktuel server count
@@ -234,14 +181,6 @@ public class AxionBot {
             }
         }
         
-        // TODO: Stop web server when webController is implemented
-        /*
-        if (webController != null) {
-            webController.stopServer();
-            logger.info("Web server stoppet");
-        }
-        */
-        
         if (jda != null) {
             jda.shutdown();
             logger.info("Axion Bot er lukket ned");
@@ -250,13 +189,6 @@ public class AxionBot {
         if (databaseManager != null) {
             databaseManager.disconnect();
             logger.info("Database forbindelse lukket");
-        }
-        
-        // Close MongoDB connection
-        try {
-            MongoDBConfig.close();
-        } catch (Exception e) {
-            logger.warn("Fejl ved lukning af MongoDB forbindelse: {}", e.getMessage());
         }
     }
 
@@ -272,13 +204,6 @@ public class AxionBot {
      */
     public DatabaseService getDatabaseService() {
         return databaseService;
-    }
-    
-    /**
-     * Får MongoDB service instans
-     */
-    public MongoDBService getMongoDBService() {
-        return mongoDBService;
     }
 
     /**

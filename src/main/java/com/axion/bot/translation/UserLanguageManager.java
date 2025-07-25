@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class UserLanguageManager {
     private static final Logger logger = LoggerFactory.getLogger(UserLanguageManager.class);
+    private static final String DEFAULT_LANGUAGE = "en";
     private static UserLanguageManager instance;
     private final Map<String, String> userLanguages = new ConcurrentHashMap<>();
     private DatabaseService databaseService;
@@ -57,8 +58,25 @@ public class UserLanguageManager {
      * Henter sprog for en bruger
      */
     public String getUserLanguage(String userId) {
-        // Always return English as default language
-        return "en";
+        // Check cache first
+        String language = userLanguages.get(userId);
+        
+        if (language != null) {
+            return language;
+        }
+        
+        // If not in cache, check database
+        if (databaseService != null) {
+            language = databaseService.getUserLanguage(userId);
+            if (language != null && !language.isEmpty()) {
+                // Store in cache for faster access
+                userLanguages.put(userId, language);
+                return language;
+            }
+        }
+        
+        // Return default language if no setting found
+        return DEFAULT_LANGUAGE;
     }
     
     /**
